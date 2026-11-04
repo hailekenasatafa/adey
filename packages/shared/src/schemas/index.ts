@@ -48,7 +48,7 @@ const timeRange = z.object({
   open: z.string().regex(/^\d{2}:\d{2}$/),
   close: z.string().regex(/^\d{2}:\d{2}$/),
 });
-export const hoursSchema = z.record(z.enum(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']), z.array(timeRange));
+export const hoursSchema = z.partialRecord(z.enum(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']), z.array(timeRange));
 export type Hours = z.infer<typeof hoursSchema>;
 
 export const businessSchema = z.object({
@@ -84,17 +84,15 @@ export const productSchema = z.object({
   alt_price_cents: moneyCents.nullable().optional(),
   alt_currency: z.enum(['USD', 'ETB']).nullable().optional(),
   availability: z.enum(['in_stock', 'out_of_stock', 'preorder', 'made_to_order']),
-  shipping: z
-    .object({
-      domestic_only: z.boolean().default(true),
-      ships_to: z.array(z.string().length(2)).optional(),
-      estimated_days_min: z.number().int().min(0).optional(),
-      estimated_days_max: z.number().int().min(0).optional(),
-      notes: z.string().max(500).optional(),
-    })
-    .default({ domestic_only: true }),
+  shipping: z.object({
+    domestic_only: z.boolean(),
+    ships_to: z.array(z.string().length(2)).optional(),
+    estimated_days_min: z.number().int().min(0).optional(),
+    estimated_days_max: z.number().int().min(0).optional(),
+    notes: z.string().max(500).optional(),
+  }),
   return_policy: z.string().trim().max(2000).optional().or(z.literal('')),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 export type ProductInput = z.infer<typeof productSchema>;
 
@@ -105,7 +103,7 @@ export const serviceSchema = z.object({
   currency: z.enum(['USD', 'ETB']),
   price_note: z.string().trim().max(60).optional().or(z.literal('')),
   duration_minutes: z.number().int().positive().nullable().optional(),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 export type ServiceInput = z.infer<typeof serviceSchema>;
 
@@ -137,9 +135,9 @@ export const adScreenSchema = z.object({
   advertising_hours: hoursSchema.optional(),
   estimated_daily_visitors: z.number().int().min(0).nullable().optional(),
   base_price_cents: moneyCents,
-  base_duration_days: z.number().int().positive().default(30),
+  base_duration_days: z.number().int().positive(),
   min_price_cents: moneyCents.nullable().optional(),
-  status: z.enum(['draft', 'active', 'paused', 'archived']).default('draft'),
+  status: z.enum(['draft', 'active', 'paused', 'archived']),
 });
 export type AdScreenInput = z.infer<typeof adScreenSchema>;
 
@@ -165,11 +163,11 @@ export const campaignInfoSchema = z
   .refine((v) => v.end_date >= v.start_date, { path: ['end_date'], message: 'End date must be after the start date' });
 
 export const campaignTargetingSchema = z.object({
-  states: z.array(z.string().trim().min(2).max(40)).default([]),
-  cities: z.array(z.string().trim().min(1).max(100)).default([]),
-  category_ids: z.array(z.string().uuid()).default([]),
+  states: z.array(z.string().trim().min(2).max(40)),
+  cities: z.array(z.string().trim().min(1).max(100)),
+  category_ids: z.array(z.string().uuid()),
   preferred_locations: z.string().trim().max(1000).optional().or(z.literal('')),
-  desired_screen_count: z.number().int().min(1).max(500).default(10),
+  desired_screen_count: z.number().int().min(1).max(500),
 });
 export type CampaignTargeting = z.infer<typeof campaignTargetingSchema>;
 

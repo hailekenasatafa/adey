@@ -27,7 +27,7 @@ create policy "categories: admin write" on public.categories for all using (publ
 -- -----------------------------------------------------------------------------
 create table public.businesses (
   id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
+  slug text not null default '' unique,   -- generated from name by trigger when empty
   owner_user_id uuid not null references public.profiles (id) on delete restrict,
   market public.market not null default 'us',
   name text not null check (length(name) between 2 and 120),
