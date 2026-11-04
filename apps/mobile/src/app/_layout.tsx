@@ -10,6 +10,7 @@ import { ThemeProvider, useTheme } from '@/lib/theme';
 import { AuthProvider } from '@/lib/auth';
 import { NetworkProvider } from '@/lib/network';
 import { LocationProvider } from '@/lib/location';
+import { CampaignCartProvider } from '@/lib/campaignCart';
 import { hydratePublicCache, persistPublicCache, queryClient } from '@/lib/query';
 import { usePushNotifications } from '@/lib/notifications';
 import { BrandSplash } from '@/components/BrandSplash';
@@ -37,7 +38,9 @@ export default function RootLayout() {
             <NetworkProvider>
               <AuthProvider>
                 <LocationProvider>
-                  <Shell ready={ready} />
+                  <CampaignCartProvider>
+                    <Shell ready={ready} />
+                  </CampaignCartProvider>
                 </LocationProvider>
               </AuthProvider>
             </NetworkProvider>

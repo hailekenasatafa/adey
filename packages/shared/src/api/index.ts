@@ -202,6 +202,7 @@ export function createAdeyApi(sb: AdeyClient) {
     screenReviews: (screenId: string) => run(sb.from('reviews').select('*, author:public_profiles!reviews_author_id_fkey(display_name,avatar_url)').eq('screen_id', screenId).eq('status', 'published').order('created_at', { ascending: false }).then(unwrap)),
     myScreens: (businessId: string) => run(sb.from('ad_screens').select('*, packages:ad_screen_packages(*), private:ad_screen_private(*)').eq('business_id', businessId).neq('status', 'archived').order('created_at').then(unwrap)),
     upsertScreen: (input: TablesInsert<'ad_screens'> & { id?: string }) => run(sb.from('ad_screens').upsert(input).select().single().then(unwrap)),
+    updateScreen: (id: string, patch: TablesUpdate<'ad_screens'>) => run(sb.from('ad_screens').update(patch).eq('id', id).select().single().then(unwrap)),
     setScreenPrivate: (screen_id: string, patch: Omit<TablesInsert<'ad_screen_private'>, 'screen_id'>) => run(sb.from('ad_screen_private').upsert({ screen_id, ...patch }).select().single().then(unwrap)),
     upsertPackage: (input: TablesInsert<'ad_screen_packages'> & { id?: string }) => run(sb.from('ad_screen_packages').upsert(input).select().single().then(unwrap)),
     deletePackage: (id: string) => run(sb.from('ad_screen_packages').delete().eq('id', id).then(unwrap)),
