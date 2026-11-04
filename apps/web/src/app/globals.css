@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
+/* ADEY brand tokens — mirrors packages/shared/src/tokens.ts */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --gold: #e8b923;
+  --gold-soft: #fdf8e6;
+  --gold-deep: #8f6d0e;
+  --forest: #174b3a;
+  --forest-soft: #e8f1ee;
+  --forest-deep: #0f3227;
+  --ivory: #faf8f2;
+  --charcoal: #202522;
+  --background: #faf8f2;
+  --surface: #ffffff;
+  --surface-muted: #f2efe6;
+  --border: #e4e0d4;
+  --text: #202522;
+  --text-muted: #7e7a6f;
+  --success: #2e7d4f;
+  --warning: #b26a00;
+  --danger: #b3261e;
+  --info: #1f5f8b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #15181a;
+    --surface: #202522;
+    --surface-muted: #2c2a25;
+    --border: #3f3d36;
+    --text: #faf8f2;
+    --text-muted: #a8a396;
+    --forest: #6fa393;
+    --forest-soft: #0b251d;
+    --gold-soft: #4a3807;
+    --gold-deep: #e8b923;
+    --success: #5bcb8a;
+    --warning: #f5b041;
+    --danger: #f28b82;
+    --info: #7fb8e6;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-gold-deep: var(--gold-deep);
+  --color-forest: var(--forest);
+  --color-forest-soft: var(--forest-soft);
+  --color-forest-deep: var(--forest-deep);
+  --color-ivory: var(--ivory);
+  --color-charcoal: var(--charcoal);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, "Noto Sans", "Noto Sans Ethiopic", sans-serif;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
 }
+
+html { scroll-behavior: smooth; }
+body { background: var(--background); color: var(--text); font-family: var(--font-sans); }
+.ethiopic { font-family: "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala", var(--font-sans); }
+
+/* Components */
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-[14px] px-5 h-12 font-semibold text-base transition disabled:opacity-50 disabled:pointer-events-none; }
+.btn-sm { @apply h-9 px-3 text-sm rounded-[10px]; }
+.btn-primary { @apply bg-forest text-white hover:brightness-110; }
+.btn-accent { @apply bg-gold text-charcoal hover:brightness-105; }
+.btn-secondary { @apply bg-forest-soft text-forest hover:brightness-95; }
+.btn-outline { @apply border border-border text-text hover:bg-surface-muted; }
+.btn-ghost { @apply text-forest hover:bg-forest-soft; }
+.btn-danger { @apply bg-danger text-white; }
+.card { @apply bg-surface border border-border rounded-[20px]; }
+.input { @apply w-full rounded-[14px] border border-border bg-surface px-4 py-3 text-base outline-none focus:border-forest transition; }
+.label { @apply block text-sm font-semibold mb-1.5; }
+.badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+.badge-success { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
+.badge-warning { background: color-mix(in srgb, var(--warning) 15%, transparent); color: var(--warning); }
+.badge-danger { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+.badge-info { background: color-mix(in srgb, var(--info) 15%, transparent); color: var(--info); }
+.badge-neutral { @apply bg-surface-muted text-text-muted; }
+.badge-accent { background: var(--gold-soft); color: var(--gold-deep); }
+.badge-primary { background: var(--forest-soft); color: var(--forest); }
+.chip { @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-sm font-semibold transition hover:bg-surface-muted; }
+.chip-on { @apply bg-forest text-white border-forest hover:bg-forest; }
+.container-x { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
+.skeleton { @apply animate-pulse rounded-[14px] bg-surface-muted; }
