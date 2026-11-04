@@ -1,8 +1,4 @@
-import { registerRootComponent } from 'expo';
-
-import App from './App';
-
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
-registerRootComponent(App);
+// Side-effect imports and polyfills must come before the router entry.
+import 'react-native-url-polyfill/auto';
+import 'react-native-gesture-handler';
+import 'expo-router/entry';
