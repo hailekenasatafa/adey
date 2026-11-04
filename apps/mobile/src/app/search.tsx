@@ -9,7 +9,7 @@ import { useTheme } from '@/lib/theme';
 import { useLocation } from '@/lib/location';
 import { api } from '@/lib/supabase';
 import { track } from '@/lib/analytics';
-import { Chip, Screen, Text, VerificationBadges } from '@/components/ui';
+import { Chip, Screen, Text } from '@/components/ui';
 import { placeLabel } from '@/components/cards';
 
 const RECENT_KEY = 'adey.recent-searches';

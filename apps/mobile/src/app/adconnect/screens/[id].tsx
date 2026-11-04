@@ -34,6 +34,7 @@ export default function ScreenDetail() {
 
   useEffect(() => {
     if (s) track('screen_view', { businessId: s.business_id, targetType: 'screen', targetId: s.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- track once per record id
   }, [s?.id]);
 
   if (q.isLoading) return <Screen><Loading /></Screen>;

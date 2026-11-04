@@ -14,7 +14,7 @@ import { AdeyFlower, Badge, Button, Card, Screen, SectionHeader, Skeleton, Text 
 import { ScreenCardItem } from '@/components/cards';
 
 export default function AdConnectHub() {
-  const { colors, radius } = useTheme();
+  const { radius } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, businesses, roles } = useAuth();
   const { location } = useLocation();

@@ -18,6 +18,7 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: 'Adey',
+      // eslint-disable-next-line import/namespace -- re-exported via `export *`, resolves fine at runtime/tsc
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#E8B923',

@@ -8,7 +8,7 @@ import { Button, Header, Screen, Text } from '@/components/ui';
 
 export default function LocationPicker() {
   const { colors, radius } = useTheme();
-  const { location, useDeviceLocation, setManual, permission } = useLocation();
+  const { location, requestDeviceLocation, setManual, permission } = useLocation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,7 +27,7 @@ export default function LocationPicker() {
           setBusy(true);
           setError(null);
           try {
-            const ok = await useDeviceLocation();
+            const ok = await requestDeviceLocation();
             if (ok) router.back();
             else setError('Location permission was not granted. Pick a city below instead.');
           } catch (e) {

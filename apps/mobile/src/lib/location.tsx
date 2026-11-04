@@ -26,7 +26,7 @@ export const LOCATION_PRESETS: UserLocation[] = [
 type Ctx = {
   location: UserLocation;
   permission: 'unknown' | 'granted' | 'denied';
-  useDeviceLocation: () => Promise<boolean>;
+  requestDeviceLocation: () => Promise<boolean>;
   setManual: (loc: UserLocation) => void;
 };
 
@@ -55,7 +55,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.setItem(KEY, JSON.stringify(loc)).catch(() => {});
   };
 
-  const useDeviceLocation = useCallback(async () => {
+  const requestDeviceLocation = useCallback(async () => {
     const p = await Location.requestForegroundPermissionsAsync();
     if (!p.granted) {
       setPermission('denied');
@@ -74,7 +74,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     return true;
   }, []);
 
-  const value = useMemo<Ctx>(() => ({ location, permission, useDeviceLocation, setManual: persist }), [location, permission, useDeviceLocation]);
+  const value = useMemo<Ctx>(() => ({ location, permission, requestDeviceLocation, setManual: persist }), [location, permission, requestDeviceLocation]);
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
 }
 

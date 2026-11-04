@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import React, { useMemo, useState } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
@@ -31,7 +31,6 @@ type Draft = {
 };
 
 export default function CampaignWizard() {
-  const { screenId } = useLocalSearchParams<{ screenId?: string }>();
   const { colors, radius } = useTheme();
   const { user, businesses } = useAuth();
   const { location } = useLocation();
@@ -73,12 +72,9 @@ export default function CampaignWizard() {
   });
 
   const estimate = (item: CartItem) => (d.prices[item.id!] ? Math.round(Number(d.prices[item.id!]) * 100) : estimatePrice(item.base_price_cents ?? 0, item.base_duration_days ?? 30, days));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- estimate depends only on d.prices and days
   const total = useMemo(() => cart.items.reduce((a, i) => a + estimate(i), 0), [cart.items, d.prices, days]);
   const budgetCents = Math.round(Number(d.budget || 0) * 100);
-
-  useEffect(() => {
-    if (screenId && cart.items.length === 1) setStep(0);
-  }, [screenId]);
 
   const submit = useMutation({
     mutationFn: async () => {

@@ -20,7 +20,7 @@ export default function SignIn() {
     setError(null);
     try {
       await api.auth.signIn(v.email, v.password);
-      router.canGoBack() ? router.back() : router.replace('/(tabs)');
+      if (router.canGoBack()) router.back(); else router.replace('/(tabs)');
     } catch (e) {
       const msg = friendlyError(e);
       if (/confirm/i.test(msg)) setNeedsVerify(v.email);

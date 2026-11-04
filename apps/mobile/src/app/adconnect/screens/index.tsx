@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import MapView, { Marker, Callout } from 'react-native-maps';
-import { formatMoney, type ScreenCard } from '@adey/shared';
+import { formatMoney } from '@adey/shared';
 import { useTheme } from '@/lib/theme';
 import { useLocation } from '@/lib/location';
 import { api } from '@/lib/supabase';

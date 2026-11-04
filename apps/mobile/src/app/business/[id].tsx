@@ -12,7 +12,7 @@ import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/supabase';
 import { track } from '@/lib/analytics';
 import { callPhone, DAY_LABELS, DAY_ORDER, fmtTime, openDirections, openStatus, openWebsite, shareBusiness } from '@/lib/actions';
-import { Badge, Button, Card, Divider, ErrorState, IconButton, Loading, RatingStars, Screen, SectionHeader, Text, VerificationBadges } from '@/components/ui';
+import { Badge, Button, Card, ErrorState, IconButton, Loading, RatingStars, Screen, SectionHeader, Text, VerificationBadges } from '@/components/ui';
 import { SaveButton } from '@/components/SaveButton';
 import { cover, placeLabel } from '@/components/cards';
 import { ReviewList } from '@/components/ReviewList';
@@ -34,6 +34,7 @@ export default function BusinessDetail() {
 
   useEffect(() => {
     if (b) track('business_view', { businessId: b.id, targetType: 'business', targetId: b.id, meta: { category_id: b.category_id } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- track once per record id
   }, [b?.id]);
 
   const badges = useMemo(() => (b?.verifications ?? []).filter((v) => !v.revoked_at && (!v.expires_at || new Date(v.expires_at) > new Date())).map((v) => v.level as VerificationLevel), [b]);
@@ -153,7 +154,7 @@ export default function BusinessDetail() {
 
         {tab === 'products' && (
           <View style={{ marginTop: 16, gap: 10 }}>
-            {products.isLoading ? <Loading /> : products.data?.length ? products.data.map((p) => <ProductRow key={p.id} p={p} businessId={b.id} />) : <Text color="muted">No products listed yet.</Text>}
+            {products.isLoading ? <Loading /> : products.data?.length ? products.data.map((p) => <ProductRow key={p.id} p={p} />) : <Text color="muted">No products listed yet.</Text>}
           </View>
         )}
         {tab === 'services' && (
@@ -193,8 +194,8 @@ function Row({ icon, text, onPress }: { icon: keyof typeof Ionicons.glyphMap; te
   );
 }
 
-function ProductRow({ p, businessId }: { p: Product; businessId: string }) {
-  const { colors, radius } = useTheme();
+function ProductRow({ p }: { p: Product }) {
+  const { colors } = useTheme();
   const img = cover('product-media', p.images[0]);
   return (
     <Card padded={false} onPress={() => router.push(`/product/${p.id}`)} accessibilityLabel={p.name}>

@@ -18,9 +18,8 @@ export function BusinessPicker({ value, onChange, filter }: { value: string | nu
 export function useSelectedBusiness(initial?: string, filter?: (b: ReturnType<typeof useAuth>['businesses'][number]) => boolean) {
   const { businesses } = useAuth();
   const list = businesses.filter((b) => b.role !== 'staff').filter(filter ?? (() => true));
-  const [id, setId] = React.useState<string | null>(initial ?? list[0]?.id ?? null);
-  React.useEffect(() => {
-    if (!id && list[0]) setId(list[0].id);
-  }, [list.length]);
+  const [picked, setId] = React.useState<string | null>(initial ?? null);
+  // Fall back to the first managed business once the list has loaded (no effect needed).
+  const id = picked && list.some((b) => b.id === picked) ? picked : list[0]?.id ?? null;
   return [id, setId] as const;
 }

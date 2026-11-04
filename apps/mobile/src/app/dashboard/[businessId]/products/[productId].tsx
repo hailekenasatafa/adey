@@ -38,6 +38,7 @@ export default function ProductEditor() {
       reset({ name: p.name, description: p.description ?? '', category_id: p.category_id, price_cents: p.price_cents, currency: p.currency, alt_price_cents: p.alt_price_cents, alt_currency: p.alt_currency, availability: p.availability, shipping: (p.shipping as ProductInput['shipping']) ?? { domestic_only: true }, return_policy: p.return_policy ?? '', is_active: p.is_active });
       setImages(p.images);
     } else if (isEt) setValue('currency', 'ETB');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate form once data arrives
   }, [existing.data, isEt]);
   const v = watch();
 

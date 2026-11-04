@@ -36,7 +36,7 @@ export function BusinessForm({ initial, onSubmit, submitting, submitLabel = 'Sav
       const [hit] = await Location.geocodeAsync(q);
       if (hit) setGeo({ lat: hit.latitude, lng: hit.longitude, status: `Pinned at ${hit.latitude.toFixed(4)}, ${hit.longitude.toFixed(4)}` });
       else setGeo((g) => ({ ...g, status: 'Address not found — check spelling or add a ZIP code.' }));
-    } catch (e) {
+    } catch {
       setGeo((g) => ({ ...g, status: 'Geocoding unavailable right now; you can save and pin later.' }));
     }
   };

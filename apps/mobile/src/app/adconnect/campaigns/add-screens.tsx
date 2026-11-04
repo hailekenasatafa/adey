@@ -18,14 +18,14 @@ export default function AddScreens() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SubmitResult | null>(null);
   const c = useQuery({ queryKey: ['campaign', campaignId], queryFn: () => api.campaigns.get(campaignId!) });
-  const existing = new Set((c.data?.requests ?? []).filter((r) => !['declined', 'expired', 'cancelled', 'withdrawn'].includes(r.status)).map((r) => r.screen_id));
+  const existing = useMemo(() => new Set((c.data?.requests ?? []).filter((r) => !['declined', 'expired', 'cancelled', 'withdrawn'].includes(r.status)).map((r) => r.screen_id)), [c.data]);
   const days = c.data?.duration_days ?? 30;
   const inventory = useQuery({
     queryKey: ['search-screens', 'add', campaignId, location.lat.toFixed(1)],
     enabled: !!c.data,
     queryFn: () => api.adconnect.searchScreens({ p_start: c.data!.start_date!, p_end: c.data!.end_date!, p_lat: location.lat, p_lng: location.lng, p_sort: 'relevance', p_limit: 50, p_price_max_cents: c.data!.max_price_per_location_cents ?? undefined }),
   });
-  const candidates = useMemo(() => (inventory.data ?? []).filter((s) => !existing.has(s.id!) && s.business_id !== c.data?.advertiser_business_id), [inventory.data, c.data]);
+  const candidates = useMemo(() => (inventory.data ?? []).filter((s) => !existing.has(s.id!) && s.business_id !== c.data?.advertiser_business_id), [inventory.data, c.data, existing]);
   const total = cart.items.reduce((a, i) => a + estimatePrice(i.base_price_cents ?? 0, i.base_duration_days ?? 30, days), 0);
 
   const submit = useMutation({

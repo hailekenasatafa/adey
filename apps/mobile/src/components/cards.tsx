@@ -26,7 +26,7 @@ export function placeLabel(b: { city?: string | null; state?: string | null; cou
 
 // ------------------------------------------------------------------ Business
 export function BusinessCardItem({ b, horizontal }: { b: BusinessCard; horizontal?: boolean }) {
-  const { colors, radius } = useTheme();
+  const { colors } = useTheme();
   const img = cover('business-media', b.cover_url) ?? cover('business-media', b.logo_url);
   return (
     <Card padded={false} onPress={() => router.push(`/business/${b.slug ?? b.id}`)} style={horizontal ? styles.hCard : undefined} accessibilityLabel={`${b.name}, ${b.category_name ?? ''}`}>

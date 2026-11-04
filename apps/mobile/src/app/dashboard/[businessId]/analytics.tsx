@@ -6,7 +6,7 @@ import { api } from '@/lib/supabase';
 import { Card, Chip, Header, KeyValue, Loading, Screen, Text } from '@/components/ui';
 import { BarChart } from '@/components/BarChart';
 
-type Analytics = {
+type AnalyticsData = {
   days: number;
   series: { date: string; profile_views: number; contact_clicks: number; product_views: number; screen_views: number }[];
   totals: { profile_views: number; contact_clicks: number; product_views: number; inquiries: number; ad_requests: number; screen_views: number; screen_inquiries: number };
@@ -15,10 +15,10 @@ type Analytics = {
 export default function Analytics() {
   const { businessId } = useLocalSearchParams<{ businessId: string }>();
   const [days, setDays] = useState(30);
-  const q = useQuery({ queryKey: ['analytics', businessId, days], queryFn: () => api.owner.analytics(businessId!, days) as Promise<Analytics>, enabled: !!businessId });
+  const q = useQuery({ queryKey: ['analytics', businessId, days], queryFn: () => api.owner.analytics(businessId!, days) as Promise<AnalyticsData>, enabled: !!businessId });
   const d = q.data;
   const fmt = (s: string) => new Date(s + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  const series = (key: keyof Analytics['series'][number]) => (d?.series ?? []).map((r) => ({ label: fmt(r.date), value: Number(r[key]) }));
+  const series = (key: keyof AnalyticsData['series'][number]) => (d?.series ?? []).map((r) => ({ label: fmt(r.date), value: Number(r[key]) }));
 
   return (
     <Screen header={<Header title="Analytics" />} refreshing={q.isRefetching} onRefresh={() => q.refetch()}>

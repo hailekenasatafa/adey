@@ -47,6 +47,7 @@ export default function ScreenEditor() {
       const h = hoursSchema.safeParse(screen.advertising_hours);
       if (h.success) setHours(h.data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- hydrate form once per screen
   }, [screen?.id]);
   const v = watch();
 

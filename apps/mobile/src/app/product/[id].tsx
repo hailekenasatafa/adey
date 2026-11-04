@@ -33,6 +33,7 @@ export default function ProductDetail() {
 
   useEffect(() => {
     if (p) track('product_view', { businessId: p.business_id, targetType: 'product', targetId: p.id });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- track once per record id
   }, [p?.id]);
 
   if (q.isLoading) return <Screen><Loading /></Screen>;

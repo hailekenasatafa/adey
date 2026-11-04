@@ -34,6 +34,7 @@ export default function Notifications() {
     if (!user) return;
     const ch = api.notifications.subscribe(user.id, () => { qc.invalidateQueries({ queryKey: ['notifications'] }); qc.invalidateQueries({ queryKey: ['unread'] }); });
     return () => { ch.unsubscribe(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- subscribe once per user id
   }, [user?.id, qc]);
 
   const items = q.data?.pages.flat() ?? [];
