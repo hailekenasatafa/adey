@@ -1,0 +1,23 @@
+{
+  "name": "adey",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ADEY (አደይ) — Connecting Communities. Growing Businesses. Monorepo: shared backend contracts, mobile app (Expo), website (Next.js).",
+  "scripts": {
+    "mobile": "pnpm --filter @adey/mobile start",
+    "web": "pnpm --filter @adey/web dev",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "test": "pnpm -r --if-present test",
+    "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > packages/shared/src/database.types.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "19.3.0",
+      "react-dom": "19.3.0"
+    }
+  }
+}
