@@ -13,6 +13,14 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Stylistic only; apostrophes/quotes in copy are intentional.
+      "react/no-unescaped-entities": "off",
+      // Listing media are user uploads served from Supabase Storage; plain <img> with lazy loading is intentional.
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -1,0 +1,46 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres, POSTGRES_HOST_AUTH_METHOD: trust }
+        ports: ['5433:5432']
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply migrations + acceptance suite
+        env: { PGHOST: localhost, PGPORT: '5433', PGUSER: postgres }
+        run: |
+          psql -d postgres -c "create database adey_test;"
+          psql -v ON_ERROR_STOP=1 -d adey_test -f supabase/tests/local_shim.sql
+          for f in supabase/migrations/*.sql; do psql -v ON_ERROR_STOP=1 -q -d adey_test -f "$f"; done
+          psql -v ON_ERROR_STOP=1 -q -d adey_test -f supabase/seed.sql
+          psql -v ON_ERROR_STOP=1 -d adey_test -f supabase/tests/acceptance.sql 2>&1 | tee out.txt | grep -c PASS
+          grep -q "ALL ACCEPTANCE CHECKS PASSED" out.txt
+
+  apps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm --filter @adey/mobile lint
+      - run: pnpm test
+      - run: pnpm --filter @adey/web build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: placeholder
+      - name: Mobile Hermes bundles
+        working-directory: apps/mobile
+        run: npx expo export --platform ios --platform android --output-dir /tmp/export
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: placeholder

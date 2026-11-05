@@ -16,7 +16,7 @@ export function ScreenActions({ screen }: { screen: CartItem & { phone: string |
   const saved = useQuery({ queryKey: ['saved', session?.user.id], queryFn: () => api.saved.list(), enabled: !!session });
   const isSaved = !!saved.data?.some((s) => s.target_type === 'screen' && s.target_id === screen.id);
   const toggleSave = useMutation({ mutationFn: () => api.saved.toggle('screen', screen.id!), onSuccess: () => qc.invalidateQueries({ queryKey: ['saved'] }) });
-  useEffect(() => { api.market.track({ p_event: 'screen_view', p_business_id: screen.business_id ?? undefined, p_target_type: 'screen', p_target_id: screen.id ?? undefined, p_platform: 'web' }).catch(() => {}); }, [screen.id]);
+  useEffect(() => { api.market.track({ p_event: 'screen_view', p_business_id: screen.business_id ?? undefined, p_target_type: 'screen', p_target_id: screen.id ?? undefined, p_platform: 'web' }).catch(() => {}); }, [screen.id, screen.business_id]);
   const gate = (fn: () => void) => (!session ? router.push(`/auth/sign-in?next=/adconnect/screens/${screen.id}`) : businesses.length === 0 ? router.push('/dashboard/new?reason=adconnect') : fn());
   const { phone, ...item } = screen;
   if (isMine) return <Link href={`/dashboard/${screen.business_id}/screens/${screen.id}`} className="btn btn-primary w-full">Manage this screen</Link>;

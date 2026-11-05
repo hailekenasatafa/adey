@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adScreenSchema, formatMoney, friendlyError, hoursSchema, type Hours } from '@adey/shared';
@@ -12,21 +12,33 @@ import { centsToDollars, dollarsToCents, uploadFile } from '@/lib/upload';
 type D = { title: string; description: string; screen_count: string; size: string; orientation: 'landscape' | 'portrait'; resolution: string; placement: string; formats: ('video' | 'image')[]; max_video: string; visitors: string; price: string; duration: string; min_price: string; status: 'draft' | 'active' | 'paused' };
 const blank: D = { title: '', description: '', screen_count: '1', size: '', orientation: 'landscape', resolution: '', placement: '', formats: ['video', 'image'], max_video: '30', visitors: '', price: '', duration: '30', min_price: '', status: 'draft' };
 
+type ScreenRow = NonNullable<Awaited<ReturnType<typeof api.adconnect.myScreens>>>[number];
+
 export default function ScreenEditor() {
   const { businessId, screenId } = useParams<{ businessId: string; screenId: string }>();
   const isNew = screenId === 'new';
-  const router = useRouter();
-  const qc = useQueryClient();
   const list = useQuery({ queryKey: ['my-screens', businessId], queryFn: () => api.adconnect.myScreens(businessId), enabled: !isNew });
   const s = list.data?.find((x) => x.id === screenId);
+  if (!isNew && list.isLoading) return <div className="skeleton h-64" />;
+  if (!isNew && !s) return <p>Screen not found.</p>;
+  return <ScreenForm key={s?.updated_at ?? 'new'} businessId={businessId} screenId={screenId} isNew={isNew} s={s} />;
+}
+
+function fromRow(s: ScreenRow): D {
+  const priv = Array.isArray(s.private) ? s.private[0] : s.private;
+  return { title: s.title, description: s.description ?? '', screen_count: String(s.screen_count), size: s.screen_size_inches?.toString() ?? '', orientation: (s.orientation as D['orientation']) ?? 'landscape', resolution: s.resolution ?? '', placement: s.placement ?? '', formats: s.formats, max_video: s.max_video_seconds?.toString() ?? '', visitors: s.estimated_daily_visitors?.toString() ?? '', price: centsToDollars(s.base_price_cents), duration: String(s.base_duration_days), min_price: centsToDollars(priv?.min_price_cents), status: s.status as D['status'] };
+}
+
+function ScreenForm({ businessId, screenId, isNew, s }: { businessId: string; screenId: string; isNew: boolean; s?: ScreenRow }) {
+  const router = useRouter();
+  const qc = useQueryClient();
   const detail = useQuery({ queryKey: ['screen', screenId], queryFn: () => api.adconnect.screen(screenId), enabled: !isNew });
-  const [d, setD] = useState<D>(blank);
-  const [images, setImages] = useState<string[]>([]);
-  const [hours, setHours] = useState<Hours>({});
+  const [d, setD] = useState<D>(() => (s ? fromRow(s) : blank));
+  const [images, setImages] = useState<string[]>(() => s?.images ?? []);
+  const [hours, setHours] = useState<Hours>(() => { const h = hoursSchema.safeParse(s?.advertising_hours); return h.success ? h.data : {}; });
   const [error, setError] = useState<string | null>(null);
   const [pkg, setPkg] = useState({ name: '', days: '30', price: '', plays: '', seconds: '15', desc: '' });
   const [block, setBlock] = useState({ start: toISODate(new Date()), end: addDays(toISODate(new Date()), 6), reason: '' });
-  useEffect(() => { if (s) { const priv = Array.isArray(s.private) ? s.private[0] : s.private; setD({ title: s.title, description: s.description ?? '', screen_count: String(s.screen_count), size: s.screen_size_inches?.toString() ?? '', orientation: (s.orientation as D['orientation']) ?? 'landscape', resolution: s.resolution ?? '', placement: s.placement ?? '', formats: s.formats, max_video: s.max_video_seconds?.toString() ?? '', visitors: s.estimated_daily_visitors?.toString() ?? '', price: centsToDollars(s.base_price_cents), duration: String(s.base_duration_days), min_price: centsToDollars(priv?.min_price_cents), status: s.status as D['status'] }); setImages(s.images); const h = hoursSchema.safeParse(s.advertising_hours); if (h.success) setHours(h.data); } }, [s?.id]);
   const inv = () => { qc.invalidateQueries({ queryKey: ['my-screens', businessId] }); qc.invalidateQueries({ queryKey: ['screen', screenId] }); qc.invalidateQueries({ queryKey: ['my-businesses'] }); };
   const save = useMutation({
     mutationFn: async () => {

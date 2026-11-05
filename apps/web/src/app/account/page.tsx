@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { friendlyError, notificationPrefsSchema, type NotificationPrefs } from '@adey/shared';
@@ -11,14 +11,21 @@ import { timeAgo } from '@/lib/media';
 const ROWS: [keyof NotificationPrefs, string][] = [['push', 'Push notifications (mobile)'], ['email', 'Email'], ['inquiries', 'Customer inquiries'], ['ad_requests', 'Advertising requests'], ['offers', 'Offers & counteroffers'], ['bookings', 'Bookings'], ['verification', 'Verification updates'], ['payments', 'Payments'], ['messages', 'Messages'], ['marketing', 'Tips & announcements']];
 
 export default function Account() {
+  const { session, profile } = useAuth();
+  if (!session) return null;
+  if (!profile) return <div className="container-x py-10"><div className="skeleton h-40" /></div>;
+  return <AccountForm key={profile.updated_at} />;
+}
+
+function AccountForm() {
   const { session, profile, refresh } = useAuth();
   const router = useRouter();
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [locale, setLocale] = useState<'en' | 'am'>('en');
-  const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
+  const parsedPrefs = notificationPrefsSchema.safeParse(profile?.notification_prefs);
+  const [name, setName] = useState(profile?.display_name ?? '');
+  const [phone, setPhone] = useState(profile?.phone ?? '');
+  const [locale, setLocale] = useState<'en' | 'am'>((profile?.locale as 'en' | 'am') ?? 'en');
+  const [prefs, setPrefs] = useState<NotificationPrefs | null>(parsedPrefs.success ? parsedPrefs.data : null);
   const [msg, setMsg] = useState<string | null>(null);
-  useEffect(() => { if (profile) { setName(profile.display_name ?? ''); setPhone(profile.phone ?? ''); setLocale((profile.locale as 'en' | 'am') ?? 'en'); const p = notificationPrefsSchema.safeParse(profile.notification_prefs); if (p.success) setPrefs(p.data); } }, [profile]);
   const notifications = useQuery({ queryKey: ['notifications', session?.user.id], queryFn: () => api.notifications.list({ limit: 30 }), enabled: !!session });
   const save = useMutation({ mutationFn: () => api.profile.update({ display_name: name, phone: phone || null, locale, notification_prefs: prefs ?? undefined }), onSuccess: () => { refresh(); setMsg('Saved.'); }, onError: (e) => setMsg(friendlyError(e)) });
   const del = useMutation({ mutationFn: () => api.profile.requestDeletion(), onSuccess: async () => { await supabase.auth.signOut(); router.push('/'); router.refresh(); } });

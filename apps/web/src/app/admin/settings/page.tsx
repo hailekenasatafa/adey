@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { friendlyError, type Json } from '@adey/shared';
 import { api } from '@/lib/supabase/client';
@@ -11,12 +11,17 @@ import { Badge } from '@/components/ui';
  * clients at runtime — nothing here is hard-coded in the apps.
  */
 export default function Settings() {
+  const q = useQuery({ queryKey: ['settings-all'], queryFn: () => api.settings.all() });
+  if (!q.data) return <div className="skeleton h-40" />;
+  return <SettingsForm key={JSON.stringify(q.data)} rows={q.data} />;
+}
+
+function SettingsForm({ rows }: { rows: { key: string; value: Json }[] }) {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
-  const q = useQuery({ queryKey: ['settings-all'], queryFn: () => api.settings.all() });
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const q = { data: rows };
+  const [drafts, setDrafts] = useState<Record<string, string>>(() => Object.fromEntries(rows.map((s) => [s.key, JSON.stringify(s.value, null, 2)])));
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { if (q.data) setDrafts(Object.fromEntries(q.data.map((s) => [s.key, JSON.stringify(s.value, null, 2)]))); }, [q.data]);
   const save = useMutation({ mutationFn: (key: string) => api.admin.updateSetting(key, JSON.parse(drafts[key]) as NonNullable<Json>), onSuccess: () => { qc.invalidateQueries({ queryKey: ['settings-all'] }); qc.invalidateQueries({ queryKey: ['settings'] }); setError(null); }, onError: (e) => setError(e instanceof SyntaxError ? 'Invalid JSON' : friendlyError(e)) });
   const toggle = (key: string, field: string) => { const v = JSON.parse(drafts[key] ?? '{}'); v[field] = !v[field]; setDrafts({ ...drafts, [key]: JSON.stringify(v, null, 2) }); };
   const monet = q.data?.find((s) => s.key === 'monetization')?.value as { enabled?: boolean; commission_bps?: number } | undefined;

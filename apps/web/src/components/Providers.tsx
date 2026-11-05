@@ -29,6 +29,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     session, profile: profile.data ?? null, businesses: biz.data ?? [], loading: loading || (!!uid && profile.isLoading),
     isStaff: profile.data?.platform_role === 'admin' || profile.data?.platform_role === 'moderator', isAdmin: profile.data?.platform_role === 'admin',
     refresh: () => { profile.refetch(); biz.refetch(); },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- query objects are stable handles; data/loading are listed
   }), [session, profile.data, profile.isLoading, biz.data, loading, uid]);
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

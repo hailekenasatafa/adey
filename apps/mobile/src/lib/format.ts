@@ -26,3 +26,9 @@ export function addDays(iso: string, days: number) {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+export function daysBetween(start: string, end: string) {
+  const s = new Date(start + 'T00:00:00Z').getTime();
+  const e = new Date(end + 'T00:00:00Z').getTime();
+  return Math.max(0, Math.round((e - s) / 86400000) + 1);
+}
