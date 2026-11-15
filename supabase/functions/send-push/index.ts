@@ -5,6 +5,7 @@
 // from a database webhook on notifications INSERT.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { isAuthorizedWorker, unauthorized } from '../_shared/worker-auth.ts';
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send';
 const BATCH = 100;
@@ -14,13 +15,9 @@ type TokenRow = { id: string; user_id: string; token: string };
 type ExpoTicket = { status: 'ok' | 'error'; id?: string; message?: string; details?: { error?: string } };
 
 Deno.serve(async (req) => {
-  // Protect the endpoint: only the service role (scheduler) or a shared secret may trigger it.
-  const auth = req.headers.get('authorization') ?? '';
-  const secret = Deno.env.get('PUSH_WORKER_SECRET');
-  if (secret && auth !== `Bearer ${secret}` && auth !== `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`) {
-    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
-  }
+  // Protect the endpoint (fails closed): see _shared/worker-auth.ts.
   const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  if (!(await isAuthorizedWorker(req, sb))) return unauthorized();
 
   const { data: pending, error } = await sb.from('notifications').select('id,user_id,title,body,data,type').is('pushed_at', null).order('created_at').limit(BATCH);
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

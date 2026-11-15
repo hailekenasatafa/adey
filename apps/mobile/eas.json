@@ -1,23 +1,30 @@
 {
   "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
   "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_WEB_URL": "https://adeyconnect.com",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://glxnvkqxedyxxhfhwuwr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_3TacRS4kbXgj4CXBMhqGJg_ET1fOwYv"
+      }
+    },
     "development": {
+      "extends": "base",
       "developmentClient": true,
       "distribution": "internal",
-      "env": { "EXPO_PUBLIC_WEB_URL": "https://staging.adey.app" },
       "ios": { "simulator": true },
       "android": { "buildType": "apk" }
     },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
       "channel": "preview",
-      "env": { "EXPO_PUBLIC_WEB_URL": "https://staging.adey.app" },
       "android": { "buildType": "apk" }
     },
     "production": {
+      "extends": "base",
       "channel": "production",
-      "autoIncrement": true,
-      "env": { "EXPO_PUBLIC_WEB_URL": "https://adey.app" }
+      "autoIncrement": true
     }
   },
   "submit": {

@@ -59,7 +59,7 @@ DB triggers insert `notifications` rows (respecting `profiles.notification_prefs
 ## Environment
 - Mobile: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_WEB_URL`, `extra.eas.projectId`.
 - Web: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SITE_URL`.
-- Edge functions: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (provided), `PUSH_WORKER_SECRET`, optional `EXPO_ACCESS_TOKEN`.
+- Edge functions: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (provided), optional `PUSH_WORKER_SECRET` and `EXPO_ACCESS_TOKEN`. Scheduled calls authenticate with the Vault secret `adey_worker_secret`, verified by the service-role-only RPC `verify_worker_secret`.
 - Vault secrets for cron: `adey_functions_url`, `adey_worker_secret`.
 
 ## Regenerating types

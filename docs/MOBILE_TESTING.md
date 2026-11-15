@@ -5,7 +5,7 @@
 | Layer | Command | Status in build environment |
 |---|---|---|
 | Database migrations apply cleanly | `supabase/tests/apply_local.sh` (local Postgres 16 + Supabase shim) | ✅ 12 migrations + seed |
-| Acceptance scenarios A–L at the data/authorization layer | `psql -d adey_test -f supabase/tests/acceptance.sql` | ✅ 49 checks pass, incl. K (unauthorized edit blocked) and L (payments blocked in free mode) |
+| Acceptance scenarios A–L at the data/authorization layer | `psql -d adey_test -f supabase/tests/acceptance.sql` | ✅ 50 checks pass, incl. K (unauthorized edit blocked) and L (payments blocked in free mode) |
 | Shared package typecheck + unit tests | `pnpm --filter @adey/shared typecheck && pnpm --filter @adey/shared test` | ✅ 8 tests |
 | Mobile typecheck | `pnpm --filter @adey/mobile typecheck` | ✅ |
 | Mobile lint | `pnpm --filter @adey/mobile lint` | ✅ 0 errors |
@@ -16,7 +16,7 @@
 
 ## Could NOT run here (needs your machine / credentials)
 - **iOS simulator / Android emulator / physical devices** — no simulators in the sandbox. Run `npx expo run:ios` / `run:android` (dev build is required for maps, push, secure store).
-- **Integration tests against the real Supabase project** — the project did not exist yet. `supabase/tests/acceptance.sql` is written to run unchanged against the real DB via the SQL editor (it rolls back), and the same flows are reachable from the app.
+- **Full acceptance suite against the real Supabase project** — `supabase/tests/acceptance.sql` uses psql meta-commands, so it runs through `psql`/CI rather than the hosted SQL runner. On 2026-11-14 the live project (`glxnvkqxedyxxhfhwuwr`) was instead checked two ways: its schema fingerprint (functions, policies, columns, triggers, constraints, indexes, enums, RLS flags, settings, categories, buckets) matched the local validation database exactly, and a rolled-back smoke run covered sign-up → business create/publish → screen → campaign request → counter → accept → booking with 0 commission, plus anonymous-visitor and cross-tenant denial checks. That smoke run found one real defect (draft business creation failed under `INSERT … RETURNING`), fixed in migration 0015 and now covered by acceptance check C.
 - **Push delivery end-to-end** — requires EAS project id + a physical device.
 - **Email verification / password reset** — requires Supabase Auth email templates + the website deployed at `NEXT_PUBLIC_SITE_URL`.
 

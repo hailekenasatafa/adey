@@ -1,14 +1,25 @@
 # Adey — Deployment & Environment Setup
 
+## 0. Live environment (provisioned 2026-11-14)
+| Piece | Value |
+|---|---|
+| Supabase project | `adey` — ref `glxnvkqxedyxxhfhwuwr`, us-east-1, https://glxnvkqxedyxxhfhwuwr.supabase.co |
+| Publishable key | `sb_publishable_3TacRS4kbXgj4CXBMhqGJg_ET1fOwYv` (public client key; RLS protects data) |
+| Database | 15 migrations applied (history versions match `supabase/migrations`), reference categories seeded, schema fingerprint identical to the locally validated database |
+| Edge functions | `send-push`, `expire-requests` deployed; cron jobs + Vault secrets configured and verified (200 with the worker secret, 401 without) |
+| Website | https://adey-app.netlify.app (Netlify site `adey-app`) |
+
+Still manual in the Supabase dashboard: Auth URL configuration (step 3) and custom SMTP — the built-in mailer only delivers to organization members at 2 emails/hour, so public sign-up needs a provider such as Resend, Brevo, or Postmark. See `docs/STORE_LAUNCH.md`.
+
 ## 1. Supabase (shared backend)
 1. Create project `adey` (us-east-1). Copy the project ref, URL, and **publishable** key.
 2. Apply migrations in order: `supabase link --project-ref <ref> && supabase db push` (or paste each `supabase/migrations/*.sql` into the SQL editor). Then run `supabase/seed.sql`.
-3. Auth → URL configuration: Site URL `https://adey.app`; redirect URLs `https://adey.app/auth/callback`, `https://adey.app/auth/reset`, `adey://`. Enable email confirmations.
+3. Auth → URL configuration: Site URL = the website origin (currently `https://adey-app.netlify.app`, later `https://adey.app`); redirect URLs `<origin>/auth/callback`, `<origin>/auth/reset`, `adey://**`. Enable email confirmations.
 4. Storage buckets are created by migration 0011. Verify `verification-docs`, `campaign-creatives`, `message-attachments`, `delivery-evidence` are **private**.
-5. Edge functions: `supabase functions deploy send-push` and `expire-requests`. Secrets: `supabase secrets set PUSH_WORKER_SECRET=<random> EXPO_ACCESS_TOKEN=<optional>`.
-6. Scheduling: in the SQL editor run
-   `select vault.create_secret('https://<ref>.supabase.co/functions/v1','adey_functions_url'); select vault.create_secret('<PUSH_WORKER_SECRET>','adey_worker_secret');`
-   Migration 0012 already created the pg_cron jobs (`adey_send_push` every minute, `adey_expire_requests` hourly).
+5. Edge functions: deploy `send-push` and `expire-requests` with JWT verification **off** (`supabase functions deploy <name> --no-verify-jwt`). They authenticate callers themselves and fail closed (`supabase/functions/_shared/worker-auth.ts`): accepted bearer tokens are the service role key, the Vault worker secret, or the optional `PUSH_WORKER_SECRET` function secret. Optional secret: `EXPO_ACCESS_TOKEN`.
+6. Scheduling: generate the worker secret inside the database so it never leaves it —
+   `select vault.create_secret('https://<ref>.supabase.co/functions/v1','adey_functions_url'); select vault.create_secret(replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),'adey_worker_secret');`
+   Migration 0012 created the pg_cron jobs (`adey_send_push` every minute, `adey_expire_requests` hourly); migration 0013 added `verify_worker_secret` so the functions can check the token.
 7. Make the first admin: `update public.profiles set platform_role='admin' where id='<your user id>';`
 8. Optional: run `supabase/tests/acceptance.sql` in the SQL editor — it rolls back and leaves no data.
 

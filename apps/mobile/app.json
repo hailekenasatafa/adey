@@ -19,7 +19,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.adey.app",
+      "bundleIdentifier": "com.adeyconnect.app",
       "config": { "usesNonExemptEncryption": false },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Adey uses your location to show Habesha businesses and advertising screens near you.",
@@ -28,10 +28,10 @@
         "NSPhotoLibraryAddUsageDescription": "Adey can save images you download to your photo library.",
         "UIBackgroundModes": ["remote-notification"]
       },
-      "associatedDomains": ["applinks:adey.app"]
+      "associatedDomains": ["applinks:adeyconnect.com"]
     },
     "android": {
-      "package": "com.adey.app",
+      "package": "com.adeyconnect.app",
       "adaptiveIcon": {
         "backgroundColor": "#174B3A",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -53,7 +53,7 @@
         {
           "action": "VIEW",
           "autoVerify": true,
-          "data": [{ "scheme": "https", "host": "adey.app", "pathPrefix": "/" }],
+          "data": [{ "scheme": "https", "host": "adeyconnect.com", "pathPrefix": "/" }],
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ],

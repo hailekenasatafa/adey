@@ -9,7 +9,7 @@ import { createAdeyApi } from '@adey/shared';
 
 export const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 export const SUPABASE_KEY = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? '';
-export const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? 'https://adey.app';
+export const WEB_URL = process.env.EXPO_PUBLIC_WEB_URL ?? 'https://adeyconnect.com';
 
 export const isConfigured = Boolean(SUPABASE_URL && SUPABASE_KEY && !SUPABASE_URL.includes('REPLACE'));
 

@@ -51,6 +51,14 @@ select pg_temp.check('owner cannot self-assign rating/featured (trigger resets)'
 insert into public.products (business_id, name, price_cents, currency) select id, 'Doro Wot', 1899, 'USD' from public.businesses where owner_user_id = '22222222-2222-2222-2222-222222222222';
 insert into public.services (business_id, name, price_cents, price_note) select id, 'Catering (per person)', 2500, 'starting at' from public.businesses where owner_user_id = '22222222-2222-2222-2222-222222222222';
 
+-- Regression: the app creates businesses as drafts with INSERT ... RETURNING (supabase-js .insert().select()).
+-- The new row must be readable by its owner before the membership row (added by an AFTER trigger) exists.
+with ins as (
+  insert into public.businesses (owner_user_id, name, city, state) values ('22222222-2222-2222-2222-222222222222', 'DEV FIXTURE Draft Returning', 'Silver Spring', 'MD')
+  returning id, status)
+select pg_temp.check('C: owner can create a draft business and read it back (INSERT ... RETURNING)', (select count(*) from ins where status = 'draft') = 1);
+delete from public.businesses where name = 'DEV FIXTURE Draft Returning';
+
 -- ---------------------------------------------------------------- Test A (customer discovers restaurant in Maryland)
 select pg_temp.as_anon();
 select pg_temp.check('A: anon search by state MD finds restaurant', (select count(*) from public.search_businesses(p_state => 'MD')) = 1);
