@@ -6,12 +6,14 @@
 |---|---|---|
 | Database migrations apply cleanly | `supabase/tests/apply_local.sh` (local Postgres 16 + Supabase shim) | ✅ 12 migrations + seed |
 | Acceptance scenarios A–L at the data/authorization layer | `psql -d adey_test -f supabase/tests/acceptance.sql` | ✅ 50 checks pass, incl. K (unauthorized edit blocked) and L (payments blocked in free mode) |
+| V1 marketplace acceptance (roles, privacy, stock, seller verification, checkout, escrow, refunds, payouts, shipping, rewards, events, support, lock-down) | `pnpm db:test` — applies all migrations + seed to an in-process Postgres (PGlite) and runs both suites; no Docker or Supabase CLI needed | ✅ 286 checks pass (49 + 237) |
+| Edge functions use real RPCs, arguments, tables and columns | `pnpm check:functions` | ✅ 36 RPC calls, 27 table reads |
 | Shared package typecheck + unit tests | `pnpm --filter @adey/shared typecheck && pnpm --filter @adey/shared test` | ✅ 8 tests |
 | Mobile typecheck | `pnpm --filter @adey/mobile typecheck` | ✅ |
 | Mobile lint | `pnpm --filter @adey/mobile lint` | ✅ 0 errors |
 | Mobile unit/component tests (jest-expo + RNTL) | `pnpm --filter @adey/mobile test` | ✅ 11 tests |
 | Mobile Hermes bundle (iOS + Android) | `npx expo export --platform ios --platform android` | ✅ both bundles compile |
-| Web typecheck + production build | `pnpm --filter @adey/web typecheck && pnpm --filter @adey/web build` | ✅ 50 routes |
+| Web typecheck + production build | `pnpm --filter @adey/web typecheck && pnpm --filter @adey/web build` | ✅ 88 routes (V1) |
 | `expo-doctor` | `npx expo-doctor` | ⚠️ 17/20 — the 3 failures are network checks (Expo API unreachable from the build sandbox), not project issues |
 
 ## Could NOT run here (needs your machine / credentials)

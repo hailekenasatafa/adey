@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
-import { badgeLabels, formatMoney, type BusinessCard, type ProductCard, type ScreenCard, type VerificationLevel } from '@adey/shared';
+import { badgeLabels, eventCategoryLabels, formatMoney, type BusinessCard, type EventCard, type ProductCard, type ScreenCard, type VerificationLevel } from '@adey/shared';
 import { mediaUrlFromPath } from '@/lib/media';
+import { CertificationBadge, Price, TrustBadge } from '@/components/commerce';
 
 export function AdeyFlower({ size = 40, petal = '#E8B923', center = '#174B3A', className }: { size?: number; petal?: string; center?: string; className?: string }) {
   return (
@@ -49,7 +50,8 @@ export function BusinessCardView({ b }: { b: BusinessCard }) {
         </div>
         <p className="text-xs text-text-muted truncate">{[b.category_name, place(b)].filter(Boolean).join(' · ')}{b.distance_km != null ? ` · ${b.distance_km.toFixed(b.distance_km < 10 ? 1 : 0)} km` : ''}</p>
         {b.tagline && <p className="text-sm line-clamp-2">{b.tagline}</p>}
-        <Rating avg={b.rating_avg} count={b.rating_count} />
+        <div className="flex flex-wrap items-center gap-1.5"><Rating avg={b.rating_avg} count={b.rating_count} /><TrustBadge tier={b.trust_tier} />{b.selling_enabled && <Badge tone="primary">Takes online orders</Badge>}</div>
+        {b.authenticity_avg != null && <p className="text-xs text-text-muted">Authenticity {Number(b.authenticity_avg).toFixed(1)}/5</p>}
       </div>
     </Link>
   );
@@ -78,14 +80,31 @@ export function ScreenCardView({ s }: { s: ScreenCard }) {
 
 export function ProductCardView({ p }: { p: ProductCard }) {
   const img = mediaUrlFromPath('product-media', p.image);
+  const soldOut = p.in_stock === false || p.availability === 'out_of_stock';
   return (
     <Link href={`/product/${p.id}`} className="card overflow-hidden hover:shadow-md transition block">
-      <div className="h-40 bg-surface-muted">{img ? <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full grid place-items-center text-4xl">🛍️</div>}</div>
-      <div className="p-3 space-y-0.5">
+      <div className="h-40 bg-surface-muted relative">
+        {img ? <img src={img} alt="" className={`w-full h-full object-cover ${soldOut ? 'opacity-60' : ''}`} loading="lazy" /> : <div className="w-full h-full grid place-items-center text-4xl">🛍️</div>}
+        <span className="absolute top-2 left-2 flex flex-wrap gap-1">{p.is_authentic && <CertificationBadge />}{soldOut && <Badge tone="danger">Sold out</Badge>}</span>
+      </div>
+      <div className="p-3 space-y-1">
         <h3 className="text-sm font-semibold line-clamp-2">{p.name}</h3>
         <p className="text-xs text-text-muted truncate">{p.business_name}{p.business_city ? ` · ${p.business_city}` : ''}</p>
-        <p className="font-semibold text-forest">{formatMoney(p.price_cents, p.currency ?? 'USD')}{p.alt_price_cents != null && p.alt_currency ? <span className="text-xs text-text-muted font-normal"> · {formatMoney(p.alt_price_cents, p.alt_currency)}</span> : null}</p>
+        <Price product={{ price_cents: p.price_cents, currency: p.currency, alt_price_cents: p.alt_price_cents, alt_currency: p.alt_currency }} />
+        <div className="flex flex-wrap items-center gap-1.5"><Rating avg={p.rating_avg} count={p.rating_count} /><TrustBadge tier={p.trust_tier} />{p.is_handmade && <Badge>Handmade</Badge>}</div>
       </div>
+    </Link>
+  );
+}
+
+export function EventCardView({ e }: { e: EventCard }) {
+  const when = e.starts_at ? new Date(e.starts_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', ...(e.all_day ? {} : { hour: 'numeric', minute: '2-digit' }), timeZone: e.timezone ?? undefined }) : null;
+  return (
+    <Link href={`/events/${e.id}`} className="card block p-4 hover:shadow-md transition">
+      <p className="text-xs font-semibold text-forest">{when}</p>
+      <h3 className="mt-1 font-semibold line-clamp-2">{e.title}</h3>
+      <p className="text-xs text-text-muted truncate">{e.is_online ? 'Online' : [e.venue_name, e.city].filter(Boolean).join(' · ')}</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">{e.category && <Badge>{eventCategoryLabels[e.category]}</Badge>}{e.is_free && <Badge tone="success">Free</Badge>}{(e.going_count ?? 0) > 0 && <span className="text-xs text-text-muted">{e.going_count} going</span>}</div>
     </Link>
   );
 }

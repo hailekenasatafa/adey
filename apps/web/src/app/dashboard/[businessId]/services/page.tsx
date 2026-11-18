@@ -2,13 +2,13 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { formatMoney, friendlyError, serviceSchema, type Service } from '@adey/shared';
+import { formatMoney, friendlyError, serviceSchema, type Service, type Currency } from '@adey/shared';
 import { api } from '@/lib/supabase/client';
 import { useAuth } from '@/components/Providers';
 import { Badge, Empty } from '@/components/ui';
 import { centsToDollars, dollarsToCents } from '@/lib/upload';
 
-type Draft = { name: string; description: string; price: string; currency: 'USD' | 'ETB'; price_note: string; duration: string; is_active: boolean };
+type Draft = { name: string; description: string; price: string; currency: Currency; price_note: string; duration: string; is_active: boolean };
 
 export default function Services() {
   const { businessId } = useParams<{ businessId: string }>();

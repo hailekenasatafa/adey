@@ -3,7 +3,7 @@ import { FlatList, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useQueries } from '@tanstack/react-query';
-import type { BusinessCard, ProductCard, ScreenCard } from '@adey/shared';
+import { businessToCard, type BusinessCard, type ProductCard, type ScreenCard } from '@adey/shared';
 import { useAuth } from '@/lib/auth';
 import { api, supabase } from '@/lib/supabase';
 import { Chip, EmptyState, Screen, Skeleton, Text } from '@/components/ui';
@@ -35,7 +35,7 @@ export default function Saved() {
             const missing = (data ?? []).filter((d) => !found.some((f) => f.id === d.id));
             for (const m of missing) {
               const b = await api.market.business(m.slug);
-              if (b) found.push({ id: b.id, slug: b.slug, name: b.name, name_am: b.name_am, tagline: b.tagline, market: b.market, category_id: b.category_id, category_name: null, category_slug: null, city: b.city, state: b.state, postal_code: b.postal_code, country: b.country, lat: b.lat, lng: b.lng, logo_url: b.logo_url, cover_url: b.cover_url, rating_avg: b.rating_avg, rating_count: b.rating_count, badges: b.verifications?.filter((v) => !v.revoked_at).map((v) => v.level) ?? [], is_featured: b.is_featured, offers_ad_screens: b.offers_ad_screens, distance_km: null, published_at: b.published_at });
+              if (b) found.push(businessToCard(b));
             }
             return found as (BusinessCard | ProductCard | ScreenCard)[];
           }

@@ -21,8 +21,10 @@ export async function proxy(request: NextRequest) {
   });
   const { data: { user } } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
-  const protectedPrefix = ['/dashboard', '/messages', '/admin', '/campaigns', '/requests', '/bookings', '/saved', '/account'];
-  if (!user && protectedPrefix.some((p) => path.startsWith(p))) {
+  const protectedPrefix = ['/dashboard', '/messages', '/admin', '/campaigns', '/requests', '/bookings', '/saved', '/account', '/cart', '/checkout', '/orders', '/rewards', '/support', '/notifications'];
+  // The payment return page must work without a website session: payments started in the app come back here first.
+  const open = path.startsWith('/checkout/return');
+  if (!user && !open && protectedPrefix.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = '/auth/sign-in';
     url.searchParams.set('next', path);

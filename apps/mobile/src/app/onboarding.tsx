@@ -12,9 +12,10 @@ import { ONBOARDING_KEY } from '@/lib/constants';
 const { width } = Dimensions.get('window');
 
 const SLIDES = [
-  { key: 'community', icon: 'storefront-outline' as const, title: 'Discover Your Community.', body: 'Find trusted Habesha businesses, restaurants, shops, and services near you.' },
-  { key: 'borders', icon: 'globe-outline' as const, title: 'Shop Beyond Borders.', body: 'Discover authentic products and verified sellers from Ethiopia.' },
-  { key: 'grow', icon: 'trending-up-outline' as const, title: 'Grow Your Business.', body: 'Connect with advertising opportunities and reach customers across your community.' },
+  { key: 'community', icon: 'storefront-outline' as const, title: 'Discover Habesha Businesses.', body: 'Find restaurants, shops and services near you, and shop products from verified sellers.' },
+  { key: 'safe', icon: 'shield-checkmark-outline' as const, title: 'Pay Safely.', body: 'Adey holds your payment and releases it to the seller only after you confirm delivery.' },
+  { key: 'rewards', icon: 'gift-outline' as const, title: 'Rewards & Community.', body: 'Earn Adey Rewards points when you shop, and find community events near you.' },
+  { key: 'grow', icon: 'trending-up-outline' as const, title: 'Grow Your Business.', body: 'Businesses can sell online and advertise on screens across the community.' },
 ];
 
 export default function Onboarding() {

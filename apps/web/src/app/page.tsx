@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import type { BusinessCard, ScreenCard } from '@adey/shared';
+import type { BusinessCard, EventCard, ProductCard, ScreenCard } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
-import { AdeyFlower, BusinessCardView, ScreenCardView, Section } from '@/components/ui';
+import { AdeyFlower, BusinessCardView, EventCardView, ProductCardView, ScreenCardView, Section } from '@/components/ui';
+import { FxAttribution } from '@/components/commerce';
 
 export const dynamic = 'force-dynamic';
 
-type Feed = { popular_categories: { id: string; slug: string; name_en: string; name_am: string | null; business_count: number }[]; nearby: BusinessCard[]; verified: BusinessCard[]; featured_sellers: BusinessCard[]; available_screens: ScreenCard[]; recommended: BusinessCard[]; recommendation_basis: string };
+type Feed = { popular_categories: { id: string; slug: string; name_en: string; name_am: string | null; business_count: number }[]; nearby: BusinessCard[]; verified: BusinessCard[]; featured_sellers: BusinessCard[]; available_screens: ScreenCard[]; recommended: BusinessCard[]; recommendation_basis: string; shop_products?: ProductCard[]; authentic_products?: ProductCard[]; trusted_vendors?: BusinessCard[]; upcoming_events?: EventCard[] };
 
 export default async function Home() {
   const api = await serverApi();
@@ -18,7 +19,7 @@ export default async function Home() {
   return (
     <div className="container-x pb-16">
       {/* Hero */}
-      <section className="relative mt-8 overflow-hidden rounded-[28px] bg-forest px-6 py-14 text-ivory sm:px-12">
+      <section className="relative mt-8 overflow-hidden rounded-[28px] bg-forest-deep px-6 py-14 text-ivory sm:px-12">
         <div className="absolute -right-10 -top-10 opacity-20"><AdeyFlower size={260} center="#174B3A" /></div>
         <p className="text-xs font-bold tracking-[0.3em] text-gold">ADEY · <span className="ethiopic tracking-normal">አደይ</span></p>
         <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">Connecting Communities. Growing Businesses.</h1>
@@ -56,9 +57,14 @@ export default async function Home() {
         </Section>
       ) : null}
 
-      <Grid title="Nearby & new businesses" items={feed?.nearby ?? []} empty="Businesses appear here as soon as owners publish them." href="/market" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} />} />
-      <Grid title="Verified businesses" items={feed?.verified ?? []} empty="Verified badges appear once Adey approves verification requests." href="/market?verified=1" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} />} />
-      <Grid title="Featured Ethiopian sellers" items={feed?.featured_sellers ?? []} empty="Ethiopian sellers appear here once they publish." href="/market?market=et" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} />} />
+      {feed?.shop_products?.length ? <Section title="Shop Habesha products" action={<Link href="/market?buyable=1" className="text-sm font-semibold text-forest">See all</Link>}><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{feed.shop_products.slice(0, 8).map((p) => <ProductCardView key={p.id} p={p} />)}</div><FxAttribution className="mt-2 text-[11px] text-text-muted" /></Section> : null}
+      {feed?.authentic_products?.length ? <Section title="Authentic Habesha" action={<Link href="/market?authentic=1" className="text-sm font-semibold text-forest">See all</Link>}><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{feed.authentic_products.slice(0, 4).map((p) => <ProductCardView key={p.id} p={p} />)}</div></Section> : null}
+      {feed?.trusted_vendors?.length ? <Section title="Trusted vendors" action={<Link href="/market?view=businesses&trusted=1" className="text-sm font-semibold text-forest">See all</Link>}><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{feed.trusted_vendors.slice(0, 4).map((b) => <BusinessCardView key={b.id} b={b} />)}</div></Section> : null}
+      {feed?.upcoming_events?.length ? <Section title="Upcoming events" action={<Link href="/events" className="text-sm font-semibold text-forest">All events</Link>}><div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{feed.upcoming_events.slice(0, 4).map((e) => <EventCardView key={e.id} e={e} />)}</div></Section> : null}
+
+      <Grid title="Nearby & new businesses" items={feed?.nearby ?? []} empty="Businesses appear here as soon as owners publish them." href="/market?view=businesses" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} />} />
+      <Grid title="Verified businesses" items={feed?.verified ?? []} empty="Verified badges appear once Adey approves verification requests." href="/market?view=businesses&verified=1" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} />} />
+      <Grid title="Featured Ethiopian sellers" items={feed?.featured_sellers ?? []} empty="Ethiopian sellers appear here once they publish." href="/market?market=et&view=businesses" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} />} />
       <Grid title="Available advertising locations" items={feed?.available_screens ?? []} empty="Screen listings appear once businesses list them in AdConnect." href="/adconnect" render={(s) => <ScreenCardView key={s.id} s={s as ScreenCard} />} />
 
       <Section title="How Adey works">

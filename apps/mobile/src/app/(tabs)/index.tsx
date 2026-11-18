@@ -5,13 +5,17 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
-import { brand, type BusinessCard, type ScreenCard } from '@adey/shared';
+import { brand, eventCategoryLabels, type BusinessCard, type EventCard, type ProductCard, type ScreenCard } from '@adey/shared';
+import { useCart, useCommerce } from '@/lib/commerce';
+import { fmtDate } from '@/lib/format';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { useLocation } from '@/lib/location';
 import { api } from '@/lib/supabase';
 import { AdeyFlower, Avatar, Button, Card, IconButton, Screen, SectionHeader, Skeleton, Text } from '@/components/ui';
-import { BusinessCardItem, CategoryTile, ScreenCardItem } from '@/components/cards';
+import { BusinessCardItem, CategoryTile, ProductCardItem, ScreenCardItem, cover } from '@/components/cards';
+import { FxAttribution } from '@/components/commerce';
+import { Image } from 'expo-image';
 
 type Feed = {
   popular_categories: { id: string; slug: string; name_en: string; name_am: string | null; icon: string | null; business_count: number }[];
@@ -21,6 +25,10 @@ type Feed = {
   available_screens: ScreenCard[];
   recommended: BusinessCard[];
   recommendation_basis: 'saved_and_viewed' | 'top_rated_fallback';
+  shop_products?: ProductCard[];
+  authentic_products?: ProductCard[];
+  trusted_vendors?: BusinessCard[];
+  upcoming_events?: EventCard[];
 };
 
 export default function Home() {
@@ -36,6 +44,8 @@ export default function Home() {
     staleTime: 2 * 60_000,
   });
   const d = feed.data;
+  const { checkoutEnabled } = useCommerce();
+  const cart = useCart();
 
   return (
     <Screen padded={false} refreshing={feed.isRefetching} onRefresh={() => feed.refetch()} style={{ paddingTop: 0 }}>
@@ -48,6 +58,7 @@ export default function Home() {
           </Text>
         </View>
         <View style={styles.topActions}>
+          {checkoutEnabled && <IconButton icon="bag-outline" accessibilityLabel={cart.data?.count ? `Cart, ${cart.data.count} items` : 'Cart'} onPress={() => router.push(user ? '/cart' : '/(auth)/sign-in')} badge={cart.data?.count} />}
           <IconButton icon="notifications-outline" accessibilityLabel="Notifications" onPress={() => router.push(user ? '/notifications' : '/(auth)/sign-in')} badge={unread.data?.notifications} />
           <Pressable onPress={() => router.push(user ? '/(tabs)/profile' : '/(auth)/sign-in')} accessibilityRole="button" accessibilityLabel="Profile">
             <Avatar url={profile?.avatar_url} name={profile?.display_name ?? (user ? 'Me' : '?')} size={40} />
@@ -123,6 +134,11 @@ export default function Home() {
         <Hint text="Categories appear here once businesses are published." />
       )}
 
+      {!!d?.shop_products?.length && <Section title="Shop from Habesha sellers" items={d.shop_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
+      {!!d?.authentic_products?.length && <Section title="Authentic Habesha" subtitle="Certified by Adey" items={d.authentic_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
+      {!!(d?.shop_products?.length || d?.authentic_products?.length) && <View style={[styles.padded, { marginTop: 6 }]}><FxAttribution /></View>}
+      {!!d?.trusted_vendors?.length && <Section title="Trusted vendors" items={d.trusted_vendors} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'businesses' } })} empty="" render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />}
+      {!!d?.upcoming_events?.length && <Section title="Upcoming events" items={d.upcoming_events} loading={false} onSeeAll={() => router.push('/(tabs)/events')} empty="" render={(e) => <EventTile e={e as EventCard} />} />}
       <Section title="Nearby businesses" items={d?.nearby} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { sort: 'distance' } })} empty={`No published businesses near ${location.label} yet.`}
         render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />
       <Section title="Verified businesses" items={d?.verified} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { verified: '1' } })} empty="Verified badges appear here once Adey approves verification requests."
@@ -166,6 +182,22 @@ function Section<T extends { id: string | null }>({ title, subtitle, items, load
         <Hint text={empty} />
       )}
     </>
+  );
+}
+
+function EventTile({ e }: { e: EventCard }) {
+  const { colors } = useTheme();
+  const img = cover('event-media', e.cover_path);
+  return (
+    <Card padded={false} onPress={() => router.push(`/events/${e.id}`)} style={{ width: 240 }} accessibilityLabel={`${e.title}, ${fmtDate(e.starts_at)}`}>
+      <View style={{ height: 110, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+        {img ? <Image source={{ uri: img }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Ionicons name="calendar-outline" size={30} color={colors.accent} />}
+      </View>
+      <View style={{ padding: 10, gap: 2 }}>
+        <Text variant="label" numberOfLines={2}>{e.title}</Text>
+        <Text variant="caption" color="muted" numberOfLines={1}>{[fmtDate(e.starts_at), e.is_online ? 'Online' : e.city, e.category ? eventCategoryLabels[e.category] : null].filter(Boolean).join(' · ')}</Text>
+      </View>
+    </Card>
   );
 }
 

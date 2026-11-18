@@ -21,6 +21,8 @@ jobs:
           psql -v ON_ERROR_STOP=1 -q -d adey_test -f supabase/seed.sql
           psql -v ON_ERROR_STOP=1 -d adey_test -f supabase/tests/acceptance.sql 2>&1 | tee out.txt | grep -c PASS
           grep -q "ALL ACCEPTANCE CHECKS PASSED" out.txt
+          psql -v ON_ERROR_STOP=1 -d adey_test -f supabase/tests/acceptance_v1.sql 2>&1 | tee out_v1.txt | grep -c PASS
+          grep -q "ALL V1 ACCEPTANCE CHECKS PASSED" out_v1.txt
 
   apps:
     runs-on: ubuntu-latest
@@ -31,6 +33,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
+      - run: pnpm check:functions
       - run: pnpm typecheck
       - run: pnpm --filter @adey/mobile lint
       - run: pnpm test

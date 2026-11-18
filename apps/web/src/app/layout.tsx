@@ -12,13 +12,18 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { themeColor: '#174B3A' };
 
+/** Applies the saved light/dark choice (src/lib/theme.ts, key `adey.theme`) before first paint. */
+const themeBoot = "try{var t=localStorage.getItem('adey.theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <head><script dangerouslySetInnerHTML={{ __html: themeBoot }} /></head>
       <body className="min-h-full flex flex-col">
+        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 btn btn-primary btn-sm">Skip to content</a>
         <Providers>
           <Nav />
-          <main className="flex-1">{children}</main>
+          <main id="main" className="flex-1">{children}</main>
           <Footer />
         </Providers>
       </body>

@@ -10,6 +10,8 @@ import { useTheme } from '@/lib/theme';
 import { useManagedBusiness } from '@/hooks/useBusiness';
 import { Badge, Button, Card, Divider, EmptyState, ErrorState, Header, Loading, Screen, Text, VerificationBadges } from '@/components/ui';
 import { MenuRow } from '@/components/MenuRow';
+import { SellingPanel } from '@/components/seller/SellingPanel';
+import { SellingNotice } from '@/components/seller/common';
 
 type Overview = {
   business: { id: string; name: string; status: string; market: string; logo_url: string | null };
@@ -76,6 +78,11 @@ export default function BusinessDashboard() {
         <Stat label="Upcoming bookings" value={o?.upcoming_bookings} icon="calendar-outline" onPress={() => router.push('/adconnect/bookings')} />
         <Stat label="Rating" value={o?.rating.avg != null ? `${Number(o.rating.avg).toFixed(1)} (${o.rating.count})` : '—'} icon="star-outline" />
       </View>
+
+      {/* Selling */}
+      <Text variant="overline" color="muted" style={{ marginTop: 24 }}>Selling</Text>
+      <View style={{ marginTop: 8 }}><SellingNotice businessId={b.id} /></View>
+      <SellingPanel businessId={b.id} role={membership.role} />
 
       {/* Revenue — honest labels */}
       <Card style={{ marginTop: 12 }}>

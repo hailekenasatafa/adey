@@ -8,6 +8,7 @@ import { useTheme } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 import { Badge, Card, RatingStars, Text, VerificationBadges } from './ui';
 import { SaveButton } from './SaveButton';
+import { PriceText, TrustBadge } from './commerce';
 
 const CATEGORY_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   restaurant: 'restaurant-outline', grocery: 'basket-outline', hotel: 'bed-outline', salon: 'cut-outline', barber: 'cut-outline', clothing: 'shirt-outline',
@@ -58,6 +59,12 @@ export function BusinessCardItem({ b, horizontal }: { b: BusinessCard; horizonta
           </Text>
         )}
         <RatingStars rating={b.rating_avg} count={b.rating_count} />
+        {(b.selling_enabled || (b.trust_tier && b.trust_tier !== 'new')) && (
+          <View style={styles.badgeRow}>
+            <TrustBadge tier={b.trust_tier} />
+            {b.selling_enabled && <Badge label="Takes online orders" tone="primary" icon="bag-check-outline" />}
+          </View>
+        )}
       </View>
     </Card>
   );
@@ -135,16 +142,14 @@ export function ProductCardItem({ p, horizontal }: { p: ProductCard; horizontal?
           {p.business_name}
           {p.business_city ? ` · ${p.business_city}` : ''}
         </Text>
-        <Text variant="bodyStrong" color="primary">
-          {formatMoney(p.price_cents, p.currency ?? 'USD')}
-          {p.alt_price_cents != null && p.alt_currency ? (
-            <Text variant="caption" color="muted">
-              {' '}
-              · {formatMoney(p.alt_price_cents, p.alt_currency)}
-            </Text>
-          ) : null}
-        </Text>
-        {p.availability && p.availability !== 'in_stock' && <Badge label={p.availability.replace('_', ' ')} tone="warning" />}
+        <PriceText product={p} estimate={!horizontal} />
+        {p.rating_count ? <RatingStars rating={p.rating_avg} count={p.rating_count} size={12} /> : null}
+        <View style={styles.badgeRow}>
+          {p.is_authentic && <Badge label="Authentic" tone="accent" icon="flower" />}
+          {p.is_handmade && !horizontal && <Badge label="Handmade" tone="neutral" />}
+          {!horizontal && <TrustBadge tier={p.trust_tier} />}
+          {p.in_stock === false || p.availability === 'out_of_stock' ? <Badge label="Sold out" tone="danger" /> : p.availability === 'made_to_order' ? <Badge label="Made to order" tone="info" /> : null}
+        </View>
       </View>
     </Card>
   );
@@ -177,6 +182,7 @@ const styles = StyleSheet.create({
   saveBtn: { position: 'absolute', top: 8, right: 8 },
   check: { position: 'absolute', top: 8, right: 8, width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   featured: { position: 'absolute', top: 8, left: 8 },
+  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   tile: { width: 104, padding: 12, alignItems: 'center', gap: 8, borderWidth: 1 },
   tileIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },

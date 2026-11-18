@@ -8,6 +8,7 @@ import { formatDualPrice } from '@adey/shared';
 import { api } from '@/lib/supabase';
 import { useTheme } from '@/lib/theme';
 import { cover } from '@/components/cards';
+import { CertificationBadge } from '@/components/commerce';
 import { Badge, Button, Card, EmptyState, Header, Loading, Screen, Text } from '@/components/ui';
 
 export default function ProductsManager() {
@@ -29,8 +30,12 @@ export default function ProductsManager() {
                   <View style={{ flex: 1, padding: 12 }}>
                     <Text variant="bodyStrong" numberOfLines={1}>{p.name}</Text>
                     <Text variant="label" color="primary">{formatDualPrice(p)}</Text>
-                    <View style={{ flexDirection: 'row', gap: 6, marginTop: 6 }}>
+                    {p.track_inventory && <Text variant="caption" color={p.stock_quantity <= p.low_stock_threshold ? 'warning' : 'muted'}>{p.stock_quantity} in stock{p.stock_quantity <= p.low_stock_threshold ? ' · running low' : ''}</Text>}
+                    <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                       {!p.is_active && <Badge label="Hidden" tone="neutral" />}
+                      {p.purchasable && <Badge label="Sold online" tone="info" />}
+                      {p.is_authentic && <CertificationBadge />}
+                      {p.is_handmade && <Badge label="Handmade" tone="neutral" />}
                       <Badge label={p.availability.replace('_', ' ')} tone={p.availability === 'in_stock' ? 'success' : 'warning'} />
                     </View>
                   </View>

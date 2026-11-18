@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import MapView, { Marker } from 'react-native-maps';
-import { formatMoney, type Product, type Service, type VerificationLevel } from '@adey/shared';
+import { formatMoney, friendlyError, type Product, type Service, type VerificationLevel } from '@adey/shared';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/supabase';
@@ -16,6 +16,7 @@ import { Badge, Button, Card, ErrorState, IconButton, Loading, RatingStars, Scre
 import { SaveButton } from '@/components/SaveButton';
 import { cover, placeLabel } from '@/components/cards';
 import { ReviewList } from '@/components/ReviewList';
+import { FxAttribution, PriceText, TrustBadge } from '@/components/commerce';
 
 const { width } = Dimensions.get('window');
 
@@ -89,8 +90,17 @@ export default function BusinessDetail() {
           <RatingStars rating={b.rating_avg} count={b.rating_count} size={16} />
           {status.open !== null && <Badge label={status.label} tone={status.open ? 'success' : 'neutral'} icon="time-outline" />}
         </View>
-        <View style={{ marginTop: 10 }}>
+        <View style={{ marginTop: 10, gap: 6 }}>
           <VerificationBadges badges={badges} />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            <TrustBadge tier={b.trust_tier} />
+            {b.selling_enabled && <Badge label="Takes online orders" tone="primary" icon="bag-check-outline" />}
+          </View>
+          {(b.authenticity_avg != null || b.service_avg != null) && (
+            <Text variant="caption" color="muted">
+              {[b.authenticity_avg != null ? `Authenticity ${Number(b.authenticity_avg).toFixed(1)}★` : null, b.service_avg != null ? `Service ${Number(b.service_avg).toFixed(1)}★` : null].filter(Boolean).join(' · ')} from buyer reviews
+            </Text>
+          )}
         </View>
         {b.tagline && <Text style={{ marginTop: 10 }}>{b.tagline}</Text>}
 
@@ -153,8 +163,13 @@ export default function BusinessDetail() {
         )}
 
         {tab === 'products' && (
-          <View style={{ marginTop: 16, gap: 10 }}>
-            {products.isLoading ? <Loading /> : products.data?.length ? products.data.map((p) => <ProductRow key={p.id} p={p} />) : <Text color="muted">No products listed yet.</Text>}
+          <View style={{ marginTop: 16 }}>
+            {products.isLoading ? <Loading /> : products.isError ? <Text color="danger">{friendlyError(products.error)}</Text> : products.data?.filter((p) => p.is_active).length ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                {products.data.filter((p) => p.is_active).map((p) => <View key={p.id} style={{ width: (width - 42) / 2 }}><ProductTile p={p} /></View>)}
+              </View>
+            ) : <Text color="muted">No products listed yet.</Text>}
+            {!!products.data?.length && <View style={{ marginTop: 8 }}><FxAttribution /></View>}
           </View>
         )}
         {tab === 'services' && (
@@ -194,22 +209,21 @@ function Row({ icon, text, onPress }: { icon: keyof typeof Ionicons.glyphMap; te
   );
 }
 
-function ProductRow({ p }: { p: Product }) {
+function ProductTile({ p }: { p: Product }) {
   const { colors } = useTheme();
   const img = cover('product-media', p.images[0]);
+  const soldOut = p.availability === 'out_of_stock' || (p.track_inventory && p.stock_quantity <= 0);
   return (
     <Card padded={false} onPress={() => router.push(`/product/${p.id}`)} accessibilityLabel={p.name}>
-      <View style={{ flexDirection: 'row' }}>
-        <View style={{ width: 92, height: 92, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' }}>
-          {img ? <Image source={{ uri: img }} style={{ width: 92, height: 92 }} contentFit="cover" /> : <Ionicons name="bag-handle-outline" size={24} color={colors.textMuted} />}
-        </View>
-        <View style={{ flex: 1, padding: 12, gap: 2 }}>
-          <Text variant="bodyStrong" numberOfLines={1}>{p.name}</Text>
-          {p.description && <Text variant="caption" color="muted" numberOfLines={2}>{p.description}</Text>}
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-            <Text variant="bodyStrong" color="primary">{formatMoney(p.price_cents, p.currency)}</Text>
-            {p.availability !== 'in_stock' && <Badge label={p.availability.replace('_', ' ')} tone="warning" />}
-          </View>
+      <View style={{ height: 130, backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center' }}>
+        {img ? <Image source={{ uri: img }} style={StyleSheet.absoluteFill} contentFit="cover" /> : <Ionicons name="bag-handle-outline" size={24} color={colors.textMuted} />}
+      </View>
+      <View style={{ padding: 10, gap: 2 }}>
+        <Text variant="label" numberOfLines={2}>{p.name}</Text>
+        <PriceText product={p} estimate={false} />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4 }}>
+          {p.is_authentic && <Badge label="Authentic" tone="accent" icon="flower" />}
+          {soldOut ? <Badge label="Sold out" tone="danger" /> : p.availability === 'made_to_order' ? <Badge label="Made to order" tone="info" /> : null}
         </View>
       </View>
     </Card>

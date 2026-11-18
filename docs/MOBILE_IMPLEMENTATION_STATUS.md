@@ -2,6 +2,11 @@
 
 _Last updated: 2026-11-04. Everything below was built in this pass against the spec in `PROJECT ADEY MOBILE`._
 
+> **V1 marketplace update (2026-11-18).** Multi-vendor checkout with escrow, seller verification, product
+> authenticity badges, shipping, multi-currency, tax, rewards, community events, the help centre and the support
+> assistant are built and tested locally but **not deployed**, and online checkout is switched off by default.
+> What exists, the switches, the go-live checklist and what is still untested: [V1_MARKETPLACE.md](V1_MARKETPLACE.md).
+
 ## Completed
 **Backend (shared source of truth)** — 12 migrations, RLS on every table, 25+ RPCs, triggers for notifications/aggregates/slugs/badges, storage buckets + policies, settings/feature flags, audit log, payments-ready tables, pg_cron scheduling, 2 edge functions. Validated locally with a 49-check acceptance suite covering spec tests A–L.
 

@@ -22,6 +22,7 @@ Still manual in the Supabase dashboard: Auth URL configuration (step 3) and cust
    Migration 0012 created the pg_cron jobs (`adey_send_push` every minute, `adey_expire_requests` hourly); migration 0013 added `verify_worker_secret` so the functions can check the token.
 7. Make the first admin: `update public.profiles set platform_role='admin' where id='<your user id>';`
 8. Optional: run `supabase/tests/acceptance.sql` in the SQL editor — it rolls back and leaves no data.
+9. **V1 marketplace** (migrations `20261117…`, seven more edge functions, their secrets, Stripe / Shippo setup and the order to switch things on): see [V1_MARKETPLACE.md](V1_MARKETPLACE.md). Online checkout stays off until `commerce.checkout_enabled` is set to `true`.
 
 ## 2. Mobile (Expo / EAS)
 1. `cp apps/mobile/.env.example apps/mobile/.env` and fill `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_WEB_URL`.

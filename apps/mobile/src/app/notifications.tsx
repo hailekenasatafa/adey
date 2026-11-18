@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Notification } from '@adey/shared';
+import { notificationRoute, type Notification } from '@adey/shared';
 import { api } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
@@ -14,6 +14,10 @@ const ICONS: Record<Notification['type'], keyof typeof Ionicons.glyphMap> = {
   inquiry_new: 'chatbubble-ellipses-outline', ad_request_new: 'tv-outline', offer_accepted: 'checkmark-circle-outline', offer_countered: 'swap-horizontal-outline', request_declined: 'close-circle-outline',
   booking_confirmed: 'calendar-outline', verification_update: 'shield-checkmark-outline', payment_update: 'card-outline', campaign_completed: 'flag-outline', dispute_opened: 'alert-circle-outline',
   message_new: 'mail-outline', moderation: 'eye-outline', system: 'information-circle-outline',
+  order_new: 'bag-handle-outline', order_update: 'receipt-outline', shipment_update: 'cube-outline', escrow_released: 'lock-open-outline', payout_update: 'wallet-outline',
+  refund_update: 'return-down-back-outline', order_dispute: 'warning-outline', kyc_update: 'id-card-outline', certification_update: 'ribbon-outline', review_new: 'star-outline',
+  low_stock: 'trending-down-outline', event_reminder: 'alarm-outline', event_update: 'calendar-outline', rewards_update: 'gift-outline', support_reply: 'help-buoy-outline',
+  announcement: 'megaphone-outline',
 };
 
 export default function Notifications() {
@@ -40,7 +44,9 @@ export default function Notifications() {
   const items = q.data?.pages.flat() ?? [];
   const open = (n: Notification) => {
     if (!n.read_at) markOne.mutate(n.id);
-    const route = (n.data as { route?: string } | null)?.route;
+    // Routes come from the server (orders, cart, rewards, events, support, dashboard, admin); only in-app paths are
+    // followed, and older notification types are translated to this app's screens.
+    const route = notificationRoute(n.data, 'app');
     if (route) router.push(route as never);
   };
 
@@ -64,7 +70,7 @@ export default function Notifications() {
             {!item.read_at && <View style={[styles.unread, { backgroundColor: colors.accent }]} />}
           </Pressable>
         )}
-        ListEmptyComponent={q.isLoading ? <View style={{ padding: 16, gap: 10 }}>{[0, 1, 2].map((i) => <Skeleton key={i} height={64} radius={14} />)}</View> : q.isError ? <ErrorState error={q.error} onRetry={() => q.refetch()} /> : <EmptyState icon="notifications-off-outline" title="You're all caught up" body="Inquiries, advertising requests, offers, and verification updates will show up here." />}
+        ListEmptyComponent={q.isLoading ? <View style={{ padding: 16, gap: 10 }}>{[0, 1, 2].map((i) => <Skeleton key={i} height={64} radius={14} />)}</View> : q.isError ? <ErrorState error={q.error} onRetry={() => q.refetch()} /> : <EmptyState icon="notifications-off-outline" title="You're all caught up" body="Orders, messages, events, rewards, support replies and other updates will show up here." />}
       />
     </Screen>
   );

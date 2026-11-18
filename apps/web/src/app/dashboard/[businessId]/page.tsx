@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { api } from '@/lib/supabase/client';
 import { useAuth } from '@/components/Providers';
 import { Badge, Stat, VerificationBadges } from '@/components/ui';
+import { SellingPanel } from '@/components/seller/SellingPanel';
 
 type Overview = { business: { status: string }; badges: string[]; pending_verifications: number; profile_completeness: number; profile_views_30d: number; contact_clicks_30d: number; open_inquiries: number; pending_ad_requests: number; upcoming_bookings: number; active_campaigns: number; revenue: { completed_net_cents: number; expected_confirmed_cents: number }; rating: { avg: number | null; count: number } };
 
@@ -26,6 +27,7 @@ export default function Overview() {
         {b && b.role !== 'staff' && b.status !== 'suspended' && <button onClick={() => publish.mutate(b.status === 'published' ? 'draft' : 'published')} className={`btn btn-sm ${b.status === 'published' ? 'btn-outline' : 'btn-primary'}`} disabled={publish.isPending}>{b.status === 'published' ? 'Unpublish' : 'Publish'}</button>}
       </div>
       {err && <p className="mt-2 text-sm text-danger">{err}</p>}
+      <SellingPanel businessId={businessId} />
       {d && (
         <>
           <div className="card mt-4 p-4"><div className="flex justify-between text-sm"><span className="text-text-muted">Profile completeness</span><b>{d.profile_completeness}%</b></div><div className="mt-2 h-2 rounded-full bg-surface-muted"><div className="h-2 rounded-full bg-forest" style={{ width: `${d.profile_completeness}%` }} /></div>{d.profile_completeness < 70 && <p className="mt-2 text-xs text-text-muted">Add a description, logo, cover, phone, hours, location, photos, and at least one product or service.</p>}</div>

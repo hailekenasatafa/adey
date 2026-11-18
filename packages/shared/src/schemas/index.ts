@@ -41,6 +41,13 @@ export const notificationPrefsSchema = z.object({
   payments: z.boolean(),
   messages: z.boolean(),
   marketing: z.boolean(),
+  // V1 marketplace topics — default on, so profiles saved before V1 still parse
+  orders: z.boolean().default(true),
+  shipping: z.boolean().default(true),
+  reviews: z.boolean().default(true),
+  events: z.boolean().default(true),
+  rewards: z.boolean().default(true),
+  support: z.boolean().default(true),
 });
 export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
 
@@ -74,15 +81,16 @@ export const businessSchema = z.object({
 export type BusinessInput = z.infer<typeof businessSchema>;
 
 export const moneyCents = z.number().int().min(0, 'Price cannot be negative');
+export const currencySchema = z.enum(['USD', 'ETB', 'EUR', 'GBP', 'CAD', 'AUD', 'AED', 'SEK', 'NOK', 'CHF', 'SAR']);
 
 export const productSchema = z.object({
   name: z.string().trim().min(1).max(160),
   description: z.string().trim().max(4000).optional().or(z.literal('')),
   category_id: z.string().uuid().nullable().optional(),
   price_cents: moneyCents.nullable(),
-  currency: z.enum(['USD', 'ETB']),
+  currency: currencySchema,
   alt_price_cents: moneyCents.nullable().optional(),
-  alt_currency: z.enum(['USD', 'ETB']).nullable().optional(),
+  alt_currency: currencySchema.nullable().optional(),
   availability: z.enum(['in_stock', 'out_of_stock', 'preorder', 'made_to_order']),
   shipping: z.object({
     domestic_only: z.boolean(),
@@ -93,14 +101,42 @@ export const productSchema = z.object({
   }),
   return_policy: z.string().trim().max(2000).optional().or(z.literal('')),
   is_active: z.boolean(),
+  // V1: selling + stock + parcel + provenance (all optional so existing forms keep working)
+  sku: z.string().trim().max(64).optional().or(z.literal('')),
+  purchasable: z.boolean().optional(),
+  track_inventory: z.boolean().optional(),
+  stock_quantity: z.number().int().min(0).optional(),
+  low_stock_threshold: z.number().int().min(0).optional(),
+  max_per_order: z.number().int().positive().nullable().optional(),
+  weight_grams: z.number().int().positive().nullable().optional(),
+  length_mm: z.number().int().positive().nullable().optional(),
+  width_mm: z.number().int().positive().nullable().optional(),
+  height_mm: z.number().int().positive().nullable().optional(),
+  origin_country: z.string().regex(/^[A-Z]{2}$/).nullable().optional(),
+  origin_region: z.string().trim().max(120).optional().or(z.literal('')),
+  materials: z.string().trim().max(500).optional().or(z.literal('')),
+  is_handmade: z.boolean().optional(),
+  tags: z.array(z.string().trim().min(1).max(30)).max(20).optional(),
+  shipping_profile_id: z.string().uuid().nullable().optional(),
 });
 export type ProductInput = z.infer<typeof productSchema>;
+
+export const variantSchema = z.object({
+  title: z.string().trim().min(1, 'Name the option, e.g. "Medium"').max(120),
+  sku: z.string().trim().max(64).optional().or(z.literal('')),
+  price_cents: moneyCents.nullable().optional(),
+  alt_price_cents: moneyCents.nullable().optional(),
+  stock_quantity: z.number().int().min(0),
+  weight_grams: z.number().int().positive().nullable().optional(),
+  is_active: z.boolean(),
+});
+export type VariantInput = z.infer<typeof variantSchema>;
 
 export const serviceSchema = z.object({
   name: z.string().trim().min(1).max(160),
   description: z.string().trim().max(4000).optional().or(z.literal('')),
   price_cents: moneyCents.nullable(),
-  currency: z.enum(['USD', 'ETB']),
+  currency: currencySchema,
   price_note: z.string().trim().max(60).optional().or(z.literal('')),
   duration_minutes: z.number().int().positive().nullable().optional(),
   is_active: z.boolean(),
@@ -212,6 +248,9 @@ export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   title: z.string().trim().max(120).optional().or(z.literal('')),
   body: z.string().trim().max(4000).optional().or(z.literal('')),
+  // V1: how authentic the product / experience is, and how good the service was
+  authenticity_rating: z.number().int().min(1).max(5).nullable().optional(),
+  service_rating: z.number().int().min(1).max(5).nullable().optional(),
 });
 
 export const messageSchema = z.object({ body: z.string().trim().min(1).max(4000) });
@@ -234,4 +273,170 @@ export function validateUpload(kind: keyof typeof uploadLimits, file: { size: nu
   if (!(limit.types as readonly string[]).includes(file.mimeType)) return `Unsupported file type (${file.mimeType})`;
   if (file.size > limit.maxBytes) return `File is too large (max ${Math.round(limit.maxBytes / 1024 / 1024)} MB)`;
   return null;
+}
+
+// =============================================================================
+// V1 marketplace
+// =============================================================================
+const countryCode = z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/, 'Choose a country');
+const httpsUrl = z.string().trim().regex(/^https:\/\//i, 'Use a full https:// link');
+
+export const addressSchema = z.object({
+  label: z.string().trim().max(40).optional().or(z.literal('')),
+  full_name: z.string().trim().min(2, 'Enter the recipient name').max(120),
+  phone: phoneSchema,
+  line1: z.string().trim().min(3, 'Enter the street address').max(200),
+  line2: z.string().trim().max(200).optional().or(z.literal('')),
+  city: z.string().trim().min(1, 'City is required').max(100),
+  region: z.string().trim().max(100).optional().or(z.literal('')),
+  postal_code: z.string().trim().max(20).optional().or(z.literal('')),
+  country: countryCode,
+  is_default: z.boolean().optional(),
+});
+export type AddressInput = z.infer<typeof addressSchema>;
+
+export const privacySchema = z.object({
+  public_profile: z.boolean().default(true),
+  personalized_recommendations: z.boolean().default(true),
+});
+export type PrivacySettings = z.infer<typeof privacySchema>;
+
+export const shippingProfileSchema = z.object({
+  name: z.string().trim().min(1).max(80),
+  origin_name: z.string().trim().max(120).optional().or(z.literal('')),
+  origin_line1: z.string().trim().max(200).optional().or(z.literal('')),
+  origin_line2: z.string().trim().max(200).optional().or(z.literal('')),
+  origin_city: z.string().trim().max(100).optional().or(z.literal('')),
+  origin_region: z.string().trim().max(100).optional().or(z.literal('')),
+  origin_postal_code: z.string().trim().max(20).optional().or(z.literal('')),
+  origin_country: countryCode.nullable().optional(),
+  origin_phone: phoneSchema,
+  handling_days_min: z.number().int().min(0).max(60),
+  handling_days_max: z.number().int().min(0).max(90),
+  allow_pickup: z.boolean(),
+  pickup_instructions: z.string().trim().max(500).optional().or(z.literal('')),
+  use_carrier_rates: z.boolean(),
+}).refine((v) => v.handling_days_max >= v.handling_days_min, { path: ['handling_days_max'], message: 'Must be at least the minimum' });
+export type ShippingProfileInput = z.infer<typeof shippingProfileSchema>;
+
+export const shippingRateSchema = z.object({
+  name: z.string().trim().min(1, 'Name this rate, e.g. "US standard"').max(80),
+  countries: z.array(z.string().trim().toUpperCase().regex(/^([A-Z]{2}|\*)$/, 'Use two-letter country codes, or * for everywhere else')).min(1, 'Add at least one destination'),
+  currency: currencySchema,
+  base_cents: moneyCents,
+  per_additional_item_cents: moneyCents,
+  per_kg_cents: moneyCents,
+  free_over_cents: moneyCents.nullable().optional(),
+  eta_min_days: z.number().int().min(0).nullable().optional(),
+  eta_max_days: z.number().int().min(0).nullable().optional(),
+  is_active: z.boolean(),
+});
+export type ShippingRateInput = z.infer<typeof shippingRateSchema>;
+
+export const kycProfileSchema = z.object({
+  entity_type: z.enum(['individual', 'sole_proprietor', 'company', 'nonprofit']),
+  legal_name: z.string().trim().min(2, 'Enter the legal name').max(200),
+  representative_name: z.string().trim().max(200).optional().or(z.literal('')),
+  representative_title: z.string().trim().max(120).optional().or(z.literal('')),
+  date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD').nullable().optional().or(z.literal('')),
+  country: countryCode,
+  address_line1: z.string().trim().min(3, 'Enter the address').max(200),
+  address_line2: z.string().trim().max(200).optional().or(z.literal('')),
+  city: z.string().trim().min(1, 'City is required').max(100),
+  region: z.string().trim().max(100).optional().or(z.literal('')),
+  postal_code: z.string().trim().max(20).optional().or(z.literal('')),
+  phone: phoneSchema,
+  email: emailSchema.optional().or(z.literal('')),
+  id_document_type: z.enum(['passport', 'national_id', 'drivers_license', 'kebele_id', 'residence_permit']),
+  id_document_country: countryCode.nullable().optional(),
+  id_document_expires_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD').nullable().optional().or(z.literal('')),
+});
+export type KycProfileInput = z.infer<typeof kycProfileSchema>;
+/** ID / registration / tax numbers are sent separately and stored encrypted; this only validates the shape. */
+export const kycIdentifierSchema = z.string().trim().min(4, 'Too short').max(64).regex(/^[A-Za-z0-9 /-]+$/, 'Letters and digits only');
+
+export const certificationRequestSchema = z.object({
+  type: z.enum(['authentic_habesha', 'handmade', 'origin_verified']),
+  statement: z.string().trim().min(20, 'Tell us what makes this item authentic (at least 20 characters)').max(4000),
+  maker_name: z.string().trim().max(200).optional().or(z.literal('')),
+  origin_country: countryCode.nullable().optional(),
+  origin_region: z.string().trim().max(120).optional().or(z.literal('')),
+  materials: z.string().trim().max(500).optional().or(z.literal('')),
+  technique: z.string().trim().max(500).optional().or(z.literal('')),
+});
+export type CertificationRequestInput = z.infer<typeof certificationRequestSchema>;
+
+export const disputeSchema = z.object({
+  category: z.enum(['not_received', 'not_as_described', 'damaged', 'wrong_item', 'counterfeit', 'other']),
+  description: z.string().trim().min(10, 'Describe what happened (at least 10 characters)').max(4000),
+});
+export type DisputeInput = z.infer<typeof disputeSchema>;
+
+export const eventSchema = z.object({
+  title: z.string().trim().min(3, 'Give the event a title').max(140),
+  title_am: z.string().trim().max(140).optional().or(z.literal('')),
+  description: z.string().trim().max(6000).optional().or(z.literal('')),
+  category: z.enum(['festival', 'holiday_market', 'live_music', 'religious', 'community', 'food_drink', 'arts_culture', 'business', 'family', 'sports', 'other']),
+  starts_at: z.string().min(1, 'Choose a start date and time'),
+  ends_at: z.string().nullable().optional().or(z.literal('')),
+  timezone: z.string().trim().min(1).max(64),
+  all_day: z.boolean(),
+  venue_name: z.string().trim().max(160).optional().or(z.literal('')),
+  address_line1: z.string().trim().max(200).optional().or(z.literal('')),
+  city: z.string().trim().max(100).optional().or(z.literal('')),
+  state: z.string().trim().max(100).optional().or(z.literal('')),
+  postal_code: z.string().trim().max(20).optional().or(z.literal('')),
+  country: countryCode,
+  is_online: z.boolean(),
+  online_url: httpsUrl.optional().or(z.literal('')),
+  is_free: z.boolean(),
+  price_note: z.string().trim().max(120).optional().or(z.literal('')),
+  ticket_url: httpsUrl.optional().or(z.literal('')),
+  organizer_name: z.string().trim().max(160).optional().or(z.literal('')),
+  organizer_business_id: z.string().uuid().nullable().optional(),
+  contact_email: emailSchema.optional().or(z.literal('')),
+  contact_phone: phoneSchema,
+}).refine((v) => !v.ends_at || new Date(v.ends_at) >= new Date(v.starts_at), { path: ['ends_at'], message: 'The end must be after the start' })
+  .refine((v) => v.is_online || !!v.city, { path: ['city'], message: 'Add the city, or mark the event as online' });
+export type EventInput = z.infer<typeof eventSchema>;
+
+export const manualPayoutSchema = z.object({
+  method: z.enum(['bank_transfer', 'telebirr', 'cbe_birr', 'mobile_money', 'other']),
+  details: z.string().trim().min(6, 'Enter the account holder, bank or wallet, and number').max(1000),
+});
+
+export const taxRuleSchema = z.object({
+  country: countryCode,
+  region: z.string().trim().max(100).optional().or(z.literal('')),
+  name: z.string().trim().min(1).max(80),
+  rate_bps: z.number().int().min(0).max(5000),
+  applies_to_shipping: z.boolean(),
+  is_active: z.boolean(),
+});
+
+export const announcementSchema = z.object({
+  title: z.string().trim().min(3).max(80),
+  body: z.string().trim().min(3).max(300),
+  audience: z.enum(['everyone', 'buyers', 'sellers']),
+  kind: z.enum(['service', 'promotion']),
+  route: z.string().trim().regex(/^\/[A-Za-z0-9/_-]*$/, 'Start with /').optional().or(z.literal('')),
+});
+
+export const helpArticleSchema = z.object({
+  slug: z.string().trim().regex(/^[a-z0-9-]{3,80}$/, 'Lowercase letters, digits and dashes'),
+  title: z.string().trim().min(3).max(160),
+  summary: z.string().trim().max(300).optional().or(z.literal('')),
+  body: z.string().trim().min(10).max(20000),
+  category: z.enum(['orders', 'shipping', 'payments', 'returns', 'account', 'selling', 'verification', 'rewards', 'events', 'safety', 'other']),
+  audience: z.enum(['all', 'buyers', 'sellers']),
+  is_published: z.boolean(),
+});
+
+export const supportMessageSchema = z.object({ message: z.string().trim().min(1, 'Write a message').max(4000) });
+
+/** Empty form strings -> null, so optional columns are stored as NULL rather than ''. */
+export function blankToNull<T extends Record<string, unknown>>(input: T): { [K in keyof T]: T[K] extends '' ? null : T[K] } {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(input)) out[k] = typeof v === 'string' && v.trim() === '' ? null : v;
+  return out as { [K in keyof T]: T[K] extends '' ? null : T[K] };
 }

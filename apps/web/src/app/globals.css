@@ -20,10 +20,34 @@
   --warning: #b26a00;
   --danger: #b3261e;
   --info: #1f5f8b;
+  /* text on filled forest / danger buttons */
+  --on-forest: #ffffff;
+  --on-danger: #ffffff;
+  color-scheme: light;
 }
 
+/* Dark theme: an explicit choice (data-theme="dark"), or the system setting when nothing is saved. */
+:root[data-theme="dark"] {
+  --background: #15181a;
+  --surface: #202522;
+  --surface-muted: #2c2a25;
+  --border: #3f3d36;
+  --text: #faf8f2;
+  --text-muted: #a8a396;
+  --forest: #6fa393;
+  --forest-soft: #0b251d;
+  --gold-soft: #4a3807;
+  --gold-deep: #e8b923;
+  --success: #5bcb8a;
+  --warning: #f5b041;
+  --danger: #f28b82;
+  --info: #7fb8e6;
+  --on-forest: #0f1a15;
+  --on-danger: #2a0e0b;
+  color-scheme: dark;
+}
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --background: #15181a;
     --surface: #202522;
     --surface-muted: #2c2a25;
@@ -38,6 +62,9 @@
     --warning: #f5b041;
     --danger: #f28b82;
     --info: #7fb8e6;
+    --on-forest: #0f1a15;
+    --on-danger: #2a0e0b;
+    color-scheme: dark;
   }
 }
 
@@ -73,12 +100,12 @@ body { background: var(--background); color: var(--text); font-family: var(--fon
 /* Components */
 .btn { @apply inline-flex items-center justify-center gap-2 rounded-[14px] px-5 h-12 font-semibold text-base transition disabled:opacity-50 disabled:pointer-events-none; }
 .btn-sm { @apply h-9 px-3 text-sm rounded-[10px]; }
-.btn-primary { @apply bg-forest text-white hover:brightness-110; }
+.btn-primary { @apply bg-forest hover:brightness-110; color: var(--on-forest); }
 .btn-accent { @apply bg-gold text-charcoal hover:brightness-105; }
 .btn-secondary { @apply bg-forest-soft text-forest hover:brightness-95; }
 .btn-outline { @apply border border-border text-text hover:bg-surface-muted; }
 .btn-ghost { @apply text-forest hover:bg-forest-soft; }
-.btn-danger { @apply bg-danger text-white; }
+.btn-danger { @apply bg-danger; color: var(--on-danger); }
 .card { @apply bg-surface border border-border rounded-[20px]; }
 .input { @apply w-full rounded-[14px] border border-border bg-surface px-4 py-3 text-base outline-none focus:border-forest transition; }
 .label { @apply block text-sm font-semibold mb-1.5; }
@@ -91,6 +118,6 @@ body { background: var(--background); color: var(--text); font-family: var(--fon
 .badge-accent { background: var(--gold-soft); color: var(--gold-deep); }
 .badge-primary { background: var(--forest-soft); color: var(--forest); }
 .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-sm font-semibold transition hover:bg-surface-muted; }
-.chip-on { @apply bg-forest text-white border-forest hover:bg-forest; }
+.chip-on { @apply bg-forest border-forest hover:bg-forest; color: var(--on-forest); }
 .container-x { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
 .skeleton { @apply animate-pulse rounded-[14px] bg-surface-muted; }

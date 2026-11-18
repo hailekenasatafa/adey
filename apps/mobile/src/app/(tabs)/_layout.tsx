@@ -6,12 +6,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/supabase';
+import { useCart, useCommerce } from '@/lib/commerce';
 
+type IconName = keyof typeof Ionicons.glyphMap;
+const icon = (on: IconName, off: IconName) =>
+  function TabIcon({ color, size, focused }: { color: unknown; size: number; focused: boolean }) {
+    return <Ionicons name={focused ? on : off} size={size} color={color as string} />;
+  };
+const count = (n: number) => (n > 0 ? (n > 99 ? '99+' : n) : undefined);
+
+/** Home · Explore · Events · Cart (Saved while checkout is off) · Profile. AdConnect and Saved stay routable. */
 export default function TabsLayout() {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const { checkoutEnabled } = useCommerce();
+  const cart = useCart();
   const unread = useQuery({ queryKey: ['unread', user?.id], queryFn: () => api.notifications.unread(), enabled: !!user, refetchInterval: 60_000 });
   const badge = (unread.data?.messages ?? 0) + (unread.data?.notifications ?? 0);
+  const badgeStyle = { backgroundColor: colors.danger, color: '#fff', fontSize: 10 };
 
   return (
     <Tabs
@@ -24,19 +36,26 @@ export default function TabsLayout() {
         tabBarHideOnKeyboard: true,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? 'home' : 'home-outline'} size={size} color={color as string} /> }} />
-      <Tabs.Screen name="explore" options={{ title: 'Explore', tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? 'compass' : 'compass-outline'} size={size} color={color as string} /> }} />
-      <Tabs.Screen name="adconnect" options={{ title: 'AdConnect', tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? 'tv' : 'tv-outline'} size={size} color={color as string} /> }} />
-      <Tabs.Screen name="saved" options={{ title: 'Saved', tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? 'heart' : 'heart-outline'} size={size} color={color as string} /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home', 'home-outline') }} />
+      <Tabs.Screen name="explore" options={{ title: 'Explore', tabBarIcon: icon('compass', 'compass-outline') }} />
+      <Tabs.Screen name="events" options={{ title: 'Events', tabBarIcon: icon('calendar', 'calendar-outline') }} />
       <Tabs.Screen
-        name="profile"
+        name="cart"
         options={{
-          title: 'Profile',
-          tabBarBadge: badge > 0 ? (badge > 99 ? '99+' : badge) : undefined,
-          tabBarBadgeStyle: { backgroundColor: colors.danger, color: '#fff', fontSize: 10 },
-          tabBarIcon: ({ color, size, focused }) => <Ionicons name={focused ? 'person' : 'person-outline'} size={size} color={color as string} />,
+          title: 'Cart',
+          href: checkoutEnabled ? undefined : null,
+          tabBarBadge: count(cart.data?.count ?? 0),
+          tabBarBadgeStyle: badgeStyle,
+          tabBarAccessibilityLabel: cart.data?.count ? `Cart, ${cart.data.count} items` : 'Cart',
+          tabBarIcon: icon('bag', 'bag-outline'),
         }}
       />
+      <Tabs.Screen name="saved" options={{ title: 'Saved', href: checkoutEnabled ? null : undefined, tabBarIcon: icon('heart', 'heart-outline') }} />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: 'Profile', tabBarBadge: count(badge), tabBarBadgeStyle: badgeStyle, tabBarIcon: icon('person', 'person-outline') }}
+      />
+      <Tabs.Screen name="adconnect" options={{ title: 'AdConnect', href: null }} />
     </Tabs>
   );
 }

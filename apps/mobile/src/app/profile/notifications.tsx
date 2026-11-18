@@ -16,7 +16,13 @@ const ROWS: { key: keyof NotificationPrefs; label: string; hint: string }[] = [
   { key: 'offers', label: 'Offers & counteroffers', hint: 'Accepted, countered, declined, or expired' },
   { key: 'bookings', label: 'Bookings', hint: 'Confirmations and completions' },
   { key: 'verification', label: 'Verification updates', hint: 'Progress on your verification requests' },
-  { key: 'payments', label: 'Payments', hint: 'Only used once Monetized Mode is enabled' },
+  { key: 'payments', label: 'Payments & payouts', hint: 'Money released to you, payouts sent' },
+  { key: 'orders', label: 'Orders', hint: 'Payment received, accepted, cancelled, refunds' },
+  { key: 'shipping', label: 'Delivery updates', hint: 'Shipped, out for delivery, delivered' },
+  { key: 'reviews', label: 'Reviews', hint: 'New reviews of your business or products' },
+  { key: 'rewards', label: 'Adey Rewards', hint: 'Points earned and tier changes' },
+  { key: 'events', label: 'Events', hint: 'Reminders and changes for events you plan to attend' },
+  { key: 'support', label: 'Support replies', hint: 'When the Adey team answers you' },
   { key: 'messages', label: 'Messages', hint: 'New chat messages' },
   { key: 'marketing', label: 'Tips & announcements', hint: 'Occasional news from Adey' },
 ];
@@ -25,7 +31,7 @@ export default function NotificationPrefsScreen() {
   const { colors } = useTheme();
   const { profile, refresh } = useAuth();
   const parsed = notificationPrefsSchema.safeParse(profile?.notification_prefs);
-  const [prefs, setPrefs] = useState<NotificationPrefs>(parsed.success ? parsed.data : { push: true, email: true, inquiries: true, ad_requests: true, offers: true, bookings: true, verification: true, payments: true, messages: true, marketing: false });
+  const [prefs, setPrefs] = useState<NotificationPrefs>(parsed.success ? parsed.data : notificationPrefsSchema.parse({ push: true, email: true, inquiries: true, ad_requests: true, offers: true, bookings: true, verification: true, payments: true, messages: true, marketing: false }));
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 

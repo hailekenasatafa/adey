@@ -5,6 +5,7 @@ import { formatMoney, type VerificationLevel } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { mediaUrlFromPath } from '@/lib/media';
 import { Badge, Rating, Section, VerificationBadges, place } from '@/components/ui';
+import { CertificationBadge, FxAttribution, Price, TrustBadge } from '@/components/commerce';
 import { BusinessActions } from './actions';
 import { Reviews } from './reviews';
 
@@ -46,7 +47,8 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
               <h1 className="text-3xl font-bold">{b.name}</h1>
               {b.name_am && <p className="ethiopic text-text-muted">{b.name_am}</p>}
               <p className="text-sm text-text-muted">{[b.category?.name_en, place(b)].filter(Boolean).join(' · ')}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-3"><Rating avg={b.rating_avg} count={b.rating_count} /><VerificationBadges badges={badges} /></div>
+              <div className="mt-2 flex flex-wrap items-center gap-3"><Rating avg={b.rating_avg} count={b.rating_count} /><TrustBadge tier={b.trust_tier} /><VerificationBadges badges={badges} />{b.selling_enabled && <Badge tone="primary">🛒 Takes online orders</Badge>}</div>
+              {(b.authenticity_avg != null || b.service_avg != null) && <p className="mt-1 text-sm text-text-muted">{[b.authenticity_avg != null ? `Authenticity ${Number(b.authenticity_avg).toFixed(1)}/5` : null, b.service_avg != null ? `Service ${Number(b.service_avg).toFixed(1)}/5` : null].filter(Boolean).join(' · ')}</p>}
             </div>
           </div>
           {b.tagline && <p className="mt-4 text-lg">{b.tagline}</p>}
@@ -54,12 +56,13 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
 
           {products.length > 0 && (
             <Section title={`Products (${products.length})`}>
-              <div className="grid gap-3 sm:grid-cols-2">{products.map((p) => (
-                <Link key={p.id} href={`/product/${p.id}`} className="card flex gap-3 overflow-hidden hover:shadow-md">
-                  <div className="h-24 w-24 shrink-0 bg-surface-muted">{p.images[0] && <img src={mediaUrlFromPath('product-media', p.images[0])!} alt="" className="h-full w-full object-cover" />}</div>
-                  <div className="py-3 pr-3"><p className="font-semibold">{p.name}</p>{p.description && <p className="text-xs text-text-muted line-clamp-2">{p.description}</p>}<p className="mt-1 font-semibold text-forest">{formatMoney(p.price_cents, p.currency)}</p>{p.availability !== 'in_stock' && <Badge tone="warning">{p.availability.replace('_', ' ')}</Badge>}</div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{products.filter((p) => p.is_active).map((p) => (
+                <Link key={p.id} href={`/product/${p.id}`} className="card block overflow-hidden hover:shadow-md">
+                  <div className="relative aspect-square bg-surface-muted">{p.images[0] ? <img src={mediaUrlFromPath('product-media', p.images[0])!} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="grid h-full place-items-center text-3xl">🛍️</div>}<span className="absolute left-2 top-2 flex flex-wrap gap-1">{p.is_authentic && <CertificationBadge />}{p.availability === 'out_of_stock' && <Badge tone="danger">Sold out</Badge>}</span></div>
+                  <div className="space-y-1 p-3"><p className="text-sm font-semibold line-clamp-2">{p.name}</p><Price product={p} /><Rating avg={p.rating_avg} count={p.rating_count} /></div>
                 </Link>
               ))}</div>
+              <FxAttribution className="mt-2 text-[11px] text-text-muted" />
             </Section>
           )}
           {services.length > 0 && (

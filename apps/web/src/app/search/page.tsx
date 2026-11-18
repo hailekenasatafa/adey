@@ -1,27 +1,45 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
+import type { CatalogSearch } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
-import { BusinessCardView, Empty, ProductCardView, ScreenCardView } from '@/components/ui';
+import { BusinessCardView, Empty, EventCardView, ProductCardView } from '@/components/ui';
+import { FxAttribution } from '@/components/commerce';
+import { SearchBox } from '@/components/shop/SearchBox';
 
 export const dynamic = 'force-dynamic';
+export const metadata: Metadata = { title: 'Search', robots: { index: false } };
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q = '' } = await searchParams;
+  const query = q.trim();
   const api = await serverApi();
-  const [biz, products, screens] = q.length >= 2 ? await Promise.all([api.market.searchBusinesses({ p_query: q, p_limit: 12 }).catch(() => []), api.market.searchProducts({ p_query: q, p_market: undefined, p_limit: 8 }).catch(() => []), api.adconnect.searchScreens({ p_query: q, p_limit: 8 }).catch(() => [])]) : [[], [], []];
+  let r: CatalogSearch | null = null;
+  let failed = false;
+  if (query.length >= 2) r = await api.shop.search(query, { limit: 12 }).catch(() => { failed = true; return null; });
+  const none = r && !r.products.length && !r.businesses.length && !r.categories.length && !r.events.length;
   return (
     <div className="container-x pb-16">
-      <form action="/search" className="mt-8 flex gap-2"><input name="q" defaultValue={q} autoFocus placeholder="Businesses, products, services, cities, ZIP codes…" className="input h-12" /><button className="btn btn-primary">Search</button></form>
-      {q.length < 2 ? <p className="mt-6 text-text-muted">Type at least two characters.</p> : (
-        <>
-          <h2 className="mt-8 text-xl font-bold">Businesses ({biz.length})</h2>
-          {biz.length ? <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{biz.map((b) => <BusinessCardView key={b.id} b={b} />)}</div> : <p className="mt-2 text-sm text-text-muted">No businesses match "{q}".</p>}
-          <h2 className="mt-8 text-xl font-bold">Products ({products.length})</h2>
-          {products.length ? <div className="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-4">{products.map((p) => <ProductCardView key={p.id} p={p} />)}</div> : <p className="mt-2 text-sm text-text-muted">No products match.</p>}
-          <h2 className="mt-8 text-xl font-bold">Advertising screens ({screens.length})</h2>
-          {screens.length ? <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{screens.map((s) => <ScreenCardView key={s.id} s={s} />)}</div> : <p className="mt-2 text-sm text-text-muted">No screens match.</p>}
-          {!biz.length && !products.length && !screens.length && <div className="mt-8"><Empty title={`Nothing found for "${q}"`} body="Try a category, city, or ZIP code." action={<Link href="/market" className="btn btn-primary btn-sm">Browse the market</Link>} /></div>}
-        </>
-      )}
+      <SearchBox key={query} initial={query} />
+      {query.length < 2 ? <p className="mt-6 text-text-muted">Type at least two characters.</p>
+        : failed ? <div className="mt-8"><Empty title="Search is unavailable right now" body="Please try again in a moment." /></div>
+        : r && (
+          <>
+            {r.categories.length > 0 && <div className="mt-6 flex flex-wrap gap-2">{r.categories.map((c) => <Link key={c.id} href={`/market?category=${c.id}`} className="chip">🏷️ {c.name_en}</Link>)}</div>}
+            {r.products.length > 0 && (
+              <section className="mt-8"><div className="flex items-center justify-between"><h2 className="text-xl font-bold">Products</h2><Link href={`/market?q=${encodeURIComponent(query)}`} className="text-sm font-semibold text-forest">See all</Link></div>
+                <div className="mt-3 grid grid-cols-2 gap-4 lg:grid-cols-4">{r.products.map((p) => <ProductCardView key={p.id} p={p} />)}</div><FxAttribution className="mt-2 text-[11px] text-text-muted" /></section>
+            )}
+            {r.businesses.length > 0 && (
+              <section className="mt-8"><div className="flex items-center justify-between"><h2 className="text-xl font-bold">Businesses &amp; vendors</h2><Link href={`/market?view=businesses&q=${encodeURIComponent(query)}`} className="text-sm font-semibold text-forest">See all</Link></div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{r.businesses.map((b) => <BusinessCardView key={b.id} b={b} />)}</div></section>
+            )}
+            {r.events.length > 0 && (
+              <section className="mt-8"><div className="flex items-center justify-between"><h2 className="text-xl font-bold">Events</h2><Link href="/events" className="text-sm font-semibold text-forest">All events</Link></div>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{r.events.map((e) => <EventCardView key={e.id} e={e} />)}</div></section>
+            )}
+            {none && <div className="mt-8"><Empty title={`Nothing found for "${query}"`} body="Try a different word, a category, or a city." action={<Link href="/market" className="btn btn-primary btn-sm">Browse the market</Link>} /></div>}
+          </>
+        )}
     </div>
   );
 }

@@ -9,7 +9,10 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "pnpm -r --if-present lint",
     "test": "pnpm -r --if-present test",
-    "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > packages/shared/src/database.types.ts"
+    "db:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > packages/shared/src/database.types.ts",
+    "db:test": "node supabase/tests/run_local.mjs",
+    "db:types:local": "node supabase/tests/run_local.mjs --no-tests --types",
+    "check:functions": "node supabase/tests/check_edge_calls.mjs"
   },
   "engines": {
     "node": ">=20"
@@ -19,5 +22,8 @@
       "react": "19.3.0",
       "react-dom": "19.3.0"
     }
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.16"
   }
 }

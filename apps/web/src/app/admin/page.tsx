@@ -1,36 +1,72 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { badgeLabels, friendlyError, type Enums } from '@adey/shared';
+import { useQuery } from '@tanstack/react-query';
+import { formatMoney, orderStatusLabels, type AdminOverview, type MoneyByCurrency, type OrderStatus } from '@adey/shared';
 import { api } from '@/lib/supabase/client';
-import { useAuth } from '@/components/Providers';
-import { Badge, Empty } from '@/components/ui';
-import { fmtDate } from '@/lib/media';
+import { Stat } from '@/components/ui';
+import { ErrorLine, Loading, PageHead, useStaff } from '@/components/admin/kit';
 
-export default function AdminVerifications() {
-  const { session } = useAuth();
-  const qc = useQueryClient();
-  const q = useQuery({ queryKey: ['admin-verifications'], queryFn: () => api.admin.pendingVerifications() });
-  const [notes, setNotes] = useState<Record<string, string>>({});
-  const [internal, setInternal] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
-  const set = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'verification_status'> }) => api.admin.setVerificationStatus(id, status, notes[id] || undefined), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-verifications'] }), onError: (e) => setError(friendlyError(e)) });
-  const addNote = useMutation({ mutationFn: (id: string) => api.admin.addInternalNote(id, session!.user.id, internal[id]), onSuccess: (_d, id) => setInternal({ ...internal, [id]: '' }) });
-  const view = async (path: string) => { try { window.open(await api.storage.signedUrl('verification-docs', path, 300), '_blank'); } catch (e) { setError(friendlyError(e)); } };
+const QUEUES: { key: keyof AdminOverview['queues']; label: string; href: string; perm: string }[] = [
+  { key: 'kyc', label: 'Seller applications', href: '/admin/kyc', perm: 'verification.review' },
+  { key: 'verifications', label: 'Business verifications', href: '/admin/verifications', perm: 'verification.review' },
+  { key: 'certifications', label: 'Badge requests', href: '/admin/certifications', perm: 'catalog.moderate' },
+  { key: 'order_disputes', label: 'Order disputes', href: '/admin/order-disputes', perm: 'disputes.resolve' },
+  { key: 'booking_disputes', label: 'AdConnect disputes', href: '/admin/disputes', perm: 'disputes.resolve' },
+  { key: 'events', label: 'Events to review', href: '/admin/events', perm: 'events.moderate' },
+  { key: 'support', label: 'Support waiting for staff', href: '/admin/support', perm: 'support.reply' },
+  { key: 'reports', label: 'Open reports', href: '/admin/reports', perm: 'moderation.content' },
+  { key: 'refunds', label: 'Refunds to send', href: '/admin/finance', perm: 'finance.manage' },
+  { key: 'payouts', label: 'Payouts to pay', href: '/admin/finance', perm: 'finance.manage' },
+  { key: 'deletion_requests', label: 'Deletion requests', href: '/admin/members', perm: 'roles.manage' },
+];
+
+const Money = ({ rows }: { rows: MoneyByCurrency }) => !rows.length ? <span className="text-text-muted">—</span> : <>{rows.map((r) => <div key={r.currency}>{formatMoney(r.cents, r.currency)}</div>)}</>;
+
+export default function AdminOverviewPage() {
+  const { can } = useStaff();
+  const q = useQuery({ queryKey: ['admin-overview'], queryFn: () => api.admin.overview(), refetchInterval: 60_000 });
+  if (q.isLoading) return <Loading />;
+  if (q.error || !q.data) return <ErrorLine error={q.error ?? 'Could not load the overview.'} />;
+  const { queues, marketplace: m, finance } = q.data;
+  const statuses = Object.entries(m.orders_by_status).filter(([, n]) => n) as [OrderStatus, number][];
   return (
     <div>
-      <h2 className="text-xl font-bold">Verification queue ({q.data?.length ?? 0})</h2>
-      {error && <p className="mt-2 text-sm text-danger">{error}</p>}
-      <div className="mt-4 space-y-4">{q.isLoading ? <div className="skeleton h-24" /> : !q.data?.length ? <Empty title="Queue is empty" /> : q.data.map((r) => (
-        <div key={r.id} className="card p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-semibold">{r.business?.name} <Link href={`/business/${r.business?.slug}`} className="text-xs font-normal text-forest underline">view listing</Link></p><p className="text-xs text-text-muted">{badgeLabels[r.level]} · {[r.business?.city, r.business?.state].filter(Boolean).join(', ')} · submitted {fmtDate(r.created_at)}</p></div><Badge tone={r.status === 'needs_info' ? 'warning' : 'info'}>{r.status.replace('_', ' ')}</Badge></div>
-          {r.applicant_notes && <p className="mt-2 text-sm"><b>Applicant:</b> {r.applicant_notes}</p>}
-          <div className="mt-3"><p className="text-xs font-semibold text-text-muted">Documents ({r.documents?.length ?? 0}) — signed links expire in 5 minutes</p><ul className="mt-1 flex flex-wrap gap-2">{(r.documents ?? []).map((d) => <li key={d.id}><button onClick={() => view(d.storage_path)} className="chip">📄 {d.original_filename ?? d.storage_path.split('/').pop()} <span className="text-text-muted">· {d.doc_type.replace('_', ' ')}</span></button></li>)}</ul></div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2"><div><label className="label">Note to applicant (required for needs-info / reject)</label><input value={notes[r.id] ?? ''} onChange={(e) => setNotes({ ...notes, [r.id]: e.target.value })} className="input" /></div><div><label className="label">Internal note (staff only)</label><div className="flex gap-2"><input value={internal[r.id] ?? ''} onChange={(e) => setInternal({ ...internal, [r.id]: e.target.value })} className="input" /><button onClick={() => addNote.mutate(r.id)} disabled={!internal[r.id]} className="btn btn-outline btn-sm">Add</button></div></div></div>
-          <div className="mt-3 flex flex-wrap gap-2">{r.status === 'submitted' && <button onClick={() => set.mutate({ id: r.id, status: 'in_review' })} className="btn btn-secondary btn-sm">Start review</button>}<button onClick={() => confirm(`Approve "${badgeLabels[r.level]}" for ${r.business?.name}?`) && set.mutate({ id: r.id, status: 'approved' })} className="btn btn-primary btn-sm">Approve</button><button onClick={() => set.mutate({ id: r.id, status: 'needs_info' })} disabled={!notes[r.id]} className="btn btn-outline btn-sm">Needs info</button><button onClick={() => set.mutate({ id: r.id, status: 'rejected' })} disabled={!notes[r.id]} className="btn btn-danger btn-sm">Reject</button></div>
-        </div>
-      ))}</div>
+      <PageHead title="Overview" hint="What needs a decision right now. Counts refresh every minute." />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {QUEUES.filter((x) => can(x.perm)).map((x) => (
+          <Link key={x.key} href={x.href} className="card block p-4 transition hover:shadow-md">
+            <p className="text-xs text-text-muted">{x.label}</p>
+            <p className={`mt-1 text-2xl font-bold ${queues[x.key] > 0 ? 'text-danger' : ''}`}>{queues[x.key]}</p>
+          </Link>
+        ))}
+      </div>
+
+      <h3 className="mt-8 text-lg font-bold">Marketplace health</h3>
+      <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Stat label="Sellers who can sell" value={m.sellers_enabled} />
+        <Stat label="Products you can buy" value={m.purchasable_products} />
+        <Stat label="Authentic-badge products" value={m.authentic_products} />
+        <Stat label="Upcoming events" value={m.upcoming_events} />
+        <Stat label="Members" value={m.members} />
+        <Stat label="Rewards members" value={m.rewards_members} />
+      </div>
+      <div className="card mt-3 p-4">
+        <p className="text-xs font-semibold text-text-muted">Orders by status</p>
+        {!statuses.length ? <p className="mt-1 text-sm text-text-muted">No orders yet.</p> : <ul className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm">{statuses.map(([s, n]) => <li key={s}>{orderStatusLabels[s]}: <b>{n}</b></li>)}</ul>}
+      </div>
+
+      {finance && (
+        <>
+          <h3 className="mt-8 text-lg font-bold">Finance, last 30 days</h3>
+          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="card p-4"><p className="text-xs text-text-muted">Paid orders</p><div className="mt-1 text-lg font-bold">{!finance.paid_30d.length ? '—' : finance.paid_30d.map((r) => <div key={r.currency}>{formatMoney(r.cents, r.currency)} <span className="text-xs font-normal text-text-muted">· {r.orders} orders</span></div>)}</div></div>
+            <div className="card p-4"><p className="text-xs text-text-muted">Held in escrow now</p><div className="mt-1 text-lg font-bold"><Money rows={finance.held_in_escrow} /></div></div>
+            <div className="card p-4"><p className="text-xs text-text-muted">Platform fees</p><div className="mt-1 text-lg font-bold"><Money rows={finance.fees_30d} /></div></div>
+            <div className="card p-4"><p className="text-xs text-text-muted">Tax collected</p><div className="mt-1 text-lg font-bold"><Money rows={finance.tax_collected_30d} /></div></div>
+          </div>
+          <p className="mt-2 text-xs text-text-muted">Each currency is shown on its own; amounts are never converted.</p>
+        </>
+      )}
     </div>
   );
 }
