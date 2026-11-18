@@ -6,6 +6,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const CDN_HEADERS = {
   'Cache-Control': 'public, max-age=0, must-revalidate',
   'Netlify-CDN-Cache-Control': 'public, s-maxage=900, stale-while-revalidate=86400',
+  // The CDN leaves query parameters out of its cache key for this app unless told otherwise, and every
+  // filter here IS a query parameter: without this line "?region=dmv" and the unfiltered feed share one copy.
+  'Netlify-Vary': 'query=region|category|tag|business',
 };
 export const siteOrigin = () => (process.env.NEXT_PUBLIC_SITE_URL || 'https://adeyconnect.com').replace(/\/+$/, '');
 

@@ -5,9 +5,10 @@ verified sellers, pay into escrow, track delivery, review what they bought, earn
 community events and get help from an assistant. Everything below is in this repository (database
 migrations `20261117000100` … `20261117001200`, nine edge functions, the shared API, the website and the app).
 
-**State (2026-11-18):** the database migrations and the website are live on https://adeyconnect.com. The seven
-new edge functions are not deployed yet, the phone app still needs a new store build, and **online checkout is
-switched off by default** (`platform_settings.commerce.checkout_enabled = false`). Until an admin switches it on,
+**State (2026-11-18):** the database migrations (29 of 29) and the website are live on https://adeyconnect.com,
+including the events calendar in section 7 and its importer function `events-ingest`. The seven V1 payment,
+shipping and assistant functions are not deployed yet, the phone app still needs a new store build, and **online
+checkout is switched off by default** (`platform_settings.commerce.checkout_enabled = false`). Until an admin switches it on,
 the site behaves as before (contact seller / request a quotation) plus the parts that need no payment provider:
 dark mode, settings, addresses, seller verification, authenticity badges, events, help centre, reviews.
 
@@ -107,8 +108,9 @@ answered by a fallback model instead of failing.
 ## 6. Go-live checklist
 
 1. **Database — done 2026-11-18.** The thirteen `20261117…` migrations and the help-centre block at the end of
-   `supabase/seed.sql` (21 articles) are applied to the live project. Its migration history matches this folder
-   (28 of 28), so later changes can go out with `supabase db push`.
+   `supabase/seed.sql` (21 articles) are applied to the live project, and so is the later events-calendar
+   migration. Its migration history matches this folder (29 of 29), so later changes can go out with
+   `supabase db push`.
 2. **Functions.** `supabase functions deploy <name>` for the nine functions; add `--no-verify-jwt` for
    `stripe-webhook`, `payment-worker`, `shipping-webhook` and `fx-sync`. Set the secrets with `supabase secrets set`.
 3. **Stripe.** Activate the account and Connect. Create two webhook endpoints pointing at
@@ -163,6 +165,10 @@ source says so.
 **Calendar subscription.** `/events/calendar.ics` accepts `region` (for example `dmv`), `category`, `tag` and
 `business` (a vendor's own feed). People subscribe with the buttons on `/events` (Apple / Outlook through
 `webcal://`, Google Calendar, or copying the link); their calendar app refreshes it every few hours.
+
+**Checked on the live project (2026-11-18):** the deployed importer read a real public calendar feed end to end
+(16 upcoming all-day events, correct dates, held for review), after which the test source and its events were
+removed.
 
 **Not tested:** the Eventbrite and Ticketmaster adapters against the live APIs (no keys were available; their
 request parameters follow the published documentation), and subscribing from real Apple, Google and Outlook
