@@ -4,7 +4,8 @@ _Last updated: 2026-11-04. Everything below was built in this pass against the s
 
 > **V1 marketplace update (2026-11-18).** Multi-vendor checkout with escrow, seller verification, product
 > authenticity badges, shipping, multi-currency, tax, rewards, community events, the help centre and the support
-> assistant are built and tested locally but **not deployed**, and online checkout is switched off by default.
+> assistant are built. The database migrations and the website are **live on adeyconnect.com**; the new edge
+> functions and the app build are not, and online checkout is switched off by default.
 > What exists, the switches, the go-live checklist and what is still untested: [V1_MARKETPLACE.md](V1_MARKETPLACE.md).
 
 ## Completed

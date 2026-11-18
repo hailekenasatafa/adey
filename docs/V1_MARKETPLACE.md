@@ -5,9 +5,10 @@ verified sellers, pay into escrow, track delivery, review what they bought, earn
 community events and get help from an assistant. Everything below is in this repository (database
 migrations `20261117000100` … `20261117001200`, nine edge functions, the shared API, the website and the app).
 
-**State:** built and tested locally. **Nothing is deployed and online checkout is switched off by default**
-(`platform_settings.commerce.checkout_enabled = false`). Until an admin switches it on, the site and the app
-behave as before (contact seller / request a quotation) plus the parts that need no payment provider:
+**State (2026-11-18):** the database migrations and the website are live on https://adeyconnect.com. The seven
+new edge functions are not deployed yet, the phone app still needs a new store build, and **online checkout is
+switched off by default** (`platform_settings.commerce.checkout_enabled = false`). Until an admin switches it on,
+the site behaves as before (contact seller / request a quotation) plus the parts that need no payment provider:
 dark mode, settings, addresses, seller verification, authenticity badges, events, help centre, reviews.
 
 ## 1. What was built, by requirement
@@ -101,8 +102,9 @@ answered by a fallback model instead of failing.
 
 ## 6. Go-live checklist
 
-1. **Database.** Apply the thirteen `20261117…` migrations to the Supabase project (`supabase db push`). They only
-   add to the existing schema. Then run the help-centre block at the end of `supabase/seed.sql` (21 articles).
+1. **Database — done 2026-11-18.** The thirteen `20261117…` migrations and the help-centre block at the end of
+   `supabase/seed.sql` (21 articles) are applied to the live project. Its migration history matches this folder
+   (28 of 28), so later changes can go out with `supabase db push`.
 2. **Functions.** `supabase functions deploy <name>` for the nine functions; add `--no-verify-jwt` for
    `stripe-webhook`, `payment-worker`, `shipping-webhook` and `fx-sync`. Set the secrets with `supabase secrets set`.
 3. **Stripe.** Activate the account and Connect. Create two webhook endpoints pointing at
@@ -110,7 +112,10 @@ answered by a fallback model instead of failing.
    `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`,
    `refund.updated`, `refund.failed`) and a Connect endpoint (`account.updated`); put each signing secret in its
    own function secret. Use test keys first and run one full order (pay → ship → confirm → payout, and one refund).
-4. **Website.** Deploy the Next.js app as usual (no new environment variables).
+4. **Website — done 2026-11-18.** Deployed to Netlify (site `adey-app`, no new environment variables). When
+   deploying by upload, deploy from a clean export of the committed code (`git archive HEAD | tar -x -C <empty
+   folder>`): the upload tool zips the whole folder, including `apps/web/.next` and nested `node_modules`, and
+   the upload fails on the size otherwise.
 5. **App.** V1 needs a new store build (new screens, the `adey://checkout/return` link). Physical goods are paid
    with a card through Stripe, which is what the stores require for goods used outside the app.
 6. **First sellers.** Each seller completes verification, delivery prices and payout details (the dashboard shows
@@ -140,5 +145,9 @@ Not tested, because they need live accounts or devices:
 - real Shippo rates, labels, customs forms and tracking webhooks;
 - the support assistant against the live Anthropic API;
 - the app's payment browser session and deep link on iOS and Android, push delivery for the new notification types;
-- the migrations against the production database (they were applied only to a local copy of the schema), and the
-  V1 acceptance file under real `psql` in CI (locally it runs through an interpreter of the same commands).
+- signed-in pages on the live site (cart, checkout, orders, dashboard, admin): after the deploy only the public
+  pages were opened (home, market, search, a business page, events, help centre, verification, sign-in redirects).
+
+Checked since this was first written: CI on GitHub runs both acceptance suites under real `psql` on Postgres 16
+and passes, and the migrations were applied to the production database (Postgres 17) only after the database
+confirmed that the SQL it received matched these files.
