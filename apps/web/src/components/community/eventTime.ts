@@ -92,3 +92,6 @@ export function downloadText(filename: string, text: string, type: string) {
 
 /** True once an event has finished (events without an end time are treated as lasting 3 hours, as the search does). */
 export const hasEnded = (e: { starts_at: string; ends_at: string | null }) => new Date(e.ends_at ?? e.starts_at).getTime() + (e.ends_at ? 0 : 3 * 3600_000) < Date.now();
+
+/** "Eventbrite", "Ticketmaster" or "a partner calendar" for imported events. */
+export const sourceLabel = (kind: string | null | undefined) => (kind === 'eventbrite' ? 'Eventbrite' : kind === 'ticketmaster' ? 'Ticketmaster' : kind === 'ics' ? 'a partner calendar' : null);

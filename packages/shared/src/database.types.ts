@@ -1616,6 +1616,101 @@ export type Database = {
           }
         ]
       },
+      "event_sources": {
+        Row: {
+          "auto_publish": boolean
+          "config": NonNullable<Json>
+          "created_at": string
+          "created_by": string | null
+          "default_category": Database["public"]["Enums"]["event_category"]
+          "default_city": string | null
+          "default_country": string
+          "default_state": string | null
+          "default_tags": (string)[]
+          "default_timezone": string
+          "id": string
+          "is_active": boolean
+          "kind": string
+          "last_counts": Json | null
+          "last_error": string | null
+          "last_run_at": string | null
+          "last_status": string | null
+          "name": string
+          "organizer_business_id": string | null
+          "organizer_name": string | null
+          "updated_at": string
+        }
+        ComputedFields: never
+        Insert: {
+          "auto_publish"?: boolean
+          "config"?: NonNullable<Json>
+          "created_at"?: string
+          "created_by"?: string | null
+          "default_category"?: Database["public"]["Enums"]["event_category"]
+          "default_city"?: string | null
+          "default_country"?: string
+          "default_state"?: string | null
+          "default_tags"?: (string)[]
+          "default_timezone"?: string
+          "id"?: string
+          "is_active"?: boolean
+          "kind": string
+          "last_counts"?: Json | null
+          "last_error"?: string | null
+          "last_run_at"?: string | null
+          "last_status"?: string | null
+          "name": string
+          "organizer_business_id"?: string | null
+          "organizer_name"?: string | null
+          "updated_at"?: string
+        }
+        Update: {
+          "auto_publish"?: boolean
+          "config"?: NonNullable<Json>
+          "created_at"?: string
+          "created_by"?: string | null
+          "default_category"?: Database["public"]["Enums"]["event_category"]
+          "default_city"?: string | null
+          "default_country"?: string
+          "default_state"?: string | null
+          "default_tags"?: (string)[]
+          "default_timezone"?: string
+          "id"?: string
+          "is_active"?: boolean
+          "kind"?: string
+          "last_counts"?: Json | null
+          "last_error"?: string | null
+          "last_run_at"?: string | null
+          "last_status"?: string | null
+          "name"?: string
+          "organizer_business_id"?: string | null
+          "organizer_name"?: string | null
+          "updated_at"?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_sources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_sources_organizer_business_id_fkey"
+            columns: ["organizer_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          }
+        ]
+      },
       "events": {
         Row: {
           "address_line1": string | null
@@ -1626,12 +1721,17 @@ export type Database = {
           "contact_phone": string | null
           "country": string
           "cover_path": string | null
+          "cover_url": string | null
           "created_at": string
           "created_by": string
           "description": string | null
           "ends_at": string | null
+          "external_id": string | null
+          "external_url": string | null
           "going_count": number
           "id": string
+          "import_locked": boolean
+          "imported_at": string | null
           "interested_count": number
           "is_featured": boolean
           "is_free": boolean
@@ -1648,9 +1748,12 @@ export type Database = {
           "reviewed_at": string | null
           "reviewed_by": string | null
           "slug": string
+          "source_id": string | null
+          "source_kind": string | null
           "starts_at": string
           "state": string | null
           "status": Database["public"]["Enums"]["event_status"]
+          "tags": (string)[]
           "ticket_url": string | null
           "timezone": string
           "title": string
@@ -1668,12 +1771,17 @@ export type Database = {
           "contact_phone"?: string | null
           "country"?: string
           "cover_path"?: string | null
+          "cover_url"?: string | null
           "created_at"?: string
           "created_by": string
           "description"?: string | null
           "ends_at"?: string | null
+          "external_id"?: string | null
+          "external_url"?: string | null
           "going_count"?: number
           "id"?: string
+          "import_locked"?: boolean
+          "imported_at"?: string | null
           "interested_count"?: number
           "is_featured"?: boolean
           "is_free"?: boolean
@@ -1690,9 +1798,12 @@ export type Database = {
           "reviewed_at"?: string | null
           "reviewed_by"?: string | null
           "slug"?: string
+          "source_id"?: string | null
+          "source_kind"?: string | null
           "starts_at": string
           "state"?: string | null
           "status"?: Database["public"]["Enums"]["event_status"]
+          "tags"?: (string)[]
           "ticket_url"?: string | null
           "timezone"?: string
           "title": string
@@ -1709,12 +1820,17 @@ export type Database = {
           "contact_phone"?: string | null
           "country"?: string
           "cover_path"?: string | null
+          "cover_url"?: string | null
           "created_at"?: string
           "created_by"?: string
           "description"?: string | null
           "ends_at"?: string | null
+          "external_id"?: string | null
+          "external_url"?: string | null
           "going_count"?: number
           "id"?: string
+          "import_locked"?: boolean
+          "imported_at"?: string | null
           "interested_count"?: number
           "is_featured"?: boolean
           "is_free"?: boolean
@@ -1731,9 +1847,12 @@ export type Database = {
           "reviewed_at"?: string | null
           "reviewed_by"?: string | null
           "slug"?: string
+          "source_id"?: string | null
+          "source_kind"?: string | null
           "starts_at"?: string
           "state"?: string | null
           "status"?: Database["public"]["Enums"]["event_status"]
+          "tags"?: (string)[]
           "ticket_url"?: string | null
           "timezone"?: string
           "title"?: string
@@ -1776,8 +1895,56 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "event_sources"
+            referencedColumns: ["id"]
           }
         ]
+      },
+      "events_feed_cache": {
+        Row: {
+          "generated_at": string
+          "key": string
+          "payload": NonNullable<Json>
+          "version": number
+        }
+        ComputedFields: never
+        Insert: {
+          "generated_at"?: string
+          "key": string
+          "payload": NonNullable<Json>
+          "version": number
+        }
+        Update: {
+          "generated_at"?: string
+          "key"?: string
+          "payload"?: NonNullable<Json>
+          "version"?: number
+        }
+        Relationships: []
+      },
+      "events_feed_state": {
+        Row: {
+          "changed_at": string
+          "id": boolean
+          "version": number
+        }
+        ComputedFields: never
+        Insert: {
+          "changed_at"?: string
+          "id"?: boolean
+          "version"?: number
+        }
+        Update: {
+          "changed_at"?: string
+          "id"?: boolean
+          "version"?: number
+        }
+        Relationships: []
       },
       "exchange_rates": {
         Row: {
@@ -5257,6 +5424,22 @@ export type Database = {
         Args: { "p_event_id": string; "p_status": string }
         Returns: Json
       },
+      "events_can_submit": {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      },
+      "events_feed": {
+        Args: { "p_business_id"?: string; "p_category"?: Database["public"]["Enums"]["event_category"]; "p_days"?: number; "p_region"?: string; "p_tag"?: string }
+        Returns: Json
+      },
+      "events_import": {
+        Args: { "p_error"?: string; "p_events"?: Json; "p_source_id": string }
+        Returns: Json
+      },
+      "events_ingest_now": {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      },
       "expire_seller_kyc": {
         Args: Record<PropertyKey, never>
         Returns: number
@@ -5276,6 +5459,10 @@ export type Database = {
       "home_feed": {
         Args: { "p_lat"?: number; "p_lng"?: number; "p_market"?: Database["public"]["Enums"]["market"] }
         Returns: Json
+      },
+      "https_or_null": {
+        Args: { "p_url": string }
+        Returns: string
       },
       "internal_begin": {
         Args: Record<PropertyKey, never>
@@ -5400,6 +5587,10 @@ export type Database = {
       "new_order_number": {
         Args: Record<PropertyKey, never>
         Returns: string
+      },
+      "normalize_tags": {
+        Args: { "p_tags": (string)[] }
+        Returns: (string)[]
       },
       "notify_business": {
         Args: { "p_body": string; "p_business_id": string; "p_data"?: Json; "p_pref_key"?: string; "p_title": string; "p_type": Database["public"]["Enums"]["notification_type"] }
@@ -5616,7 +5807,7 @@ export type Database = {
         Returns: Json
       },
       "search_events": {
-        Args: { "p_category"?: Database["public"]["Enums"]["event_category"]; "p_city"?: string; "p_country"?: string; "p_free_only"?: boolean; "p_from"?: string; "p_lat"?: number; "p_limit"?: number; "p_lng"?: number; "p_mine"?: boolean; "p_offset"?: number; "p_online"?: boolean; "p_query"?: string; "p_radius_km"?: number; "p_sort"?: string; "p_state"?: string; "p_to"?: string }
+        Args: { "p_business_id"?: string; "p_category"?: Database["public"]["Enums"]["event_category"]; "p_city"?: string; "p_country"?: string; "p_free_only"?: boolean; "p_from"?: string; "p_lat"?: number; "p_limit"?: number; "p_lng"?: number; "p_mine"?: boolean; "p_offset"?: number; "p_online"?: boolean; "p_query"?: string; "p_radius_km"?: number; "p_region"?: string; "p_sort"?: string; "p_state"?: string; "p_tag"?: string; "p_to"?: string }
         Returns: Database["public"]["CompositeTypes"]["event_card"][]
         SetofOptions: {
           from: "*"
@@ -5927,6 +6118,10 @@ export type Database = {
         "interested_count": number | null
         "distance_km": number | null
         "my_rsvp": Database["public"]["Enums"]["rsvp_status"] | null
+        "tags": (string)[] | null
+        "cover_url": string | null
+        "source_kind": string | null
+        "external_url": string | null
       },
       "product_card": {
         "id": string | null

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { eventCategoryLabels, friendlyError, type EventStatus } from '@adey/shared';
 import { api } from '@/lib/supabase/client';
 import { Badge, Empty } from '@/components/ui';
+import { sourceLabel } from '@/components/community/eventTime';
 import { ConfirmDialog, DT, ErrorLine, Gate, Loading, PageHead, Tabs } from '@/components/admin/kit';
 
 const TABS: { id: EventStatus; label: string }[] = [{ id: 'pending', label: 'Pending' }, { id: 'published', label: 'Published' }, { id: 'rejected', label: 'Rejected' }, { id: 'cancelled', label: 'Cancelled' }];
@@ -25,14 +26,15 @@ function Page() {
   const feat = useMutation({ mutationFn: ({ id, on }: { id: string; on: boolean }) => api.admin.featureEvent(id, on), onSuccess: refresh, onError: (e) => setError(friendlyError(e)) });
   return (
     <div>
-      <PageHead title="Events" hint="Events from verified businesses publish straight away; everyone else waits here." />
+      <PageHead title="Events" hint="Events from verified businesses publish straight away; imported events wait here unless their source publishes automatically." />
       <Tabs value={tab} onChange={(t) => { setTab(t); setError(null); }} items={TABS} />
       <ErrorLine error={q.error ?? error} />
       {q.isLoading ? <Loading /> : !q.data?.length ? <Empty title={`No ${tab} events`} /> : (
         <div className="space-y-3">{q.data.map((e) => (
           <div key={e.id} className="card p-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
-              <div><p className="font-semibold">{e.title} {e.is_featured && <Badge tone="accent">Featured</Badge>}</p><p className="text-xs text-text-muted">{eventCategoryLabels[e.category]} · {DT(e.starts_at)} · {e.is_online ? 'Online' : [e.venue_name, e.city, e.country].filter(Boolean).join(', ')}</p><p className="text-xs text-text-muted">By {e.organizer_name ?? e.business?.name ?? e.creator?.display_name ?? 'unknown'}</p></div>
+              <div><p className="font-semibold">{e.title} {e.is_featured && <Badge tone="accent">Featured</Badge>}</p><p className="text-xs text-text-muted">{eventCategoryLabels[e.category]} · {DT(e.starts_at)} · {e.is_online ? 'Online' : [e.venue_name, e.city, e.country].filter(Boolean).join(', ')}</p><p className="text-xs text-text-muted">By {e.organizer_name ?? e.business?.name ?? e.creator?.display_name ?? 'unknown'}</p>
+                {sourceLabel(e.source_kind) && <p className="text-xs text-text-muted">Imported from {sourceLabel(e.source_kind)}{e.external_url && <> · <a href={e.external_url} target="_blank" rel="noopener noreferrer" className="underline">View original</a></>}</p>}</div>
               <Link href={`/events/${e.id}`} target="_blank" className="text-sm underline">Open page</Link>
             </div>
             {e.description && <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-sm">{e.description}</p>}

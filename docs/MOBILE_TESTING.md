@@ -6,9 +6,9 @@
 |---|---|---|
 | Database migrations apply cleanly | `supabase/tests/apply_local.sh` (local Postgres 16 + Supabase shim) | ✅ 12 migrations + seed |
 | Acceptance scenarios A–L at the data/authorization layer | `psql -d adey_test -f supabase/tests/acceptance.sql` | ✅ 50 checks pass, incl. K (unauthorized edit blocked) and L (payments blocked in free mode) |
-| V1 marketplace acceptance (roles, privacy, stock, seller verification, checkout, escrow, refunds, payouts, shipping, rewards, events, support, lock-down) | `pnpm db:test` — applies all migrations + seed to an in-process Postgres (PGlite) and runs both suites; no Docker or Supabase CLI needed | ✅ 286 checks pass (49 + 237) |
+| V1 marketplace acceptance (roles, privacy, stock, seller verification, checkout, escrow, refunds, payouts, shipping, rewards, events, support, lock-down) | `pnpm db:test` — applies all migrations + seed to an in-process Postgres (PGlite) and runs both suites; no Docker or Supabase CLI needed | ✅ 308 checks pass (49 + 259) |
 | Edge functions use real RPCs, arguments, tables and columns | `pnpm check:functions` | ✅ 36 RPC calls, 27 table reads |
-| Shared package typecheck + unit tests | `pnpm --filter @adey/shared typecheck && pnpm --filter @adey/shared test` | ✅ 8 tests |
+| Shared package typecheck + unit tests | `pnpm --filter @adey/shared typecheck && pnpm --filter @adey/shared test` | ✅ 30 tests (22 for the calendar-file reader and writer) |
 | Mobile typecheck | `pnpm --filter @adey/mobile typecheck` | ✅ |
 | Mobile lint | `pnpm --filter @adey/mobile lint` | ✅ 0 errors |
 | Mobile unit/component tests (jest-expo + RNTL) | `pnpm --filter @adey/mobile test` | ✅ 11 tests |

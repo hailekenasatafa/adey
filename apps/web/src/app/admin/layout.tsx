@@ -15,6 +15,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     { href: '/admin/certifications', label: 'Badges', perm: 'catalog.moderate', queue: ['certifications'] },
     { href: '/admin/verifications', label: 'Business verification', perm: 'verification.review', queue: ['verifications'] },
     { href: '/admin/events', label: 'Events', perm: 'events.moderate', queue: ['events'] },
+    { href: '/admin/event-sources', label: 'Event sources', perm: 'events.moderate' },
     { href: '/admin/reports', label: 'Reports', perm: 'moderation.content', queue: ['reports'] },
   ] },
   { title: 'Orders', items: [

@@ -587,6 +587,9 @@ select pg_temp.check('home feed: shop and authenticity sections come from real l
   (select jsonb_array_length(f -> 'shop_products') = 3 and jsonb_array_length(f -> 'authentic_products') = 1 and f ? 'upcoming_events' and f ? 'nearby' from public.home_feed() f));
 
 -- ================================================================ 14. community events
+-- (this section exercises open member submissions; the vendors-only default is tested in 14b)
+select pg_temp.as_backend();
+update public.platform_settings set value = value || '{"submissions": "members"}' where key = 'events';
 select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
 insert into public.events (title, category, starts_at, ends_at, venue_name, city, state, created_by, status, is_featured, going_count)
 values ('DEV FIXTURE Enkutatash Celebration', 'festival', now() + interval '10 days', now() + interval '10 days 5 hours', 'Veterans Plaza', 'Silver Spring', 'MD',
@@ -627,6 +630,91 @@ select pg_temp.check('events: people who RSVP''d hear about changes and cancella
 select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
 update public.events set title = 'DEV FIXTURE Enkutatash Celebration (new wording)' where id = :'ev1';
 select pg_temp.check('events: rewording a moderated event sends it back for review', (select status = 'pending' from public.events where id = :'ev1'));
+
+-- ================================================================ 14b. events calendar: vendors only, tags, regions, imports, shared feed
+select pg_temp.as_backend();
+update public.platform_settings set value = value || '{"submissions": "verified_businesses"}' where key = 'events';
+select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
+select pg_temp.check('events: by default only verified businesses can post',
+  pg_temp.raises(format('insert into public.events (title, starts_at, city, created_by) values (''Member picnic'', now() + interval ''3 days'', ''Arlington'', %L)', 'a1111111-1111-1111-1111-111111111111'), '%only verified businesses%'));
+select pg_temp.check('events: the apps are told a member may not post', (select not (r ->> 'allowed')::boolean and r ->> 'mode' = 'verified_businesses' from public.events_can_submit() r));
+select pg_temp.as_user('a2222222-2222-2222-2222-222222222222');
+select pg_temp.check('events: the apps are told a verified business may post', (select (r ->> 'allowed')::boolean and jsonb_array_length(r -> 'businesses') >= 1 from public.events_can_submit() r));
+insert into public.events (title, category, starts_at, city, state, lat, lng, tags, created_by, organizer_business_id, cover_url, source_kind, import_locked)
+values ('DEV FIXTURE Coffee Ceremony Night', 'food_drink', now() + interval '6 days', 'Washington', 'DC', 38.9072, -77.0369, array['Coffee Ceremony', 'live music', 'x'],
+        'a2222222-2222-2222-2222-222222222222', :'s1', 'https://images.test/a.png', 'eventbrite', true);
+select id as ev3 from public.events where title = 'DEV FIXTURE Coffee Ceremony Night' \gset
+select pg_temp.check('events: tags are normalised and a vendor cannot pose as an imported event',
+  (select tags = array['coffee-ceremony', 'live-music'] and status = 'published' and cover_url is null and source_kind is null and not import_locked from public.events where id = :'ev3'));
+delete from public.events where id = :'ev2';
+delete from public.events where id = :'ev3';
+select pg_temp.check('events: a vendor can remove its own cancelled event, but a published one must be cancelled first',
+  (select count(*) from public.events where id = :'ev2') = 0 and (select count(*) from public.events where id = :'ev3') = 1);
+
+select pg_temp.as_user('a6666666-6666-6666-6666-666666666666');
+insert into public.event_sources (name, kind, config, default_tags, default_city, default_state, auto_publish, created_by)
+values ('DEV FIXTURE community calendar', 'ics', '{"url": "https://calendar.test/feed.ics"}', array['community'], 'Alexandria', 'VA', true, 'a6666666-6666-6666-6666-666666666666');
+select id as src1 from public.event_sources where name = 'DEV FIXTURE community calendar' \gset
+select pg_temp.check('event sources: a calendar feed must be an https address',
+  pg_temp.raises('insert into public.event_sources (name, kind, config) values (''Bad feed'', ''ics'', ''{"url": "http://calendar.test/feed.ics"}'')', '%check constraint%'));
+select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
+select pg_temp.check('event sources: only staff can see them or run an import',
+  (select count(*) from public.event_sources) = 0
+  and pg_temp.raises(format('select public.events_import(%L, ''[]'')', :'src1'), '%permission denied%')
+  and pg_temp.raises('select public.events_ingest_now()', '%not authorized%'));
+select pg_temp.as_backend();
+select public.events_import(:'src1', jsonb_build_array(
+  jsonb_build_object('external_id', 'uid-1', 'title', 'DEV FIXTURE Timket Gathering', 'starts_at', now() + interval '20 days', 'ends_at', now() + interval '20 days 4 hours',
+                     'venue_name', 'Community Hall', 'external_url', 'https://calendar.test/e/1', 'tags', jsonb_build_array('Timket', 'Faith'), 'cover_url', 'http://insecure.test/a.png'),
+  jsonb_build_object('external_id', 'uid-2', 'title', 'DEV FIXTURE Old Concert', 'starts_at', now() - interval '30 days'),
+  jsonb_build_object('external_id', 'uid-3', 'title', 'x', 'starts_at', now() + interval '5 days'),
+  jsonb_build_object('external_id', 'uid-4', 'title', 'DEV FIXTURE Injera Workshop', 'starts_at', now() + interval '8 days', 'is_free', true, 'lat', 38.80, 'lng', -77.05))) as imp \gset
+select pg_temp.check('event imports: new events are added; past and unusable ones are skipped',
+  (:'imp'::jsonb ->> 'inserted')::int = 2 and (:'imp'::jsonb ->> 'skipped')::int = 2);
+select pg_temp.check('event imports: an imported event carries the source defaults and only trustworthy fields',
+  (select status = 'published' and city = 'Alexandria' and state = 'VA' and tags = array['community', 'timket', 'faith'] and source_kind = 'ics'
+          and external_url = 'https://calendar.test/e/1' and cover_url is null and not is_free and price_note is not null
+     from public.events where source_id = :'src1' and external_id = 'uid-1'));
+select pg_temp.check('event imports: importing the same data again changes nothing',
+  (public.events_import(:'src1', jsonb_build_array(jsonb_build_object('external_id', 'uid-4', 'title', 'DEV FIXTURE Injera Workshop', 'starts_at', now() + interval '8 days', 'is_free', true, 'lat', 38.80, 'lng', -77.05))) ->> 'unchanged')::int = 1);
+select pg_temp.check('event imports: a change at the source updates the event',
+  (public.events_import(:'src1', jsonb_build_array(jsonb_build_object('external_id', 'uid-4', 'title', 'DEV FIXTURE Injera Workshop', 'starts_at', now() + interval '9 days', 'is_free', true, 'lat', 38.80, 'lng', -77.05))) ->> 'updated')::int = 1);
+select pg_temp.as_user('a6666666-6666-6666-6666-666666666666');
+update public.events set title = 'DEV FIXTURE Timket Gathering (corrected)' where source_id = :'src1' and external_id = 'uid-1';
+select pg_temp.as_backend();
+select public.events_import(:'src1', jsonb_build_array(jsonb_build_object('external_id', 'uid-1', 'title', 'DEV FIXTURE Timket Gathering', 'starts_at', now() + interval '21 days')));
+select pg_temp.check('event imports: a correction made by staff is not overwritten',
+  (select title like '%(corrected)' and import_locked from public.events where source_id = :'src1' and external_id = 'uid-1'));
+select pg_temp.check('event imports: an event cancelled at the source is cancelled here',
+  (public.events_import(:'src1', jsonb_build_array(jsonb_build_object('external_id', 'uid-4', 'title', 'DEV FIXTURE Injera Workshop', 'starts_at', now() + interval '9 days', 'cancelled', true))) ->> 'cancelled')::int = 1);
+update public.event_sources set auto_publish = false where id = :'src1';
+select public.events_import(:'src1', jsonb_build_array(jsonb_build_object('external_id', 'uid-5', 'title', 'DEV FIXTURE Azmari Night', 'starts_at', now() + interval '12 days')));
+select pg_temp.check('event imports: with review on, new events wait and staff get one summary notification',
+  (select status = 'pending' from public.events where source_id = :'src1' and external_id = 'uid-5')
+  and (select count(*) from public.notifications where user_id = 'a6666666-6666-6666-6666-666666666666' and title = 'Imported events to review') = 1);
+select pg_temp.check('event imports: a failed run is recorded on the source',
+  public.events_import(:'src1', '[]', 'the feed answered 503') ->> 'status' = 'error');
+select pg_temp.check('event imports: the source shows its last error', (select last_status = 'error' and last_error like '%503%' from public.event_sources where id = :'src1'));
+
+select pg_temp.as_anon();
+select pg_temp.check('calendar: the DMV view finds events by distance from DC or by state, and an unknown region finds nothing',
+  (select count(*) from public.search_events(p_region => 'dmv')) = 2 and (select count(*) from public.search_events(p_region => 'nowhere')) = 0);
+select pg_temp.check('calendar: filter by cultural tag and by vendor',
+  (select count(*) from public.search_events(p_tag => 'Coffee Ceremony')) = 1 and (select count(*) from public.search_events(p_business_id => :'s1')) = 1);
+select pg_temp.check('feed: the shared feed has what a calendar needs and nothing personal',
+  (select jsonb_array_length(f -> 'events') = 2 and (f -> 'events' -> 0) ?& array['id', 'title', 'starts_at', 'timezone', 'tags', 'updated_at'] and not (f -> 'events' -> 0) ? 'my_rsvp'
+          and not (f ->> 'cached')::boolean and f ->> 'region_name' like 'DMV%'
+     from public.events_feed(p_region => 'dmv') f));
+select pg_temp.check('feed: the next reader gets the cached copy', (select (f ->> 'cached')::boolean from public.events_feed(p_region => 'DMV') f));
+select pg_temp.as_user('a2222222-2222-2222-2222-222222222222');
+update public.events set venue_name = 'Dukem Hall' where id = :'ev3';
+select pg_temp.as_anon();
+select pg_temp.check('feed: a change to a public event clears the cache',
+  (select not (f ->> 'cached')::boolean and f -> 'events' @> '[{"venue_name": "Dukem Hall"}]' from public.events_feed(p_region => 'dmv') f));
+select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
+select public.event_rsvp(:'ev3', 'going');
+select pg_temp.as_anon();
+select pg_temp.check('feed: an RSVP does not clear the cache', (select (f ->> 'cached')::boolean from public.events_feed(p_region => 'dmv') f));
 
 -- ================================================================ 15. help centre and support assistant
 select pg_temp.as_anon();
@@ -676,7 +764,7 @@ select pg_temp.as_user('a4444444-4444-4444-4444-444444444444');
 select pg_temp.check('dashboards: closed to everyone else', pg_temp.raises(format('select public.seller_overview(%L)', :'s1'), 'not authorized') and pg_temp.raises('select public.admin_overview()', 'not authorized'));
 select pg_temp.as_user('a6666666-6666-6666-6666-666666666666');
 select pg_temp.check('admin overview: moderators get work queues without financial totals',
-  (select (a -> 'queues' ->> 'events')::int = 1 and a -> 'finance' = 'null'::jsonb from public.admin_overview() a));
+  (select (a -> 'queues' ->> 'events')::int = 2 and a -> 'finance' = 'null'::jsonb from public.admin_overview() a));
 select pg_temp.check('announcements: moderators cannot broadcast', pg_temp.raises('select public.send_announcement(''Hello'', ''Hello everyone'')', 'not authorized'));
 select pg_temp.as_user('a5555555-5555-5555-5555-555555555555');
 select pg_temp.check('admin overview: admins also see escrow, fees and tax collected',
@@ -706,7 +794,7 @@ select pg_temp.check('lock-down: anonymous visitors can run only the read-only a
     where p.pronamespace = 'public'::regnamespace and p.prosecdef and p.prorettype <> 'trigger'::regtype and has_function_privilege('anon', p.oid, 'execute'))
   = (select array_agg(x order by x) from unnest(array[
       'business_can', 'business_role', 'can_manage_business', 'can_view_order', 'cart_view', 'convert_cents', 'estimate_screen_price_cents', 'estimate_shipping',
-      'home_feed', 'is_admin', 'is_business_member', 'is_conversation_participant', 'is_staff', 'loyalty_tier_for', 'mark_conversation_read', 'mark_notifications_read',
+      'events_feed', 'home_feed', 'is_admin', 'is_business_member', 'is_conversation_participant', 'is_staff', 'loyalty_tier_for', 'mark_conversation_read', 'mark_notifications_read',
       'my_access', 'my_businesses', 'owns_business', 'product_available_quantity', 'product_badges', 'screen_is_available', 'search_businesses', 'search_catalog',
       'search_events', 'search_help', 'search_products', 'search_screens', 'search_suggestions', 'seller_can_sell', 'setting', 'staff_can', 'suggest_screens',
       'support_facts', 'tax_manual', 'track_event', 'unread_counts']) x));
@@ -717,7 +805,7 @@ select pg_temp.check('lock-down: money, stock and escrow internals are reachable
       'payout_account_sync_stripe', 'payment_event_begin', 'payment_event_finish', 'stock_apply', 'loyalty_apply', 'loyalty_redeem', 'loyalty_restore', 'loyalty_restore_for_order',
       'loyalty_earn_for_order', 'loyalty_maintenance', 'shipment_record_label', 'shipment_label_begin', 'shipment_label_abort', 'shipment_tracking_update', 'shipping_quote_context', 'shipping_quotes_insert',
       'upsert_exchange_rates', 'auto_release_escrow', 'auto_mark_delivered', 'expire_unpaid_checkouts', 'commerce_housekeeping', 'daily_housekeeping', 'expire_seller_kyc',
-      'send_event_reminders', 'support_add_reply', 'notify_user', 'notify_business', 'refresh_business_trust', 'cart_lines', 'internal_begin', 'internal_end'])
+      'send_event_reminders', 'events_import', 'support_add_reply', 'notify_user', 'notify_business', 'refresh_business_trust', 'cart_lines', 'internal_begin', 'internal_end'])
     and (has_function_privilege('anon', p.oid, 'execute') or has_function_privilege('authenticated', p.oid, 'execute'))));
 
 rollback;

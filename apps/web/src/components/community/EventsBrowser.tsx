@@ -1,6 +1,7 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { eventCategoryLabels, type EventCard, type EventCategory } from '@adey/shared';
 import { api } from '@/lib/supabase/client';
@@ -15,8 +16,17 @@ const NONE: Filters = { category: '', city: '', state: '', free: false, online: 
 const pad = (n: number) => String(n).padStart(2, '0');
 const key = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
-export function EventsBrowser({ initial }: { initial: EventCard[] }) {
+export function EventsBrowser({ initial, regions, region, tag, canPost }: { initial: EventCard[]; regions: { key: string; name: string }[]; region: string; tag: string; canPost: boolean }) {
   const { session } = useAuth();
+  const router = useRouter();
+  const go = (next: { region?: string; tag?: string }) => {
+    const q = new URLSearchParams();
+    const r = next.region ?? region; const t = next.tag ?? tag;
+    if (r) q.set('region', r);
+    if (t) q.set('tag', t);
+    router.push(q.size ? `/events?${q}` : '/events');
+  };
+  const regionName = regions.find((r) => r.key === region)?.name;
   const now = new Date();
   const [draft, setDraft] = useState<Filters>(NONE);
   const [f, setF] = useState<Filters>(NONE);
@@ -24,8 +34,9 @@ export function EventsBrowser({ initial }: { initial: EventCard[] }) {
   const [day, setDay] = useState<string | null>(null);
   const args = useMemo(() => ({
     p_category: f.category || undefined, p_city: f.city.trim() || undefined, p_state: f.state.trim() || undefined,
+    p_region: region || undefined, p_tag: tag || undefined,
     p_free_only: f.free || undefined, p_online: f.online ? true : undefined, p_mine: f.mine || undefined,
-  }), [f]);
+  }), [f, region, tag]);
   const pristine = JSON.stringify(f) === JSON.stringify(NONE);
   const upcoming = useQuery({
     queryKey: ['events', 'upcoming', args, session?.user.id], queryFn: () => api.events.search({ ...args, p_limit: 60 }),
@@ -89,9 +100,16 @@ export function EventsBrowser({ initial }: { initial: EventCard[] }) {
           {month.error && <div className="mt-2"><ErrorLine error={month.error} retry={() => month.refetch()} /></div>}
           {!month.isLoading && !month.error && !Object.keys(counts).length && <p className="mt-2 text-xs text-text-muted">No upcoming events this month.</p>}
         </section>
+        <Subscribe region={region} regionName={regionName} category={f.category} tag={tag} />
       </aside>
 
       <section aria-live="polite">
+        {regions.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Region">
+            {[{ key: '', name: 'Everywhere' }, ...regions].map((r) => <button key={r.key} type="button" aria-pressed={region === r.key} className={`chip ${region === r.key ? 'chip-on' : ''}`} onClick={() => go({ region: r.key })}>{r.name}</button>)}
+          </div>
+        )}
+        {tag && <p className="mb-3 flex flex-wrap items-center gap-2 text-sm">Showing events tagged <span className="badge badge-primary">#{tag}</span><button type="button" className="btn btn-ghost btn-sm" onClick={() => go({ tag: '' })}>Clear tag</button></p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-bold">{day ? new Date(day + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : f.mine ? 'My events' : 'Upcoming events'}</h2>
           {day && <button className="btn btn-ghost btn-sm" onClick={() => setDay(null)}>Show all upcoming</button>}
@@ -99,10 +117,37 @@ export function EventsBrowser({ initial }: { initial: EventCard[] }) {
         <div className="mt-3 space-y-3">
           {busy ? <><div className="skeleton h-28" /><div className="skeleton h-28" /></>
             : err ? <ErrorLine error={err} retry={() => (day ? month : upcoming).refetch()} />
-            : !list.length ? <Empty title={f.mine ? 'Nothing here yet' : 'No events found'} body={pristine ? 'No upcoming events are listed right now. Know of one? Add it.' : 'Try different filters.'} action={<Link href="/events/new" className="btn btn-primary btn-sm">Submit an event</Link>} />
+            : !list.length ? <Empty title={f.mine ? 'Nothing here yet' : 'No events found'} body={pristine && !region && !tag ? 'No upcoming events are listed right now.' : 'Try different filters.'} action={canPost ? <Link href="/events/new" className="btn btn-primary btn-sm">Submit an event</Link> : undefined} />
             : list.map((e) => <EventTile key={e.id} e={e} />)}
         </div>
       </section>
     </div>
+  );
+}
+
+function Subscribe({ region, regionName, category, tag }: { region: string; regionName?: string; category: string; tag: string }) {
+  const [copied, setCopied] = useState(false);
+  const origin = useSyncExternalStore(() => () => {}, () => window.location.protocol + '//' + window.location.host, () => '');
+  const q = new URLSearchParams();
+  if (region) q.set('region', region);
+  if (category) q.set('category', category);
+  if (tag) q.set('tag', tag);
+  const path = `/events/calendar.ics${q.size ? `?${q}` : ''}`;
+  const https = origin + path;
+  const webcal = origin ? `webcal://${origin.split('//')[1]}${path}` : '';
+  const what = [regionName, category ? eventCategoryLabels[category as EventCategory] : '', tag ? `#${tag}` : ''].filter(Boolean).join(' · ');
+  const copy = async () => { try { await navigator.clipboard.writeText(https); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch { window.prompt('Copy this link', https); } };
+  return (
+    <section className="card space-y-3 p-4" aria-label="Subscribe to this calendar">
+      <h2 className="font-semibold">Subscribe to this calendar</h2>
+      <p className="text-sm text-text-muted">{what ? `Following: ${what}. ` : ''}Your calendar app refreshes it by itself every few hours, so new events show up without you doing anything.</p>
+      {webcal ? (
+        <div className="flex flex-col gap-2">
+          <a className="btn btn-outline btn-sm" href={webcal}>Apple Calendar / Outlook</a>
+          <a className="btn btn-outline btn-sm" href={`https://calendar.google.com/calendar/render?cid=${encodeURIComponent(webcal)}`} target="_blank" rel="noopener noreferrer">Google Calendar</a>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={copy}>{copied ? 'Link copied' : 'Copy link'}</button>
+        </div>
+      ) : <div className="skeleton h-24" />}
+    </section>
   );
 }

@@ -7,7 +7,7 @@ import { mediaUrlFromPath } from '@/lib/media';
 import { Badge } from '@/components/ui';
 import { Paragraphs } from '@/components/community/common';
 import { EventActions } from '@/components/community/EventActions';
-import { eventEnds, eventWhen, hasEnded } from '@/components/community/eventTime';
+import { eventEnds, eventWhen, hasEnded, sourceLabel } from '@/components/community/eventTime';
 
 type Props = { params: Promise<{ id: string }> };
 const load = async (id: string) => (await serverApi()).events.get(decodeURIComponent(id)).catch(() => null);
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const e = await load((await params).id);
   if (!e || e.status !== 'published') return { title: 'Event', robots: { index: false } };
   const desc = (e.description ?? `${eventCategoryLabels[e.category]} · ${eventWhen(e)}`).slice(0, 200);
-  const img = mediaUrlFromPath('event-media', e.cover_path);
+  const img = mediaUrlFromPath('event-media', e.cover_path) ?? e.cover_url;
   return { title: e.title, description: desc, alternates: { canonical: `/events/${e.slug}` }, openGraph: { title: e.title, description: desc, type: 'website', ...(img ? { images: [img] } : {}) } };
 }
 
@@ -24,6 +24,8 @@ export default async function EventPage({ params }: Props) {
   const e = await load((await params).id);
   if (!e) notFound();
   const img = mediaUrlFromPath('event-media', e.cover_path);
+  const coverImg = img ?? e.cover_url;
+  const from = sourceLabel(e.source_kind);
   const published = e.status === 'published';
   const over = hasEnded(e);
   const address = [e.address_line1, e.city, e.state, e.postal_code, countryName(e.country)].filter(Boolean).join(', ');
@@ -44,11 +46,13 @@ export default async function EventPage({ params }: Props) {
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />}
       <nav aria-label="Breadcrumb" className="mt-6 text-sm text-text-muted"><Link href="/events" className="hover:underline">Events</Link> / <span>{e.title}</span></nav>
       {!published && <p role="status" className="mt-4 card p-4 text-sm"><Badge tone={e.status === 'cancelled' || e.status === 'rejected' ? 'danger' : 'warning'}>{{ draft: 'Draft', pending: 'Waiting for review', rejected: 'Not approved', cancelled: 'Cancelled', published: '' }[e.status]}</Badge> Only you can see this page.{e.status === 'rejected' && e.rejection_reason ? ` Reason: ${e.rejection_reason}` : ''}</p>}
-      <div className="mt-4 overflow-hidden rounded-[20px] bg-forest-soft">{img ? <img src={img} alt="" className="max-h-[420px] w-full object-cover" /> : <div className="grid h-40 place-items-center text-5xl">🎉</div>}</div>
+      <div className="mt-4 overflow-hidden rounded-[20px] bg-forest-soft">{coverImg ? <img src={coverImg} alt="" referrerPolicy="no-referrer" className="max-h-[420px] w-full object-cover" /> : <div className="grid h-40 place-items-center text-5xl">🎉</div>}</div>
       <div className="mt-6 grid gap-8 md:grid-cols-[1fr_300px]">
         <div>
           <div className="flex flex-wrap gap-1.5"><Badge>{eventCategoryLabels[e.category]}</Badge>{e.is_free ? <Badge tone="success">Free</Badge> : <Badge tone="info">{e.price_note || 'Paid'}</Badge>}{e.is_online && <Badge tone="primary">Online</Badge>}{over && published && <Badge tone="neutral">Ended</Badge>}</div>
+          {(e.tags ?? []).length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{e.tags.map((t) => <Link key={t} href={`/events?tag=${encodeURIComponent(t)}`} className="chip !px-2 !py-0.5 text-xs">#{t}</Link>)}</div>}
           <h1 className="mt-2 text-3xl font-bold">{e.title}</h1>
+          {from && <p className="mt-1 text-sm text-text-muted">From {from}{e.external_url && <> · <a href={e.external_url} target="_blank" rel="noopener noreferrer" className="text-forest underline">View original</a></>}</p>}
           {e.title_am && <p className="ethiopic text-lg text-text-muted">{e.title_am}</p>}
           {e.description ? <Paragraphs text={e.description} className="mt-5" /> : <p className="mt-5 text-text-muted">The organiser has not added a description.</p>}
         </div>

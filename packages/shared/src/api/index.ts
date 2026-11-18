@@ -60,6 +60,20 @@ export type KycStatus = Enums<'kyc_status'>;
 export type CertificationType = Enums<'certification_type'>;
 export type EventCategory = Enums<'event_category'>;
 export type EventStatus = Enums<'event_status'>;
+export type EventSource = Tables<'event_sources'>;
+export type EventSourceKind = 'ics' | 'eventbrite' | 'ticketmaster';
+/** One event in the shared public feed (`events.feed`): everything a calendar needs, nothing personal. */
+export type FeedEvent = {
+  id: string; slug: string; title: string; title_am: string | null; description: string | null; category: EventCategory; tags: string[];
+  starts_at: string; ends_at: string | null; timezone: string; all_day: boolean;
+  venue_name: string | null; address_line1: string | null; city: string | null; state: string | null; postal_code: string | null; country: string;
+  lat: number | null; lng: number | null; is_online: boolean; is_free: boolean; price_note: string | null; ticket_url: string | null;
+  cover_path: string | null; cover_url: string | null; organizer_name: string | null; organizer_business_id: string | null;
+  source_kind: EventSourceKind | null; external_url: string | null; is_featured: boolean; going_count: number; interested_count: number; updated_at: string;
+};
+export type EventsFeed = { version: number; generated_at: string; days: number; region: string | null; region_name: string | null; cached: boolean; events: FeedEvent[] };
+export type EventsCanSubmit = { mode: 'verified_businesses' | 'members'; allowed: boolean; businesses: { id: string; name: string; verified: boolean }[] };
+export const eventSourceKindLabels: Record<EventSourceKind, string> = { ics: 'Calendar feed (.ics)', eventbrite: 'Eventbrite', ticketmaster: 'Ticketmaster' };
 export type RsvpStatus = Enums<'rsvp_status'>;
 export type TrustTier = 'new' | 'verified' | 'trusted' | 'top';
 
@@ -725,6 +739,18 @@ export function createAdeyApi(sb: AdeyClient) {
     },
     setStatus: (id: string, status: 'draft' | 'pending' | 'cancelled') => run(sb.from('events').update({ status }).eq('id', id).select().single().then(unwrap)),
     remove: (id: string) => run(sb.from('events').delete().eq('id', id).then(unwrap)),
+    /**
+     * The shared feed of upcoming public events, kept in a server-side cache that is cleared whenever a
+     * public event changes. Use it for the default calendar view and for calendar subscriptions; use
+     * `search` for anything personal (my RSVPs) or free-text.
+     */
+    feed: (args: { region?: string | null; category?: EventCategory | null; tag?: string | null; businessId?: string | null; days?: number | null } = {}) =>
+      rpcJson<EventsFeed>(sb.rpc('events_feed', {
+        p_region: args.region ?? undefined, p_category: args.category ?? undefined, p_tag: args.tag ?? undefined,
+        p_business_id: args.businessId ?? undefined, p_days: args.days ?? undefined,
+      })),
+    /** Whether the signed-in member may post events right now (by default only verified businesses can), and for which businesses. */
+    canSubmit: () => rpcJson<EventsCanSubmit>(sb.rpc('events_can_submit')),
   };
 
   // ---------------------------------------------------------------- help centre + support assistant
@@ -832,6 +858,19 @@ export function createAdeyApi(sb: AdeyClient) {
     eventsByStatus: (status: EventStatus) => run(sb.from('events').select('*, business:businesses(id,name,slug), creator:public_profiles!events_created_by_fkey(display_name)').eq('status', status).order('starts_at').limit(200).then(unwrap)),
     setEventStatus: (id: string, status: EventStatus, rejection_reason?: string) => run(sb.from('events').update({ status, rejection_reason: rejection_reason ?? null }).eq('id', id).select().single().then(unwrap)),
     featureEvent: (id: string, is_featured: boolean) => run(sb.from('events').update({ is_featured }).eq('id', id).then(unwrap)),
+    // Outside calendars that the nightly importer reads (staff with events.moderate)
+    eventSources: () => run(sb.from('event_sources').select('*').order('created_at').then(unwrap)),
+    saveEventSource: async (input: Omit<TablesInsert<'event_sources'>, 'created_by'> & { id?: string }) => {
+      const u = await requireUser();
+      const { id, ...fields } = input;
+      if (id) return unwrap(await sb.from('event_sources').update(fields).eq('id', id).select().single());
+      return unwrap(await sb.from('event_sources').insert({ ...fields, created_by: u.id }).select().single());
+    },
+    deleteEventSource: (id: string) => run(sb.from('event_sources').delete().eq('id', id).then(unwrap)),
+    importedEvents: (sourceId: string) =>
+      run(sb.from('events').select('id,slug,title,starts_at,status,external_url,import_locked').eq('source_id', sourceId).order('starts_at').limit(100).then(unwrap)),
+    /** Starts the importer now for every active source; results appear on each source a little later. */
+    runEventImport: () => run(sb.rpc('events_ingest_now').then(unwrap)),
     // support
     supportQueue: () => run(sb
         .from('support_threads')

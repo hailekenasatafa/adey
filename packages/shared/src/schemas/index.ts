@@ -396,6 +396,8 @@ export const eventSchema = z.object({
   organizer_business_id: z.string().uuid().nullable().optional(),
   contact_email: emailSchema.optional().or(z.literal('')),
   contact_phone: phoneSchema,
+  /** Cultural tags such as "live music" or "timket"; the server stores them lower-case with hyphens. */
+  tags: z.array(z.string().trim().min(2, 'Tags need at least 2 characters').max(30, 'Keep each tag under 30 characters')).max(12, 'Up to 12 tags').optional(),
 }).refine((v) => !v.ends_at || new Date(v.ends_at) >= new Date(v.starts_at), { path: ['ends_at'], message: 'The end must be after the start' })
   .refine((v) => v.is_online || !!v.city, { path: ['city'], message: 'Add the city, or mark the event as online' });
 export type EventInput = z.infer<typeof eventSchema>;

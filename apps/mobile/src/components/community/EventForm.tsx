@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { blankToNull, eventCategoryLabels, eventSchema, friendlyError, type CommunityEvent, type EventCategory } from '@adey/shared';
 import { api } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
@@ -56,6 +56,11 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
     organizer_name: existing?.organizer_name ?? '', organizer_business_id: existing?.organizer_business_id ?? null as string | null,
     contact_email: existing?.contact_email ?? '', contact_phone: existing?.contact_phone ?? '',
   });
+  const canQ = useQuery({ queryKey: ['events', 'can-submit', user?.id], queryFn: () => api.events.canSubmit(), enabled: !!user });
+  const verifiedOnly = canQ.data?.mode === 'verified_businesses';
+  const orgs = verifiedOnly ? (canQ.data?.businesses ?? []).filter((b) => b.verified) : businesses.map((b) => ({ id: b.id, name: b.name }));
+  const [tagText, setTagText] = useState((existing?.tags ?? []).join(', '));
+  const orgId = f.organizer_business_id ?? (verifiedOnly && !existing ? orgs[0]?.id ?? null : null);
   const [cover, setCover] = useState<string | null>(existing?.cover_path ?? null);
   const [uploading, setUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -105,8 +110,10 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
       title: f.title, title_am: f.title_am, description: f.description, category: f.category, starts_at: startsAt ?? '', ends_at: endsAt, timezone: f.timezone, all_day: f.all_day,
       venue_name: f.venue_name, address_line1: f.address_line1, city: f.city, state: f.state, postal_code: f.postal_code, country: f.country,
       is_online: f.is_online, online_url: f.online_url, is_free: f.is_free, price_note: f.price_note, ticket_url: f.ticket_url,
-      organizer_name: f.organizer_name, organizer_business_id: f.organizer_business_id, contact_email: f.contact_email, contact_phone: f.contact_phone,
+      organizer_name: f.organizer_name, organizer_business_id: orgId, contact_email: f.contact_email, contact_phone: f.contact_phone,
+      tags: tagText.split(',').map((t) => t.trim()).filter(Boolean),
     });
+    if (verifiedOnly && !orgId) errs.organizer_business_id = 'Choose one of your verified businesses as the organiser';
     if (!parsed.success) for (const i of parsed.error.issues) errs[String(i.path[0])] ??= i.message;
     if (f.is_online && !f.online_url.trim()) errs.online_url = 'Add the link people use to join';
     if (!parsed.success || Object.keys(errs).length) {
@@ -129,7 +136,7 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
   return (
     <Screen header={<Header title={existing ? 'Edit event' : 'Add an event'} />} keyboard>
       <Card style={{ marginBottom: 16 }}>
-        <Text variant="caption" color="muted">Events from verified businesses are published right away. Everything else is reviewed by the Adey team before it appears in the calendar.</Text>
+        <Text variant="caption" color="muted">{verifiedOnly ? 'Only verified businesses can post events. Your event may be reviewed by the Adey team before it appears in the calendar.' : 'Events from verified businesses are published right away. Everything else is reviewed by the Adey team before it appears in the calendar.'}</Text>
       </Card>
 
       <Pressable onPress={changeCover} accessibilityRole="button" accessibilityLabel={cover ? 'Change cover photo' : 'Add a cover photo'} style={{ height: 150, borderRadius: 16, overflow: 'hidden', backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>
@@ -143,6 +150,7 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
       {text('title', 'Title', { maxLength: 140 })}
       {text('title_am', 'Title in Amharic (optional)', { maxLength: 140 })}
       {text('description', 'Description', { multiline: true, maxLength: 6000 })}
+      <Input label="Tags (optional)" value={tagText} onChangeText={setTagText} error={field('tags')} placeholder="live music, timket, food" autoCapitalize="none" hint="Separate with commas. Up to 12." />
       <Text variant="label" style={{ marginBottom: 8 }}>Category</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
         {(Object.keys(eventCategoryLabels) as EventCategory[]).map((c) => <Chip key={c} small label={eventCategoryLabels[c]} selected={f.category === c} onPress={() => set('category', c)} />)}
@@ -178,13 +186,14 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
       {text('ticket_url', 'Ticket or info link (optional)', { placeholder: 'https://', autoCapitalize: 'none', keyboardType: 'url', autoCorrect: false })}
 
       <Text variant="subheading" style={{ marginTop: 8, marginBottom: 8 }}>Organiser</Text>
-      {businesses.length > 0 && (
+      {orgs.length > 0 && (
         <>
-          <Text variant="caption" color="muted" style={{ marginBottom: 8 }}>Organise as one of your businesses (optional).</Text>
+          <Text variant="caption" color="muted" style={{ marginBottom: 8 }}>{verifiedOnly ? 'Events are posted by one of your verified businesses.' : 'Organise as one of your businesses (optional).'}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-            <Chip small label="Myself" selected={!f.organizer_business_id} onPress={() => set('organizer_business_id', null)} />
-            {businesses.map((b) => <Chip key={b.id} small label={b.name} selected={f.organizer_business_id === b.id} onPress={() => set('organizer_business_id', b.id)} />)}
+            {!verifiedOnly && <Chip small label="Myself" selected={!f.organizer_business_id} onPress={() => set('organizer_business_id', null)} />}
+            {orgs.map((b) => <Chip key={b.id} small label={b.name} selected={orgId === b.id} onPress={() => set('organizer_business_id', b.id)} />)}
           </View>
+          {!!field('organizer_business_id') && <Text color="danger" variant="caption" style={{ marginBottom: 8 }}>{field('organizer_business_id')}</Text>}
         </>
       )}
       {text('organizer_name', 'Organiser name (optional)')}

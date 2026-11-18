@@ -79,6 +79,9 @@ dark mode, settings, addresses, seller verification, authenticity badges, events
 | `loyalty.enabled` | `true` | Adey Rewards (1 point per US$1, 100 points = US$1, at most 30 % of an order) |
 | `support.ai_enabled` | `false` | Support assistant (needs `ANTHROPIC_API_KEY`) |
 | `ethiopian_market.cross_border_checkout` | `false` | Lets sellers in the Ethiopian market ship abroad |
+| `events.submissions` | `verified_businesses` | Who may post events: only verified businesses, or `members` (every member, reviewed first) |
+| `events.regions` | `dmv` | Regional calendar views: a centre, a radius and a list of states |
+| `events.feed_days` | `180` | How far ahead the shared feed and the calendar subscription look |
 | `events.*`, `trust.*` | see migrations | Event moderation and the Trusted / Top-rated thresholds |
 
 ## 5. Edge functions and secrets
@@ -94,6 +97,7 @@ dark mode, settings, addresses, seller verification, authenticity badges, events
 | `shipping-webhook` | Shippo | **off** (token in the URL) | `SHIPPO_WEBHOOK_TOKEN` (32+ random characters) |
 | `fx-sync` | pg_cron every 6 h | **off** (worker secret) | — |
 | `support-chat` | signed-in member | on | `ANTHROPIC_API_KEY`, optional `SUPPORT_ASSISTANT_MODEL` |
+| `events-ingest` | pg_cron nightly at 07:30 UTC | **off** (worker secret) | optional `EVENTBRITE_API_TOKEN`, `TICKETMASTER_API_KEY` |
 
 `SITE_URL` defaults to `https://adeyconnect.com`. The worker functions authenticate exactly like `send-push`
 (Vault secret `adey_worker_secret`). `support-chat` uses `claude-opus-5-5` unless `SUPPORT_ASSISTANT_MODEL` names
@@ -128,12 +132,49 @@ answered by a fallback model instead of failing.
 Before step 7 also update the Terms and Privacy pages for buying and selling (escrow, refunds, seller
 verification data, the assistant), and decide the business numbers above (fee, timers, reward rates).
 
-## 7. Tests and what has not been tested
+## 7. Events calendar: imports, calendar subscription, shared feed
+
+Added after V1 (migration `20261118000100_events_calendar.sql`, function `events-ingest`). The brief for it named
+generic cloud services; each one maps to something Adey already runs, so no second cloud account is needed:
+
+| In the brief | Here |
+| --- | --- |
+| Managed cloud database, event schema, indexes | The existing Postgres. `event_id` = `id`, `vendor_id` = `organizer_business_id`, `start_time` / `end_time` = `starts_at` / `ends_at`, `location_coordinates` = `lat`, `lng`, `cultural_tags` = `tags` (next to the fixed `category`). Indexes on the date window, coordinates, state, category and tags |
+| Serverless functions + nightly cron | Edge function `events-ingest`, scheduled by pg_cron every night at 07:30 UTC |
+| iCal endpoint behind an API gateway | `https://adeyconnect.com/events/calendar.ics` (website route), plus JSON at `/api/events/feed` |
+| Vendor APIs with RBAC, flyer bucket + CDN | The `events` table through the Supabase API with row-level security; by default only verified businesses can post. Flyers go to the public `event-media` bucket, served by Supabase's CDN |
+| In-memory cache with invalidation | The shared feed is computed once and kept in the database until a public event changes (a trigger clears it), then cached again at Netlify's CDN for 15 minutes. No Redis: the data is small and changes a few times a day |
+
+**Imports.** Staff add sources in `/admin/event-sources`; the importer reads each active one and the database
+adds, updates or cancels events (`events_import`). Three kinds:
+- **Calendar feed (.ics)** — any public iCalendar address (community organisations, churches, a public Google
+  Calendar). Needs no key. Repeating events are expanded for the next 180 days.
+- **Eventbrite** — the events of given organizations, venues or single events. Eventbrite shut down its public
+  keyword / location search in December 2019, so events cannot be found by topic; they are followed by id.
+  Needs `EVENTBRITE_API_TOKEN`.
+- **Ticketmaster** — keyword search around a point (default: 80 km around Washington DC). Needs
+  `TICKETMASTER_API_KEY`.
+
+Each source chooses whether new events are published straight away or wait in `/admin/events` for review
+(staff then get one summary notification per run). An event corrected by a person on Adey is no longer
+overwritten by later imports. Imported events link back to the original page, and "free" is only shown when the
+source says so.
+
+**Calendar subscription.** `/events/calendar.ics` accepts `region` (for example `dmv`), `category`, `tag` and
+`business` (a vendor's own feed). People subscribe with the buttons on `/events` (Apple / Outlook through
+`webcal://`, Google Calendar, or copying the link); their calendar app refreshes it every few hours.
+
+**Not tested:** the Eventbrite and Ticketmaster adapters against the live APIs (no keys were available; their
+request parameters follow the published documentation), and subscribing from real Apple, Google and Outlook
+calendars. The calendar-file reader and writer have 22 unit tests, including daylight-saving changes and
+repeating events.
+
+## 8. Tests and what has not been tested
 
 Run locally (no Docker or Supabase CLI needed; Postgres runs in-process through PGlite):
 
 ```bash
-pnpm db:test                                  # applies all 28 migrations + seed, runs both acceptance suites (286 checks)
+pnpm db:test                                  # applies all 29 migrations + seed, runs both acceptance suites (308 checks)
 pnpm check:functions                          # every RPC / table / column used by the edge functions exists
 pnpm typecheck && pnpm lint && pnpm test      # apps and shared package
 ```

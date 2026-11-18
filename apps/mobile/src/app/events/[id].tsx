@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { openDirections, openWebsite } from '@/lib/actions';
 import { Badge, Button, Card, EmptyState, ErrorState, Header, IconButton, Loading, Screen, Text } from '@/components/ui';
-import { eventCoverUrl, eventWhen } from '@/components/community/events';
+import { eventArt, eventSourceLabel, eventWhen } from '@/components/community/events';
 
 const gcal = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 
@@ -40,7 +40,8 @@ export default function EventDetail() {
   if (q.isError) return <Screen header={<Header title="Event" />}><ErrorState error={q.error} onRetry={() => q.refetch()} /></Screen>;
   if (!e) return <Screen header={<Header title="Event" />}><EmptyState icon="calendar-outline" title="Event not found" body="It may have been removed or is not published yet." /></Screen>;
 
-  const cover = eventCoverUrl(e.cover_path);
+  const cover = eventArt(e);
+  const source = eventSourceLabel(e.source_kind);
   const my = rsvpQ.data ?? null;
   const going = counts?.going ?? e.going_count;
   const interested = counts?.interested ?? e.interested_count;
@@ -79,6 +80,17 @@ export default function EventDetail() {
       </View>
       <Text variant="heading" accessibilityRole="header">{e.title}</Text>
       {!!e.title_am && <Text color="muted">{e.title_am}</Text>}
+      {!!e.tags?.length && (
+        <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+          {e.tags.map((t) => <Badge key={t} label={`#${t}`} tone="neutral" />)}
+        </View>
+      )}
+      {!!source && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+          <Text variant="caption" color="muted">From {source}</Text>
+          {!!e.external_url && <Button title="View original" icon="open-outline" variant="outline" size="sm" onPress={() => openWebsite(e.external_url!)} />}
+        </View>
+      )}
 
       <Card style={{ marginTop: 14, gap: 12 }}>
         <Row icon="time-outline" text={eventWhen(e, true)} sub={e.timezone} />

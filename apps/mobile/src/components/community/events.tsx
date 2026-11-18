@@ -34,9 +34,14 @@ export function eventWhen(e: { starts_at: string | null; ends_at?: string | null
 
 export const rsvpLabel = (s: string | null | undefined) => (s === 'going' ? "You're going" : s === 'interested' ? 'Interested' : null);
 
-export function EventListCard({ e }: { e: EventCard }) {
+/** Uploaded cover first, else the artwork hosted by the source calendar. */
+export const eventArt = (e: { cover_path?: string | null; cover_url?: string | null }) => eventCoverUrl(e.cover_path) ?? e.cover_url ?? null;
+
+export const eventSourceLabel = (k: string | null | undefined) => (k === 'eventbrite' ? 'Eventbrite' : k === 'ticketmaster' ? 'Ticketmaster' : k ? 'a partner calendar' : null);
+
+export function EventListCard({ e, tag, onTag }: { e: EventCard; tag?: string | null; onTag?: (t: string) => void }) {
   const { colors, radius } = useTheme();
-  const cover = eventCoverUrl(e.cover_path);
+  const cover = eventArt(e);
   const where = e.is_online ? 'Online' : [e.venue_name, e.city].filter(Boolean).join(', ');
   const rsvp = rsvpLabel(e.my_rsvp);
   const counts = [e.going_count ? `${e.going_count} going` : null, e.interested_count ? `${e.interested_count} interested` : null].filter(Boolean).join(' · ');
@@ -67,6 +72,16 @@ export function EventListCard({ e }: { e: EventCard }) {
         )}
         {(e.organizer_business_name || e.organizer_name) && <Text variant="caption" color="muted" numberOfLines={1}>By {e.organizer_business_name || e.organizer_name}</Text>}
         {!!counts && <Text variant="caption" color="muted">{counts}</Text>}
+        {!!e.tags?.length && (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+            {e.tags.slice(0, 4).map((t) => (
+              <Pressable key={t} onPress={onTag ? () => onTag(t) : undefined} disabled={!onTag} accessibilityRole="button" accessibilityLabel={`Filter by tag ${t}`} hitSlop={6}
+                style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.lg, backgroundColor: tag === t ? colors.primary : colors.surfaceMuted }}>
+                <Text variant="caption" style={{ color: tag === t ? colors.onPrimary : colors.textMuted }}>#{t}</Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
       </View>
     </Pressable>
   );
