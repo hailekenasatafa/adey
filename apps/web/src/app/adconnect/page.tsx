@@ -1,29 +1,104 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
+import type { ScreenCard } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { Empty, ScreenCardView } from '@/components/ui';
 import { Dropdown, MenuLinks } from '@/components/FilterMenu';
+import { CleanForm } from '@/components/CleanForm';
 import { addDays, toISODate } from '@/lib/media';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Adey AdConnect', description: 'Advertise on screens inside Habesha businesses, or earn by listing yours.' };
-const SORTS = [['relevance', 'Best match'], ['price_asc', 'Price: low to high'], ['rating', 'Top rated'], ['traffic', 'Most visitors']] as const;
-const CLEARED = { city: undefined, state: undefined, max: undefined, size: undefined, visitors: undefined, avail: undefined, verified: undefined, sort: undefined };
-type SP = { q?: string; city?: string; state?: string; category?: string; max?: string; size?: string; visitors?: string; avail?: string; verified?: string; sort?: string; page?: string };
+
+const PAGE_SIZE = 24;
+const SORTS = [['relevance', 'Relevance'], ['price_asc', 'Price: Low to High'], ['rating', 'Rating'], ['traffic', 'Traffic']] as const;
+const PRICES = [100, 250, 500, 1000];
+const SIZES = [43, 55, 65];
+const VISITORS = [100, 250];
+const AVAIL = [['7', 'Available next 7 days'], ['30', 'Available next 30 days']] as const;
+
+type Param = string | string[] | undefined;
+type SP = Record<'q' | 'city' | 'state' | 'category' | 'max' | 'size' | 'visitors' | 'avail' | 'verified' | 'sort' | 'page', Param>;
+/** Everything the page filters on, read once from the URL. `cats` allows several categories (?category=a&category=b or ?category=a,b). */
+type State = { q: string; city: string; state: string; max: string; cats: string[]; size: string; visitors: string; avail: string; verified: boolean; sort: string; page: number };
+
+const one = (v: Param) => (Array.isArray(v) ? v[0] : v)?.trim() ?? '';
+const readState = (sp: SP): State => ({
+  q: one(sp.q), city: one(sp.city), state: one(sp.state), max: one(sp.max),
+  cats: [...new Set([sp.category].flat().flatMap((v) => (v ?? '').split(',')).map((v) => v.trim()).filter(Boolean))],
+  size: one(sp.size), visitors: one(sp.visitors), avail: one(sp.avail), verified: one(sp.verified) === '1',
+  sort: SORTS.some(([v]) => v === one(sp.sort)) ? one(sp.sort) : 'relevance', page: Math.max(1, Number(one(sp.page)) || 1),
+});
+
+/** A URL for the given state; empty values and defaults are left out so links stay short. */
+function hrefFor(s: State) {
+  const p = new URLSearchParams();
+  for (const k of ['q', 'city', 'state', 'max', 'size', 'visitors', 'avail'] as const) if (s[k]) p.set(k, s[k]);
+  for (const c of s.cats) p.append('category', c);
+  if (s.verified) p.set('verified', '1');
+  if (s.sort !== 'relevance') p.set('sort', s.sort);
+  if (s.page > 1) p.set('page', String(s.page));
+  const q = p.toString();
+  return q ? `/adconnect?${q}` : '/adconnect';
+}
+
+/** Same order as search_screens in the database, minus "featured", which the card doesn't carry. */
+function compareScreens(sort: string) {
+  const desc = (a?: number | null, b?: number | null) => (b ?? -Infinity) - (a ?? -Infinity);
+  const tie = (a: ScreenCard, b: ScreenCard) => (b.badges?.length ?? 0) - (a.badges?.length ?? 0) || desc(a.rating_avg, b.rating_avg) || (a.estimated_price_cents ?? 0) - (b.estimated_price_cents ?? 0);
+  return (a: ScreenCard, b: ScreenCard) =>
+    (sort === 'price_asc' ? (a.estimated_price_cents ?? 0) - (b.estimated_price_cents ?? 0)
+      : sort === 'rating' ? desc(a.rating_avg, b.rating_avg)
+        : sort === 'traffic' ? desc(a.estimated_daily_visitors, b.estimated_daily_visitors) : 0) || tie(a, b);
+}
 
 export default async function AdConnectPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const sp = await searchParams;
+  const st = readState(await searchParams);
   const api = await serverApi();
-  const page = Math.max(1, Number(sp.page ?? 1));
   const today = toISODate(new Date());
-  const avail = sp.avail ? Number(sp.avail) : null;
-  const [categories, screens] = await Promise.all([
-    api.market.categories('us').catch(() => []),
-    api.adconnect.searchScreens({ p_query: sp.q || undefined, p_city: sp.city || undefined, p_state: sp.state || undefined, p_category_id: sp.category || undefined, p_price_max_cents: sp.max ? Number(sp.max) * 100 : undefined, p_min_size_inches: sp.size ? Number(sp.size) : undefined, p_min_daily_visitors: sp.visitors ? Number(sp.visitors) : undefined, p_start: avail ? today : undefined, p_end: avail ? addDays(today, avail - 1) : undefined, p_verified_only: sp.verified === '1', p_sort: sp.sort ?? 'relevance', p_limit: 24, p_offset: (page - 1) * 24 }).catch(() => []),
-  ]);
-  const category = categories.find((c) => c.id === sp.category);
-  const activeFilters = (['city', 'state', 'max', 'size', 'visitors', 'avail'] as const).filter((k) => sp[k]).length + (sp.verified === '1' ? 1 : 0) + (sp.sort && sp.sort !== 'relevance' ? 1 : 0);
-  const qs = (patch: Partial<SP>) => { const p = new URLSearchParams(Object.fromEntries(Object.entries({ ...sp, ...patch }).filter(([, v]) => v)) as Record<string, string>); return `/adconnect?${p}`; };
+  const avail = Number(st.avail) || null;
+  const base = {
+    p_query: st.q || undefined, p_city: st.city || undefined, p_state: st.state || undefined,
+    p_price_max_cents: st.max ? Number(st.max) * 100 : undefined, p_min_size_inches: st.size ? Number(st.size) : undefined,
+    p_min_daily_visitors: st.visitors ? Number(st.visitors) : undefined, p_start: avail ? today : undefined, p_end: avail ? addDays(today, avail - 1) : undefined,
+    p_verified_only: st.verified, p_sort: st.sort,
+  };
+  // The database search takes one category, so several categories are searched one by one and merged here.
+  const search = async (): Promise<{ screens: ScreenCard[]; more: boolean }> => {
+    if (st.cats.length <= 1) {
+      const screens = await api.adconnect.searchScreens({ ...base, p_category_id: st.cats[0], p_limit: PAGE_SIZE, p_offset: (st.page - 1) * PAGE_SIZE }).catch(() => []);
+      return { screens, more: screens.length === PAGE_SIZE };
+    }
+    const lists = await Promise.all(st.cats.map((c) => api.adconnect.searchScreens({ ...base, p_category_id: c, p_limit: 50, p_offset: 0 }).catch(() => [] as ScreenCard[])));
+    const seen = new Set<string>();
+    const all = lists.flat().filter((s) => !seen.has(s.id!) && seen.add(s.id!)).sort(compareScreens(st.sort));
+    return { screens: all.slice((st.page - 1) * PAGE_SIZE, st.page * PAGE_SIZE), more: all.length > st.page * PAGE_SIZE };
+  };
+  const [categories, { screens, more }] = await Promise.all([api.market.categories('us').catch(() => []), search()]);
+
+  const go = (patch: Partial<State>) => hrefFor({ ...st, page: 1, ...patch });
+  const catName = new Map(categories.map((c) => [c.id, c.name_en]));
+  const chips: { label: string; href: string }[] = [
+    ...(st.city ? [{ label: st.city, href: go({ city: '' }) }] : []),
+    ...(st.state ? [{ label: st.state.toUpperCase(), href: go({ state: '' }) }] : []),
+    ...(st.max ? [{ label: `Up to $${st.max}`, href: go({ max: '' }) }] : []),
+    ...st.cats.filter((c) => catName.has(c)).map((c) => ({ label: catName.get(c)!, href: go({ cats: st.cats.filter((x) => x !== c) }) })),
+    ...(st.size ? [{ label: `${st.size}"+ screen`, href: go({ size: '' }) }] : []),
+    ...(st.visitors ? [{ label: `${st.visitors}+ visitors/day`, href: go({ visitors: '' }) }] : []),
+    ...(st.avail ? [{ label: AVAIL.find(([v]) => v === st.avail)?.[1] ?? `Next ${st.avail} days`, href: go({ avail: '' }) }] : []),
+    ...(st.verified ? [{ label: 'Verified only', href: go({ verified: false }) }] : []),
+  ];
+  const cleared: Partial<State> = { city: '', state: '', max: '', cats: [], size: '', visitors: '', avail: '', verified: false };
+  const sortLabel = SORTS.find(([v]) => v === st.sort)![1];
+  const hidden = (keys: (keyof State)[]) => keys.flatMap((k) => {
+    const v = st[k];
+    if (k === 'cats') return st.cats.map((c) => <input key={`category-${c}`} type="hidden" name="category" value={c} />);
+    if (k === 'verified') return st.verified ? [<input key="verified" type="hidden" name="verified" value="1" />] : [];
+    if (k === 'sort') return st.sort !== 'relevance' ? [<input key="sort" type="hidden" name="sort" value={st.sort} />] : [];
+    return v ? [<input key={k} type="hidden" name={k} value={String(v)} />] : [];
+  });
+
   return (
     <div className="container-x pb-16">
       <section className="mt-8 rounded-[28px] bg-gold-soft p-8 sm:p-12">
@@ -34,44 +109,100 @@ export default async function AdConnectPage({ searchParams }: { searchParams: Pr
         <p className="mt-4 text-xs"><span className="badge badge-accent">Free Launch Mode</span> No platform commission while payments are settled directly between advertiser and screen owner.</p>
       </section>
 
-      <div className="relative mt-8 flex flex-wrap items-center gap-2">
-        <form action="/adconnect" role="search" className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto">
-          {Object.entries(sp).filter(([k, v]) => v && k !== 'q' && k !== 'page').map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
-          <input name="q" defaultValue={sp.q} placeholder="Search by business, city, or area" aria-label="Search screens" className="input" />
-          <button className="btn btn-primary">Search</button>
-        </form>
-        <Dropdown label="Filter" count={activeFilters}>
-          <form action="/adconnect" className="space-y-3" aria-label="Filter screens">
-            {sp.q && <input type="hidden" name="q" value={sp.q} />}
-            {sp.category && <input type="hidden" name="category" value={sp.category} />}
-            <div className="grid grid-cols-2 gap-2">
-              <div><label htmlFor="ac-city" className="label">City</label><input id="ac-city" name="city" defaultValue={sp.city} className="input" /></div>
-              <div><label htmlFor="ac-state" className="label">State</label><input id="ac-state" name="state" defaultValue={sp.state} className="input" /></div>
+      {/* 1. Search bar */}
+      <CleanForm action="/adconnect" role="search" aria-label="Search screens" className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-[minmax(0,1fr)_9rem_7rem_10rem_auto] sm:items-center">
+        {hidden(['cats', 'size', 'visitors', 'avail', 'verified', 'sort'])}
+        <input name="q" defaultValue={st.q} placeholder="Business, city, or area" aria-label="Business, city, or area" className="input col-span-2 sm:col-span-1" />
+        <input name="city" defaultValue={st.city} placeholder="City" aria-label="City" className="input" />
+        <input name="state" defaultValue={st.state} placeholder="State" aria-label="State" maxLength={30} className="input" />
+        <select name="max" defaultValue={st.max} aria-label="Price for 30 days" className="input">
+          <option value="">Any price</option>{PRICES.map((p) => <option key={p} value={p}>Up to ${p}</option>)}
+        </select>
+        <button className="btn btn-primary h-full min-h-12 sm:px-6">Search</button>
+      </CleanForm>
+
+      {/* 2. Filters, active filters, sort */}
+      <div className="relative mt-3 flex flex-wrap items-center gap-2">
+        <Dropdown align="start" size="lg" count={chips.length} label={<><FilterIcon />Filters</>}>
+          <CleanForm action="/adconnect" aria-label="Filter screens">
+            {hidden(['q', 'city', 'state', 'max', 'sort'])}
+            <div className="flex items-center justify-between"><p className="text-base font-bold">Filters</p><span className="text-xs text-text-muted">Choose any, then apply</span></div>
+            <Section title="Category">
+              {categories.map((c) => <Pill key={c.id} type="checkbox" name="category" value={c.id} checked={st.cats.includes(c.id)}>{c.name_en}</Pill>)}
+            </Section>
+            <Section title="Screen size">
+              <Pill type="radio" name="size" value="" checked={!st.size}>Any</Pill>
+              {SIZES.map((s) => <Pill key={s} type="radio" name="size" value={String(s)} checked={st.size === String(s)}>{s}&quot;+</Pill>)}
+            </Section>
+            <Section title="Daily traffic">
+              <Pill type="radio" name="visitors" value="" checked={!st.visitors}>Any</Pill>
+              {VISITORS.map((v) => <Pill key={v} type="radio" name="visitors" value={String(v)} checked={st.visitors === String(v)}>{v}+ visitors/day</Pill>)}
+            </Section>
+            <Section title="Availability">
+              <Pill type="radio" name="avail" value="" checked={!st.avail}>Any time</Pill>
+              {AVAIL.map(([v, l]) => <Pill key={v} type="radio" name="avail" value={v} checked={st.avail === v}>{l}</Pill>)}
+            </Section>
+            <Section title="Status">
+              <label className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-[14px] border border-border px-4 py-3 text-sm font-semibold">
+                <span>Verified businesses only</span>
+                <input type="checkbox" name="verified" value="1" defaultChecked={st.verified} className="peer sr-only" />
+                <span aria-hidden className="relative h-6 w-11 shrink-0 rounded-full bg-border transition peer-checked:bg-forest peer-focus-visible:ring-2 peer-focus-visible:ring-forest peer-focus-visible:ring-offset-2 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5" />
+              </label>
+            </Section>
+            <div className="sticky -bottom-4 -mx-4 -mb-4 mt-5 flex gap-2 border-t border-border bg-surface p-4">
+              <Link href={go({ cats: [], size: '', visitors: '', avail: '', verified: false })} className="btn btn-outline flex-1">Reset</Link>
+              <button className="btn btn-primary flex-[2]">Apply Filters</button>
             </div>
-            <div><label htmlFor="ac-max" className="label">Price (30 days)</label>
-              <select id="ac-max" name="max" defaultValue={sp.max ?? ''} className="input"><option value="">Any price</option>{[100, 250, 500, 1000].map((p) => <option key={p} value={p}>Up to ${p}</option>)}</select></div>
-            <div className="grid grid-cols-2 gap-2">
-              <div><label htmlFor="ac-size" className="label">Screen size</label>
-                <select id="ac-size" name="size" defaultValue={sp.size ?? ''} className="input"><option value="">Any</option>{[43, 55, 65].map((s) => <option key={s} value={s}>{s}&quot; or larger</option>)}</select></div>
-              <div><label htmlFor="ac-visitors" className="label">Visitors / day</label>
-                <select id="ac-visitors" name="visitors" defaultValue={sp.visitors ?? ''} className="input"><option value="">Any</option>{[100, 250].map((v) => <option key={v} value={v}>{v}+</option>)}</select></div>
-            </div>
-            <div><label htmlFor="ac-avail" className="label">Available</label>
-              <select id="ac-avail" name="avail" defaultValue={sp.avail ?? ''} className="input"><option value="">Any time</option><option value="7">In the next 7 days</option><option value="30">In the next 30 days</option></select></div>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="verified" value="1" defaultChecked={sp.verified === '1'} className="h-4 w-4 accent-[var(--forest)]" /> Verified businesses only</label>
-            <div><label htmlFor="ac-sort" className="label">Sort by</label>
-              <select id="ac-sort" name="sort" defaultValue={sp.sort ?? 'relevance'} className="input">{SORTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></div>
-            <div className="flex gap-2 pt-1"><button className="btn btn-primary btn-sm">Apply</button><Link href={qs({ ...CLEARED, page: undefined })} className="btn btn-outline btn-sm">Clear</Link></div>
-          </form>
+          </CleanForm>
         </Dropdown>
-        <Dropdown label={category?.name_en ?? 'Category'} active={!!category}>
-          <MenuLinks label="Venue category" items={[{ href: qs({ category: undefined, page: undefined }), label: 'All categories', current: !category }, ...categories.map((c) => ({ href: qs({ category: c.id, page: undefined }), label: c.name_en, current: c.id === category?.id }))]} />
-        </Dropdown>
-        {(activeFilters > 0 || category || sp.q) && <Link href="/adconnect" className="btn btn-ghost btn-sm">Clear all</Link>}
+
+        {chips.map((c) => (
+          <Link key={c.label} href={c.href} aria-label={`Remove filter: ${c.label}`}
+            className="inline-flex items-center gap-1.5 rounded-full bg-forest-soft py-1.5 pl-3 pr-2 text-sm font-semibold text-forest transition hover:brightness-95">
+            {c.label}<span aria-hidden className="grid h-4 w-4 place-items-center rounded-full text-base leading-none">×</span>
+          </Link>
+        ))}
+        {chips.length > 0 && <Link href={go(cleared)} className="px-1 text-sm font-semibold text-text-muted underline-offset-4 hover:text-forest hover:underline">Clear all</Link>}
+
+        <div className="ml-auto">
+          <Dropdown size="sm" label={<><span className="font-normal text-text-muted">Sort by:</span> {sortLabel}</>}>
+            <MenuLinks columns={1} label="Sort screens" items={SORTS.map(([v, l]) => ({ href: hrefFor({ ...st, sort: v, page: 1 }), label: l, current: v === st.sort }))} />
+          </Dropdown>
+        </div>
       </div>
 
       <div className="mt-6">{screens.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{screens.map((s) => <ScreenCardView key={s.id} s={s} />)}</div> : <Empty title="No screens match" body="Widen filters or check back soon. Listings appear as soon as businesses publish them." action={<Link href="/dashboard" className="btn btn-primary btn-sm">List your screen</Link>} />}</div>
-      <div className="mt-8 flex justify-center gap-2">{page > 1 && <Link href={qs({ page: String(page - 1) })} className="btn btn-outline btn-sm">← Previous</Link>}{screens.length === 24 && <Link href={qs({ page: String(page + 1) })} className="btn btn-outline btn-sm">Next →</Link>}</div>
+      <div className="mt-8 flex justify-center gap-2">{st.page > 1 && <Link href={hrefFor({ ...st, page: st.page - 1 })} className="btn btn-outline btn-sm">← Previous</Link>}{more && <Link href={hrefFor({ ...st, page: st.page + 1 })} className="btn btn-outline btn-sm">Next →</Link>}</div>
     </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <fieldset className="mt-5 border-t border-border pt-4 first-of-type:border-t-0 first-of-type:pt-0">
+      <legend className="sr-only">{title}</legend>
+      <p aria-hidden className="mb-2.5 text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{title}</p>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </fieldset>
+  );
+}
+
+/** A checkbox or radio that looks like a pill: outlined when off, dark green when on. Works without JavaScript. */
+function Pill({ type, name, value, checked, children }: { type: 'checkbox' | 'radio'; name: string; value: string; checked: boolean; children: ReactNode }) {
+  return (
+    <label className="cursor-pointer">
+      <input type={type} name={name} value={value} defaultChecked={checked} className="peer sr-only" />
+      <span className="inline-flex items-center rounded-full border border-border bg-surface px-3.5 py-1.5 text-sm font-semibold transition hover:bg-surface-muted peer-checked:border-forest peer-checked:bg-forest peer-checked:text-[var(--on-forest)] peer-focus-visible:ring-2 peer-focus-visible:ring-forest peer-focus-visible:ring-offset-2">
+        {children}
+      </span>
+    </label>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="h-4 w-4 shrink-0">
+      <path d="M3 5h14M5.5 10h9M8 15h4" />
+    </svg>
   );
 }
