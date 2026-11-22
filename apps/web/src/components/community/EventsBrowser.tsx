@@ -7,12 +7,13 @@ import { eventCategoryLabels, type EventCard, type EventCategory } from '@adey/s
 import { api } from '@/lib/supabase/client';
 import { useAuth } from '@/components/Providers';
 import { Empty } from '@/components/ui';
+import { Dropdown, MenuButtons } from '@/components/FilterMenu';
 import { ErrorLine } from './common';
 import { EventTile } from './EventTile';
 import { dayKey } from './eventTime';
 
-type Filters = { category: EventCategory | ''; city: string; state: string; free: boolean; online: boolean; mine: boolean };
-const NONE: Filters = { category: '', city: '', state: '', free: false, online: false, mine: false };
+type Filters = { q: string; category: EventCategory | ''; city: string; state: string; free: boolean; online: boolean; mine: boolean };
+const NONE: Filters = { q: '', category: '', city: '', state: '', free: false, online: false, mine: false };
 const pad = (n: number) => String(n).padStart(2, '0');
 const key = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
@@ -30,10 +31,11 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
   const now = new Date();
   const [draft, setDraft] = useState<Filters>(NONE);
   const [f, setF] = useState<Filters>(NONE);
+  const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [day, setDay] = useState<string | null>(null);
   const args = useMemo(() => ({
-    p_category: f.category || undefined, p_city: f.city.trim() || undefined, p_state: f.state.trim() || undefined,
+    p_query: f.q.trim() || undefined, p_category: f.category || undefined, p_city: f.city.trim() || undefined, p_state: f.state.trim() || undefined,
     p_region: region || undefined, p_tag: tag || undefined,
     p_free_only: f.free || undefined, p_online: f.online ? true : undefined, p_mine: f.mine || undefined,
   }), [f, region, tag]);
@@ -56,15 +58,19 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
   const cells = [...Array(first).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
   const shift = (n: number) => { const d = new Date(cursor.y, cursor.m + n, 1); setCursor({ y: d.getFullYear(), m: d.getMonth() }); setDay(null); };
   const today = key(now.getFullYear(), now.getMonth(), now.getDate());
+  const activeFilters = [f.city.trim(), f.state.trim(), f.free, f.online, f.mine].filter(Boolean).length;
+  const apply = (next: Filters) => { setF(next); setDraft(next); setDay(null); };
+  const clearAll = () => { setQuery(''); apply(NONE); };
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
-      <aside className="space-y-4">
-        <form onSubmit={(e) => { e.preventDefault(); setF(draft); setDay(null); }} className="card space-y-3 p-4" aria-label="Filter events">
-          <div><label htmlFor="ev-cat" className="label">Category</label>
-            <select id="ev-cat" className="input" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as EventCategory | '' })}>
-              <option value="">All categories</option>{Object.entries(eventCategoryLabels).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
-            </select></div>
+    <>
+    <div className="relative mt-6 flex flex-wrap items-center gap-2">
+      <form role="search" className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto" onSubmit={(e) => { e.preventDefault(); apply({ ...f, q: query }); }}>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search events by name, venue, or city" aria-label="Search events" className="input" />
+        <button type="submit" className="btn btn-primary">Search</button>
+      </form>
+      <Dropdown label="Filter" count={activeFilters}>
+        <form onSubmit={(e) => { e.preventDefault(); apply({ ...draft, q: f.q, category: f.category }); }} className="space-y-3" aria-label="Filter events">
           <div className="grid grid-cols-2 gap-2">
             <div><label htmlFor="ev-city" className="label">City</label><input id="ev-city" className="input" value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} /></div>
             <div><label htmlFor="ev-state" className="label">State</label><input id="ev-state" className="input" value={draft.state} onChange={(e) => setDraft({ ...draft, state: e.target.value })} /></div>
@@ -72,9 +78,17 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.free} onChange={(e) => setDraft({ ...draft, free: e.target.checked })} /> Free events only</label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.online} onChange={(e) => setDraft({ ...draft, online: e.target.checked })} /> Online events only</label>
           {session && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.mine} onChange={(e) => setDraft({ ...draft, mine: e.target.checked })} /> Events I am going to or interested in</label>}
-          <div className="flex gap-2"><button type="submit" className="btn btn-primary btn-sm">Apply filters</button>{!pristine && <button type="button" className="btn btn-outline btn-sm" onClick={() => { setDraft(NONE); setF(NONE); setDay(null); }}>Clear</button>}</div>
+          <div className="flex gap-2 pt-1"><button type="submit" className="btn btn-primary btn-sm">Apply</button><button type="button" data-close className="btn btn-outline btn-sm" onClick={() => apply({ ...NONE, q: f.q, category: f.category })}>Clear</button></div>
         </form>
-
+      </Dropdown>
+      <Dropdown label={f.category ? eventCategoryLabels[f.category] : 'Category'} active={!!f.category}>
+        <MenuButtons label="Event category" onPick={(v) => apply({ ...f, category: v as EventCategory | '' })}
+          items={[{ value: '', label: 'All categories', current: !f.category }, ...Object.entries(eventCategoryLabels).map(([k, l]) => ({ value: k, label: l, current: f.category === k }))]} />
+      </Dropdown>
+      {!pristine && <button type="button" className="btn btn-ghost btn-sm" onClick={clearAll}>Clear all</button>}
+    </div>
+    <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
+      <aside className="space-y-4">
         <section className="card p-4" aria-label="Calendar">
           <div className="flex items-center justify-between">
             <button type="button" className="btn btn-ghost btn-sm" aria-label="Previous month" onClick={() => shift(-1)}>‹</button>
@@ -104,11 +118,7 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
       </aside>
 
       <section aria-live="polite">
-        {regions.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Region">
-            {[{ key: '', name: 'Everywhere' }, ...regions].map((r) => <button key={r.key} type="button" aria-pressed={region === r.key} className={`chip ${region === r.key ? 'chip-on' : ''}`} onClick={() => go({ region: r.key })}>{r.name}</button>)}
-          </div>
-        )}
+        {region && <p className="mb-3 flex flex-wrap items-center gap-2 text-sm">Showing <span className="badge badge-primary">{regionName ?? region}</span><button type="button" className="btn btn-ghost btn-sm" onClick={() => go({ region: '' })}>Show everywhere</button></p>}
         {tag && <p className="mb-3 flex flex-wrap items-center gap-2 text-sm">Showing events tagged <span className="badge badge-primary">#{tag}</span><button type="button" className="btn btn-ghost btn-sm" onClick={() => go({ tag: '' })}>Clear tag</button></p>}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-xl font-bold">{day ? new Date(day + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : f.mine ? 'My events' : 'Upcoming events'}</h2>
@@ -122,6 +132,7 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
         </div>
       </section>
     </div>
+    </>
   );
 }
 

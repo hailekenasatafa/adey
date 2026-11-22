@@ -4,6 +4,7 @@ import type { Market } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { BusinessCardView, Empty, ProductCardView } from '@/components/ui';
 import { CountrySelectField } from '@/components/shop/CountrySelectField';
+import { Dropdown, MenuLinks } from '@/components/FilterMenu';
 import { FxAttribution } from '@/components/commerce';
 
 export const dynamic = 'force-dynamic';
@@ -43,7 +44,10 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
     const p = new URLSearchParams(Object.entries({ ...sp, page: undefined, ...patch }).filter(([, v]) => v) as [string, string][]);
     return `/market?${p.toString()}`;
   };
-  const toggle = (k: keyof SP, label: string) => <Link href={qs({ [k]: on(k) ? undefined : '1' })} aria-pressed={on(k)} className={`chip ${on(k) ? 'chip-on' : ''}`}>{label}</Link>;
+  const check = (k: keyof SP, label: string) => <label className="flex items-center gap-2 text-sm"><input type="checkbox" name={k} value="1" defaultChecked={on(k)} className="h-4 w-4 accent-[var(--forest)]" /> {label}</label>;
+  const filterKeys: (keyof SP)[] = view === 'products' ? ['min', 'max', 'ships', 'authentic', 'handmade', 'instock', 'buyable', 'rating', 'sort'] : ['city', 'state', 'zip', 'verified', 'trusted', 'selling', 'rating', 'sort'];
+  const activeFilters = filterKeys.filter((k) => (k === 'sort' ? sp.sort && sp.sort !== 'relevance' : sp[k])).length;
+  const category = categories.find((c) => c.id === sp.category);
   const results = view === 'businesses' ? businesses : products;
 
   return (
@@ -59,34 +63,44 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
         <Link role="tab" aria-selected={view === 'businesses'} href={qs({ view: 'businesses', sort: undefined, authentic: undefined, instock: undefined, handmade: undefined, buyable: undefined, min: undefined, max: undefined, ships: undefined })} className={`chip ${view === 'businesses' ? 'chip-on' : ''}`}>Businesses</Link>
       </div>
 
-      <form action="/market" className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto_auto]">
-        {Object.entries(sp).filter(([k, v]) => v && !['q', 'min', 'max', 'ships', 'city', 'state', 'zip', 'page'].includes(k)).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
-        <input name="q" defaultValue={sp.q} placeholder={view === 'products' ? 'Search products…' : 'Name, service…'} aria-label="Search" className="input" />
-        {view === 'products' ? (
-          <>
-            <input name="min" defaultValue={sp.min} inputMode="decimal" placeholder="Min price" aria-label="Minimum price" className="input sm:w-28" />
-            <input name="max" defaultValue={sp.max} inputMode="decimal" placeholder="Max price" aria-label="Maximum price" className="input sm:w-28" />
-            <CountrySelectField name="ships" defaultValue={sp.ships} label="Ships to" />
-          </>
-        ) : (
-          <>
-            <input name="city" defaultValue={sp.city} placeholder="City" aria-label="City" className="input sm:w-32" />
-            <input name="state" defaultValue={sp.state} placeholder="State / region" aria-label="State or region" className="input sm:w-32" />
-            <input name="zip" defaultValue={sp.zip} placeholder="ZIP" aria-label="ZIP code" className="input sm:w-24" />
-          </>
-        )}
-        <button className="btn btn-primary">Search</button>
-      </form>
-
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        <Link href={qs({ category: undefined })} className={`chip shrink-0 ${!sp.category ? 'chip-on' : ''}`}>All categories</Link>
-        {categories.map((c) => <Link key={c.id} href={qs({ category: c.id })} className={`chip shrink-0 ${sp.category === c.id ? 'chip-on' : ''}`}>{c.name_en}</Link>)}
-      </div>
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-        {view === 'products' ? <>{toggle('authentic', '🌼 Authentic Habesha')}{toggle('handmade', 'Handmade')}{toggle('instock', 'In stock')}{toggle('buyable', 'Buy online')}</>
-          : <>{toggle('verified', '✓ Verified')}{toggle('trusted', '★ Trusted vendors')}{toggle('selling', 'Takes online orders')}</>}
-        <Link href={qs({ rating: sp.rating === '4' ? undefined : '4' })} aria-pressed={sp.rating === '4'} className={`chip ${sp.rating === '4' ? 'chip-on' : ''}`}>★ 4+</Link>
-        <span className="ml-auto flex flex-wrap gap-1">{(view === 'products' ? PRODUCT_SORTS : BUSINESS_SORTS).map(([s, l]) => <Link key={s} href={qs({ sort: s === 'relevance' ? undefined : s })} aria-current={(sp.sort ?? 'relevance') === s ? 'true' : undefined} className={`rounded-[8px] px-2 py-1 text-xs font-semibold ${(sp.sort ?? 'relevance') === s ? 'bg-forest-soft text-forest' : 'text-text-muted'}`}>{l}</Link>)}</span>
+      <div className="relative mt-4 flex flex-wrap items-center gap-2">
+        <form action="/market" role="search" className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto">
+          {Object.entries(sp).filter(([k, v]) => v && k !== 'q' && k !== 'page').map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
+          <input name="q" defaultValue={sp.q} placeholder={view === 'products' ? 'Search products…' : 'Search businesses by name or service…'} aria-label="Search" className="input" />
+          <button className="btn btn-primary">Search</button>
+        </form>
+        <Dropdown label="Filter" count={activeFilters}>
+          <form action="/market" className="space-y-3" aria-label={view === 'products' ? 'Filter products' : 'Filter businesses'}>
+            {(['view', 'market', 'category', 'q'] as const).map((k) => sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null)}
+            {view === 'products' ? (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div><label htmlFor="mk-min" className="label">Min price</label><input id="mk-min" name="min" defaultValue={sp.min} inputMode="decimal" className="input" /></div>
+                  <div><label htmlFor="mk-max" className="label">Max price</label><input id="mk-max" name="max" defaultValue={sp.max} inputMode="decimal" className="input" /></div>
+                </div>
+                <div><span className="label">Ships to</span><CountrySelectField name="ships" defaultValue={sp.ships} label="Ships to" className="input" /></div>
+                {check('authentic', '🌼 Authentic Habesha')}{check('handmade', 'Handmade')}{check('instock', 'In stock')}{check('buyable', 'Buy online')}
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <div><label htmlFor="mk-city" className="label">City</label><input id="mk-city" name="city" defaultValue={sp.city} className="input" /></div>
+                  <div><label htmlFor="mk-state" className="label">State / region</label><input id="mk-state" name="state" defaultValue={sp.state} className="input" /></div>
+                </div>
+                <div><label htmlFor="mk-zip" className="label">ZIP code</label><input id="mk-zip" name="zip" defaultValue={sp.zip} inputMode="numeric" className="input" /></div>
+                {check('verified', '✓ Verified')}{check('trusted', '★ Trusted vendors')}{check('selling', 'Takes online orders')}
+              </>
+            )}
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="rating" value="4" defaultChecked={sp.rating === '4'} className="h-4 w-4 accent-[var(--forest)]" /> Rated 4★ and up</label>
+            <div><label htmlFor="mk-sort" className="label">Sort by</label>
+              <select id="mk-sort" name="sort" defaultValue={sp.sort ?? 'relevance'} className="input">{(view === 'products' ? PRODUCT_SORTS : BUSINESS_SORTS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></div>
+            <div className="flex gap-2 pt-1"><button className="btn btn-primary btn-sm">Apply</button><Link href={qs(Object.fromEntries(filterKeys.map((k) => [k, undefined])))} className="btn btn-outline btn-sm">Clear</Link></div>
+          </form>
+        </Dropdown>
+        <Dropdown label={category?.name_en ?? 'Category'} active={!!category}>
+          <MenuLinks label="Category" items={[{ href: qs({ category: undefined }), label: 'All categories', current: !category }, ...categories.map((c) => ({ href: qs({ category: c.id }), label: c.name_en, current: c.id === category?.id }))]} />
+        </Dropdown>
+        {(activeFilters > 0 || category || sp.q) && <Link href={qs({ category: undefined, q: undefined, ...Object.fromEntries(filterKeys.map((k) => [k, undefined])) })} className="btn btn-ghost btn-sm">Clear all</Link>}
       </div>
 
       <div className="mt-6">
