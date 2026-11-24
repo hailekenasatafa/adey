@@ -8,26 +8,32 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { friendlyError, signInSchema } from '@adey/shared';
 import { api } from '@/lib/supabase/client';
-import { AdeyFlower } from '@/components/ui';
+import { AuthCard, GoogleSignIn } from '@/components/AuthCard';
+import { safeNext } from '@/lib/safeNext';
 
 function SignInInner() {
   const router = useRouter();
   const sp = useSearchParams();
-  const [error, setError] = useState<string | null>(sp.get('error') === 'link' ? 'That link is invalid or expired. Sign in or request a new one.' : null);
+  const next = safeNext(sp.get('next'));
+  const [error, setError] = useState<string | null>(
+    sp.get('error') === 'link' ? 'That link is invalid or expired. Sign in or request a new one.'
+      : sp.get('error') === 'oauth' ? 'Google sign-in didn’t finish. Try again, or sign in with your email.' : null,
+  );
   const { register, handleSubmit, formState } = useForm<z.infer<typeof signInSchema>>({ resolver: zodResolver(signInSchema) });
   return (
-    <div className="container-x max-w-md py-16">
-      <AdeyFlower size={44} />
-      <h1 className="mt-4 text-3xl font-bold">Welcome back</h1>
-      <p className="text-text-muted">One account for shopping, your business, advertising, and your screens.</p>
-      <form onSubmit={handleSubmit(async (v) => { setError(null); try { await api.auth.signIn(v.email, v.password); router.push(sp.get('next') ?? '/'); router.refresh(); } catch (e) { setError(friendlyError(e)); } })} className="mt-8 space-y-4">
-        <div><label className="label">Email</label><input {...register('email')} type="email" autoComplete="email" className="input" />{formState.errors.email && <p className="text-sm text-danger">{formState.errors.email.message}</p>}</div>
-        <div><label className="label">Password</label><input {...register('password')} type="password" autoComplete="current-password" className="input" />{formState.errors.password && <p className="text-sm text-danger">{formState.errors.password.message}</p>}</div>
-        {error && <p className="text-sm text-danger">{error}</p>}
+    <AuthCard title="Welcome back" subtitle="Sign in to save businesses, claim deals and message owners."
+      footer={<>New to Adey? <Link href={`/auth/sign-up${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-text underline underline-offset-4">Create an account</Link></>}>
+      <GoogleSignIn next={next} />
+      <form onSubmit={handleSubmit(async (v) => { setError(null); try { await api.auth.signIn(v.email, v.password); router.push(next); router.refresh(); } catch (e) { setError(friendlyError(e)); } })} className="space-y-4" noValidate>
+        <div><label htmlFor="si-email" className="label">Email</label><input id="si-email" {...register('email')} type="email" autoComplete="email" className="input" />{formState.errors.email && <p className="mt-1 text-sm text-danger">{formState.errors.email.message}</p>}</div>
+        <div>
+          <div className="flex items-baseline justify-between"><label htmlFor="si-password" className="label">Password</label><Link href="/auth/forgot" className="text-sm font-semibold text-text-muted underline-offset-4 hover:text-text hover:underline">Forgot password?</Link></div>
+          <input id="si-password" {...register('password')} type="password" autoComplete="current-password" className="input" />{formState.errors.password && <p className="mt-1 text-sm text-danger">{formState.errors.password.message}</p>}
+        </div>
+        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
         <button className="btn btn-primary w-full" disabled={formState.isSubmitting}>Sign in</button>
       </form>
-      <div className="mt-6 flex flex-col items-center gap-2 text-sm"><Link href="/auth/forgot" className="font-semibold text-forest">Forgot password?</Link><p className="text-text-muted">New to Adey? <Link href="/auth/sign-up" className="font-semibold text-forest">Create an account</Link></p></div>
-    </div>
+    </AuthCard>
   );
 }
 
