@@ -11,7 +11,7 @@ import { ErrorLine, SignedIn } from '@/components/community/common';
 const PAGE = 30;
 const ICON: Record<string, string> = {
   order_new: '🛍️', order_update: '📦', shipment_update: '🚚', escrow_released: '💸', payout_update: '💸', refund_update: '↩️', order_dispute: '⚠️', kyc_update: '🪪', certification_update: '🌼',
-  review_new: '⭐', low_stock: '📉', event_reminder: '📅', event_update: '📅', rewards_update: '🎁', support_reply: '💬', announcement: '📣', message_new: '✉️',
+  review_new: '⭐', deal_new: '🏷️', low_stock: '📉', event_reminder: '📅', event_update: '📅', rewards_update: '🎁', support_reply: '💬', announcement: '📣', message_new: '✉️',
 };
 /** Only same-site paths are followed; older notification types are translated to this site's pages. */
 const safeRoute = (data: unknown) => notificationRoute(data, 'web');

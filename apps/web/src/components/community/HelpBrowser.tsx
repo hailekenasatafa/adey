@@ -30,7 +30,7 @@ export function HelpBrowser({ articles }: { articles: HelpItem[] }) {
     <div>
       <form role="search" onSubmit={(e) => e.preventDefault()} className="mt-6">
         <label htmlFor="help-q" className="sr-only">Search the help centre</label>
-        <input id="help-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="Search for an answer, e.g. refund, shipping, rewards" className="input" />
+        <input id="help-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="Search for an answer, e.g. deals, listing, verification" className="input" />
       </form>
       {searching ? (
         <section className="mt-6" aria-live="polite">

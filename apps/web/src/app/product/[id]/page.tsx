@@ -46,7 +46,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <div className="mt-6 grid gap-8 lg:grid-cols-2">
         <Gallery images={images} name={p.name} />
         <div>
-          {p.category && <Link href={`/market?category=${p.category.id}`} className="text-xs font-semibold text-forest">{p.category.name_en}</Link>}
+          {p.category && <Link href={`/market?view=products&category=${p.category.id}`} className="text-xs font-semibold text-forest">{p.category.name_en}</Link>}
           <h1 className="text-3xl font-bold">{p.name}</h1>
           <div className="mt-2"><Price product={p} className="text-3xl font-bold text-forest" /></div>
           <div className="mt-2 flex flex-wrap items-center gap-2">

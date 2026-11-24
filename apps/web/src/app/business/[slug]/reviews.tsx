@@ -7,6 +7,7 @@ import { api } from '@/lib/supabase/client';
 import { useAuth } from '@/components/Providers';
 import { Badge } from '@/components/ui';
 import { fmtDate } from '@/lib/media';
+import { ReportButton } from '@/components/ReportButton';
 
 export function Reviews({ businessId }: { businessId: string }) {
   const { session } = useAuth();
@@ -36,6 +37,7 @@ export function Reviews({ businessId }: { businessId: string }) {
           {r.title && <p className="mt-2 font-semibold">{r.title}</p>}
           {r.body && <p className="mt-1 text-sm">{r.body}</p>}
           {r.response && <div className="mt-2 rounded-[10px] bg-surface-muted p-3 text-sm"><p className="text-xs text-text-muted">Response from the business</p><p>{r.response}</p></div>}
+          {r.author_id !== session?.user.id && <div className="mt-2 text-right"><ReportButton targetType="review" targetId={r.id} /></div>}
         </div>
       ))}
     </div>

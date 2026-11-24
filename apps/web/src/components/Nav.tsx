@@ -8,15 +8,19 @@ import { useAuth } from './Providers';
 import { api, supabase } from '@/lib/supabase/client';
 import { useCart, useCommerce } from '@/lib/commerce';
 import { setTheme, useTheme, type ThemeChoice } from '@/lib/theme';
+import { useAdconnect, useAppSettings } from '@/lib/settings';
 
 const links = [
   { href: '/market', label: 'Adey Market' },
+  { href: '/deals', label: 'Deals' },
   { href: '/events', label: 'Events' },
   { href: '/adconnect', label: 'AdConnect' },
 ];
-const accountLinks = [
-  { href: '/orders', label: 'Orders' }, { href: '/rewards', label: 'Rewards' }, { href: '/saved', label: 'Saved' },
-  { href: '/account/addresses', label: 'Addresses' }, { href: '/account', label: 'Settings' }, { href: '/campaigns', label: 'My campaigns' }, { href: '/help', label: 'Help' },
+/** [link, shown only when online checkout is on, shown only when AdConnect campaigns are on] */
+const ACCOUNT: { href: string; label: string; checkout?: boolean; campaigns?: boolean }[] = [
+  { href: '/deals/mine', label: 'My deals' }, { href: '/saved', label: 'Saved' }, { href: '/messages', label: 'Messages' },
+  { href: '/orders', label: 'Orders', checkout: true }, { href: '/rewards', label: 'Rewards', checkout: true }, { href: '/account/addresses', label: 'Addresses', checkout: true },
+  { href: '/account', label: 'Settings' }, { href: '/campaigns', label: 'My campaigns', campaigns: true }, { href: '/help', label: 'Help' },
 ];
 const item = 'block rounded-[10px] px-3 py-2 text-sm hover:bg-surface-muted';
 
@@ -51,6 +55,8 @@ export function Nav() {
   const router = useRouter();
   const { session, profile, businesses, isStaff } = useAuth();
   const { checkoutEnabled } = useCommerce();
+  const { campaignsEnabled } = useAdconnect();
+  const accountLinks = ACCOUNT.filter((l) => (!l.checkout || checkoutEnabled) && (!l.campaigns || campaignsEnabled));
   const cart = useCart();
   const [menu, setMenu] = useState(false);
   const [mobile, setMobile] = useState(false);
@@ -129,18 +135,20 @@ export function Nav() {
 }
 
 export function Footer() {
+  const app = useAppSettings();
+  const support = app?.support_email ?? 'support@adey.app';
   return (
     <footer className="mt-20 border-t border-border bg-surface">
       <div className="container-x grid gap-8 py-12 sm:grid-cols-4">
         <div className="sm:col-span-2">
           <div className="flex items-center gap-2"><AdeyFlower size={28} /><span className="font-bold tracking-[0.25em]">ADEY</span><span className="ethiopic text-text-muted">አደይ</span></div>
-          <p className="mt-3 max-w-sm text-sm text-text-muted">Connecting Communities. Growing Businesses. The marketplace for Habesha businesses, Ethiopian sellers, and community advertising.</p>
+          <p className="mt-3 max-w-sm text-sm text-text-muted">Connecting Communities. Growing Businesses. Find Habesha-owned businesses, see their menus and photos, and claim their deals. Listing a business is free.</p>
           <div className="mt-4 max-w-xs"><p className="mb-1 text-xs font-semibold text-text-muted">Theme</p><ThemeToggle /></div>
         </div>
-        <div className="text-sm"><p className="font-semibold">Marketplace</p><ul className="mt-2 space-y-1 text-text-muted"><li><Link href="/market?market=us">US Market</Link></li><li><Link href="/market?market=et">Ethiopian Market</Link></li><li><Link href="/events">Events</Link></li><li><Link href="/rewards">Adey Rewards</Link></li><li><Link href="/adconnect">AdConnect</Link></li><li><Link href="/dashboard">List your business</Link></li></ul></div>
-        <div className="text-sm"><p className="font-semibold">Company</p><ul className="mt-2 space-y-1 text-text-muted"><li><Link href="/help">Help centre</Link></li><li><Link href="/verification">How verification works</Link></li><li><Link href="/legal/terms">Terms</Link></li><li><Link href="/legal/privacy">Privacy</Link></li><li><a href="mailto:support@adey.app">support@adey.app</a></li></ul></div>
+        <div className="text-sm"><p className="font-semibold">Marketplace</p><ul className="mt-2 space-y-1 text-text-muted"><li><Link href="/market">Find businesses</Link></li><li><Link href="/deals">Deals</Link></li><li><Link href="/events">Events</Link></li><li><Link href="/adconnect">AdConnect</Link></li><li><Link href="/dashboard/new">List your business — free</Link></li><li><Link href="/market?market=et">Ethiopian Market</Link></li></ul></div>
+        <div className="text-sm"><p className="font-semibold">Company</p><ul className="mt-2 space-y-1 text-text-muted"><li><Link href="/help">Help centre</Link></li><li><Link href="/verification">How verification works</Link></li><li><Link href="/legal/terms">Terms</Link></li><li><Link href="/legal/privacy">Privacy</Link></li><li><a href={`mailto:${support}`}>{support}</a></li></ul></div>
       </div>
-      <div className="border-t border-border py-4 text-center text-xs text-text-muted">© {new Date().getFullYear()} Adey. Get the app on iOS and Android.</div>
+      <div className="border-t border-border py-4 text-center text-xs text-text-muted">© {new Date().getFullYear()} Adey. Apps for iPhone and Android are on the way.</div>
     </footer>
   );
 }

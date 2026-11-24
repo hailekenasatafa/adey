@@ -11,7 +11,8 @@ import { buildIcs, downloadText } from './eventTime';
 
 type Ev = Parameters<typeof buildIcs>[0];
 
-export function EventActions({ event, createdBy, going: g0, interested: i0, open }: { event: Ev; createdBy: string; going: number; interested: number; open: boolean }) {
+/** `rsvp={false}` for entries from public calendars (holidays): no Going/Interested, just calendar and share. */
+export function EventActions({ event, createdBy, going: g0, interested: i0, open, rsvp: offerRsvp = true }: { event: Ev; createdBy: string; going: number; interested: number; open: boolean; rsvp?: boolean }) {
   const { session } = useAuth();
   const path = usePathname();
   const [counts, setCounts] = useState({ going: g0, interested: i0 });
@@ -35,10 +36,10 @@ export function EventActions({ event, createdBy, going: g0, interested: i0, open
   );
   return (
     <div className="space-y-3">
-      {open && (session ? (
+      {open && offerRsvp && (session ? (
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Your response">{btn('going', "I'm going")}{btn('interested', 'Interested')}</div>
       ) : <Link href={`/auth/sign-in?next=${encodeURIComponent(path)}`} className="btn btn-primary btn-sm">Sign in to say you are going</Link>)}
-      <p className="text-sm text-text-muted">{counts.going} going · {counts.interested} interested</p>
+      {offerRsvp && <p className="text-sm text-text-muted">{counts.going} going · {counts.interested} interested</p>}
       {rsvp.error && <ErrorLine error={rsvp.error} />}
       <div className="flex flex-wrap gap-2">
         <button type="button" className="btn btn-outline btn-sm" onClick={() => downloadText(`${event.title.replace(/[^\w]+/g, '-').slice(0, 40) || 'event'}.ics`, buildIcs({ ...event, url: window.location.href }), 'text/calendar')}>Add to calendar</button>

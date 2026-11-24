@@ -9,7 +9,7 @@ import { CleanForm } from '@/components/CleanForm';
 import { addDays, toISODate } from '@/lib/media';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Adey AdConnect', description: 'Advertise on screens inside Habesha businesses, or earn by listing yours.' };
+export const metadata: Metadata = { title: 'Adey AdConnect', description: 'Find TV screens inside Habesha businesses that take local ads, and contact the owners directly.' };
 
 const PAGE_SIZE = 24;
 const SORTS = [['relevance', 'Relevance'], ['price_asc', 'Price: Low to High'], ['rating', 'Rating'], ['traffic', 'Traffic']] as const;
@@ -75,7 +75,8 @@ export default async function AdConnectPage({ searchParams }: { searchParams: Pr
     const all = lists.flat().filter((s) => !seen.has(s.id!) && seen.add(s.id!)).sort(compareScreens(st.sort));
     return { screens: all.slice((st.page - 1) * PAGE_SIZE, st.page * PAGE_SIZE), more: all.length > st.page * PAGE_SIZE };
   };
-  const [categories, { screens, more }] = await Promise.all([api.market.categories('us').catch(() => []), search()]);
+  const [categories, { screens, more }, adconnect] = await Promise.all([api.market.categories('us').catch(() => []), search(), api.settings.get<{ campaigns_enabled?: boolean }>('adconnect').catch(() => undefined)]);
+  const campaignsEnabled = !!adconnect?.campaigns_enabled;
 
   const go = (patch: Partial<State>) => hrefFor({ ...st, page: 1, ...patch });
   const catName = new Map(categories.map((c) => [c.id, c.name_en]));
@@ -104,13 +105,16 @@ export default async function AdConnectPage({ searchParams }: { searchParams: Pr
       <section className="mt-8 rounded-[28px] bg-gold-soft p-8 sm:p-12">
         <p className="text-xs font-bold tracking-[0.3em] text-gold-deep">ADEY ADCONNECT</p>
         <h1 className="mt-2 text-4xl font-bold">Advertise where your community already gathers.</h1>
-        <p className="mt-3 max-w-2xl text-text-muted">Businesses list the TVs in their restaurants, salons, and shops. Advertisers pick screens, send one request per business, and negotiate directly. Agreed bookings appear for both sides — in the app and here.</p>
-        <div className="mt-6 flex flex-wrap gap-2"><Link href="/campaigns/new" className="btn btn-primary">Create Campaign</Link><Link href="/dashboard" className="btn btn-outline">List My Screens</Link><Link href="/campaigns" className="btn btn-ghost">My Campaigns</Link><Link href="/requests" className="btn btn-ghost">Incoming Requests</Link></div>
-        <p className="mt-4 text-xs"><span className="badge badge-accent">Free Launch Mode</span> No platform commission while payments are settled directly between advertiser and screen owner.</p>
+        <p className="mt-3 max-w-2xl text-text-muted">Habesha restaurants, salons and shops list the TV screens their customers watch. Find a screen that fits, then contact the owner to agree dates, price and your ad. You deal with each other directly — Adey takes no commission and isn’t part of the agreement or the payment.</p>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <a href="#screens" className="btn btn-primary">Browse screens</a><Link href="/dashboard" className="btn btn-outline">List my screens — free</Link>
+          {campaignsEnabled && <><Link href="/campaigns/new" className="btn btn-ghost">Create campaign</Link><Link href="/campaigns" className="btn btn-ghost">My campaigns</Link><Link href="/requests" className="btn btn-ghost">Incoming requests</Link></>}
+        </div>
+        <p className="mt-4 text-xs text-text-muted">Visitor numbers are the owners’ own estimates. <Link href="/help/advertise-on-screens" className="font-semibold text-forest hover:underline">How AdConnect works</Link></p>
       </section>
 
       {/* 1. Search bar */}
-      <CleanForm action="/adconnect" role="search" aria-label="Search screens" className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-[minmax(0,1fr)_9rem_7rem_10rem_auto] sm:items-center">
+      <CleanForm id="screens" action="/adconnect" role="search" aria-label="Search screens" className="scroll-mt-24 mt-8 grid grid-cols-2 gap-2 sm:grid-cols-[minmax(0,1fr)_9rem_7rem_10rem_auto] sm:items-center">
         {hidden(['cats', 'size', 'visitors', 'avail', 'verified', 'sort'])}
         <input name="q" defaultValue={st.q} placeholder="Business, city, or area" aria-label="Business, city, or area" className="input col-span-2 sm:col-span-1" />
         <input name="city" defaultValue={st.city} placeholder="City" aria-label="City" className="input" />

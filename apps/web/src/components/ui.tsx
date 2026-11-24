@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { badgeLabels, eventCategoryLabels, formatMoney, type BusinessCard, type EventCard, type ProductCard, type ScreenCard, type VerificationLevel } from '@adey/shared';
+import { badgeLabels, eventCategoryLabels, formatMoney, type BusinessCard, type BusinessSignals, type EventCard, type ProductCard, type ScreenCard, type VerificationLevel } from '@adey/shared';
 import { mediaUrlFromPath } from '@/lib/media';
 import { CertificationBadge, Price, TrustBadge } from '@/components/commerce';
 
@@ -35,22 +35,37 @@ export function place(b: { city?: string | null; state?: string | null; country?
   return [b.city, b.state ?? (b.country === 'ET' ? 'Ethiopia' : null)].filter(Boolean).join(', ');
 }
 
-export function BusinessCardView({ b }: { b: BusinessCard }) {
+/** "New" and "Trending" badges (from business_signals). */
+export function SignalBadges({ s }: { s?: BusinessSignals | null }) {
+  if (!s?.is_new && !s?.is_trending) return null;
+  return <>{s.is_new && <Badge tone="info">New on Adey</Badge>}{s.is_trending && <Badge tone="accent">🔥 Trending</Badge>}</>;
+}
+
+/** One highlighted review, quoted with its author. */
+export function ReviewQuote({ s, className = '' }: { s?: BusinessSignals | null; className?: string }) {
+  if (!s?.review_quote) return null;
+  return <p className={`text-xs text-text-muted ${className}`}><span className="italic">“{s.review_quote}”</span> <span className="whitespace-nowrap">— {s.review_author ?? 'Adey member'}</span></p>;
+}
+
+export function BusinessCardView({ b, signals }: { b: BusinessCard; signals?: BusinessSignals | null }) {
   const img = mediaUrlFromPath('business-media', b.cover_url) ?? mediaUrlFromPath('business-media', b.logo_url);
+  const s = signals;
   return (
-    <Link href={`/business/${b.slug}`} className="card overflow-hidden hover:shadow-md transition block">
-      <div className="h-40 bg-forest-soft relative">
-        {img ? <img src={img} alt="" className="w-full h-full object-cover" loading="lazy" /> : <div className="w-full h-full grid place-items-center text-forest text-4xl">🏪</div>}
-        {b.is_featured && <span className="absolute top-2 left-2"><Badge tone="accent">✨ Featured</Badge></span>}
+    <Link href={`/business/${b.slug}`} className="group card block overflow-hidden transition hover:shadow-md">
+      <div className="relative h-44 bg-forest-soft">
+        {img ? <img src={img} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" loading="lazy" /> : <div className="grid h-full w-full place-items-center text-4xl text-forest">🏪</div>}
+        <span className="absolute left-2 top-2 flex flex-wrap gap-1">{b.is_featured && <Badge tone="accent">✨ Featured</Badge>}<SignalBadges s={s} /></span>
+        {s?.deal_count ? <span className="absolute inset-x-2 bottom-2 truncate rounded-[10px] bg-forest px-2.5 py-1 text-xs font-semibold text-[color:var(--on-forest)] shadow-sm">🏷️ {s.deal_title}{s.deal_count > 1 ? ` · +${s.deal_count - 1} more` : ''}</span> : null}
       </div>
-      <div className="p-3 space-y-1">
+      <div className="space-y-1 p-3">
         <div className="flex items-center justify-between gap-2">
-          <h3 className="font-semibold truncate">{b.name}</h3>
+          <h3 className="truncate font-semibold">{b.name}</h3>
           <VerificationBadges badges={b.badges} compact />
         </div>
-        <p className="text-xs text-text-muted truncate">{[b.category_name, place(b)].filter(Boolean).join(' · ')}{b.distance_km != null ? ` · ${b.distance_km.toFixed(b.distance_km < 10 ? 1 : 0)} km` : ''}</p>
-        {b.tagline && <p className="text-sm line-clamp-2">{b.tagline}</p>}
-        <div className="flex flex-wrap items-center gap-1.5"><Rating avg={b.rating_avg} count={b.rating_count} /><TrustBadge tier={b.trust_tier} />{b.selling_enabled && <Badge tone="primary">Takes online orders</Badge>}</div>
+        <p className="truncate text-xs text-text-muted">{[b.category_name, place(b)].filter(Boolean).join(' · ')}{b.distance_km != null ? ` · ${b.distance_km.toFixed(b.distance_km < 10 ? 1 : 0)} km` : ''}</p>
+        {b.tagline && <p className="line-clamp-2 text-sm">{b.tagline}</p>}
+        <div className="flex flex-wrap items-center gap-1.5"><Rating avg={b.rating_avg} count={b.rating_count} /><TrustBadge tier={b.trust_tier} />{b.selling_enabled && <Badge tone="primary">Takes online orders</Badge>}{s?.saves_count ? <span className="text-xs text-text-muted">♥ Saved by {s.saves_count}</span> : null}</div>
+        <ReviewQuote s={s} className="line-clamp-2" />
         {b.authenticity_avg != null && <p className="text-xs text-text-muted">Authenticity {Number(b.authenticity_avg).toFixed(1)}/5</p>}
       </div>
     </Link>

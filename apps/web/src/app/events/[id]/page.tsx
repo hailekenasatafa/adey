@@ -7,6 +7,7 @@ import { mediaUrlFromPath } from '@/lib/media';
 import { Badge } from '@/components/ui';
 import { Paragraphs } from '@/components/community/common';
 import { EventActions } from '@/components/community/EventActions';
+import { ReportButton } from '@/components/ReportButton';
 import { eventEnds, eventWhen, hasEnded, sourceLabel } from '@/components/community/eventTime';
 
 type Props = { params: Promise<{ id: string }> };
@@ -29,7 +30,8 @@ export default async function EventPage({ params }: Props) {
   const published = e.status === 'published';
   const over = hasEnded(e);
   const address = [e.address_line1, e.city, e.state, e.postal_code, countryName(e.country)].filter(Boolean).join(', ');
-  const mapQuery = [e.venue_name, address].filter(Boolean).join(', ');
+  // Only offer a map when there is a real place (public holidays are listed as "Nationwide").
+  const mapQuery = e.address_line1 || e.city ? [e.venue_name, address].filter(Boolean).join(', ') : '';
   const end = eventEnds(e, { withZone: true });
   const jsonLd = published ? {
     '@context': 'https://schema.org', '@type': 'Event', name: e.title, startDate: e.starts_at, ...(e.ends_at ? { endDate: e.ends_at } : {}),
@@ -69,8 +71,9 @@ export default async function EventPage({ params }: Props) {
             </div>
             <div><p className="text-xs font-semibold uppercase tracking-wide text-text-muted">Price</p><p className="font-medium">{e.is_free ? 'Free' : e.price_note || 'See ticket link'}</p>{e.ticket_url && <a href={e.ticket_url} target="_blank" rel="noreferrer noopener" className="btn btn-accent btn-sm mt-2">Tickets / more info</a>}</div>
           </section>
-          <EventActions open={published && !over} createdBy={e.created_by} going={e.going_count} interested={e.interested_count}
+          <EventActions open={published && !over} rsvp={!from} createdBy={e.created_by} going={e.going_count} interested={e.interested_count}
             event={{ id: e.id, title: e.title, starts_at: e.starts_at, ends_at: e.ends_at, timezone: e.timezone, all_day: e.all_day, description: e.description, venue_name: e.venue_name, address_line1: e.address_line1, city: e.city, state: e.state, is_online: e.is_online, online_url: e.online_url, url: '' }} />
+          {published && <p className="text-right"><ReportButton targetType="event" targetId={e.id} label="Report this event" /></p>}
         </aside>
       </div>
     </div>

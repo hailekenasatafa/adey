@@ -19,6 +19,8 @@ export default function Saved() {
       return (await api.adconnect.searchScreens({ p_limit: 50 })).filter((s) => ids.includes(s.id!));
     },
   });
+  const bizIds = kind === 'business' ? (cards.data ?? []).map((c) => c.id as string) : [];
+  const signals = useQuery({ queryKey: ['signals', bizIds], queryFn: () => api.market.signals(bizIds), enabled: bizIds.length > 0 });
   return (
     <div className="container-x pb-16">
       <h1 className="mt-8 text-3xl font-bold">Saved</h1>
@@ -26,7 +28,7 @@ export default function Saved() {
       <div className="mt-6">
         {ids.length === 0 ? <Empty title="Nothing saved here yet" body="Tap the heart on anything to keep it here across the app and website." /> : cards.isLoading ? <div className="skeleton h-40" /> : (
           <div className={`grid gap-4 ${kind === 'product' ? 'grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
-            {(cards.data ?? []).map((c) => (kind === 'business' ? <BusinessCardView key={c.id} b={c as never} /> : kind === 'product' ? <ProductCardView key={c.id} p={c as never} /> : <ScreenCardView key={c.id} s={c as never} />))}
+            {(cards.data ?? []).map((c) => (kind === 'business' ? <BusinessCardView key={c.id} b={c as never} signals={signals.data?.[c.id as string]} /> : kind === 'product' ? <ProductCardView key={c.id} p={c as never} /> : <ScreenCardView key={c.id} s={c as never} />))}
           </div>
         )}
       </div>
