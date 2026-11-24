@@ -134,7 +134,7 @@ export function Chip({ label, selected, onPress, icon, small }: { label: string;
   );
 }
 
-export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent' | 'primary'; icon?: keyof typeof Ionicons.glyphMap }) {
+export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent' | 'primary' | 'photo'; icon?: keyof typeof Ionicons.glyphMap }) {
   const { colors, scheme } = useTheme();
   const map = {
     neutral: { bg: colors.surfaceMuted, fg: colors.textMuted },
@@ -144,6 +144,8 @@ export function Badge({ label, tone = 'neutral', icon }: { label: string; tone?:
     info: { bg: colors.info + '22', fg: colors.info },
     accent: { bg: colors.accentSoft, fg: scheme === 'dark' ? colors.accent : '#8F6D0E' },
     primary: { bg: colors.primarySoft, fg: colors.primary },
+    // Solid white so the label reads on top of any photo.
+    photo: { bg: '#FFFFFF', fg: '#1F2420' },
   }[tone];
   return (
     <View style={[styles.badge, { backgroundColor: map.bg }]}>

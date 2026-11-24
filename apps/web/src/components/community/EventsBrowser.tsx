@@ -7,7 +7,8 @@ import { eventCategoryLabels, type EventCard, type EventCategory } from '@adey/s
 import { api } from '@/lib/supabase/client';
 import { useAuth } from '@/components/Providers';
 import { Empty } from '@/components/ui';
-import { Dropdown, MenuButtons } from '@/components/FilterMenu';
+import { Dropdown } from '@/components/FilterMenu';
+import { FiltersLabel } from '@/components/SearchPill';
 import { ErrorLine } from './common';
 import { EventTile } from './EventTile';
 import { dayKey } from './eventTime';
@@ -58,35 +59,40 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
   const cells = [...Array(first).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
   const shift = (n: number) => { const d = new Date(cursor.y, cursor.m + n, 1); setCursor({ y: d.getFullYear(), m: d.getMonth() }); setDay(null); };
   const today = key(now.getFullYear(), now.getMonth(), now.getDate());
-  const activeFilters = [f.city.trim(), f.state.trim(), f.free, f.online, f.mine].filter(Boolean).length;
+  const activeFilters = [f.category, f.city.trim(), f.state.trim(), f.free, f.online, f.mine].filter(Boolean).length;
   const apply = (next: Filters) => { setF(next); setDraft(next); setDay(null); };
   const clearAll = () => { setQuery(''); apply(NONE); };
 
   return (
     <>
-    <div className="relative mt-6 flex flex-wrap items-center gap-2">
-      <form role="search" className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto" onSubmit={(e) => { e.preventDefault(); apply({ ...f, q: query }); }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search events by name, venue, or city" aria-label="Search events" className="input" />
-        <button type="submit" className="btn btn-primary">Search</button>
+    <div className="relative mt-6 flex items-center gap-2">
+      <form role="search" aria-label="Search events" className="flex min-w-0 flex-1 items-center rounded-full border border-border bg-surface p-1.5 pl-5 shadow-sm focus-within:ring-2 focus-within:ring-forest" onSubmit={(e) => { e.preventDefault(); apply({ ...f, q: query }); }}>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search events, venues or cities" aria-label="Search events, venues or cities" className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-text-muted" />
+        <button type="submit" aria-label="Search" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-forest text-[color:var(--on-forest)] transition hover:brightness-110">
+          <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="h-4 w-4"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>
+        </button>
       </form>
-      <Dropdown label="Filter" count={activeFilters}>
-        <form onSubmit={(e) => { e.preventDefault(); apply({ ...draft, q: f.q, category: f.category }); }} className="space-y-3" aria-label="Filter events">
-          <div className="grid grid-cols-2 gap-2">
-            <div><label htmlFor="ev-city" className="label">City</label><input id="ev-city" className="input" value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} /></div>
-            <div><label htmlFor="ev-state" className="label">State</label><input id="ev-state" className="input" value={draft.state} onChange={(e) => setDraft({ ...draft, state: e.target.value })} /></div>
+      <Dropdown size="md" label={<FiltersLabel />} count={activeFilters}>
+        <form onSubmit={(e) => { e.preventDefault(); apply({ ...draft, q: f.q }); }} aria-label="Filter events">
+          <label htmlFor="ev-category" className="label">Category</label>
+          <select id="ev-category" className="input" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value as EventCategory | '' })}>
+            <option value="">All categories</option>{Object.entries(eventCategoryLabels).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+          </select>
+          <label htmlFor="ev-city" className="label mt-4">City</label>
+          <input id="ev-city" className="input" placeholder="Any city" value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} />
+          <div className="mt-4 space-y-2">
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.free} onChange={(e) => setDraft({ ...draft, free: e.target.checked })} /> Free events only</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.online} onChange={(e) => setDraft({ ...draft, online: e.target.checked })} /> Online events only</label>
+            {session && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.mine} onChange={(e) => setDraft({ ...draft, mine: e.target.checked })} /> Events I’m going to or interested in</label>}
           </div>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.free} onChange={(e) => setDraft({ ...draft, free: e.target.checked })} /> Free events only</label>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.online} onChange={(e) => setDraft({ ...draft, online: e.target.checked })} /> Online events only</label>
-          {session && <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="h-4 w-4 accent-[var(--forest)]" checked={draft.mine} onChange={(e) => setDraft({ ...draft, mine: e.target.checked })} /> Events I am going to or interested in</label>}
-          <div className="flex gap-2 pt-1"><button type="submit" className="btn btn-primary btn-sm">Apply</button><button type="button" data-close className="btn btn-outline btn-sm" onClick={() => apply({ ...NONE, q: f.q, category: f.category })}>Clear</button></div>
+          <div className="mt-5 flex gap-2 border-t border-border pt-4">
+            <button type="button" data-close className="btn btn-ghost flex-1" onClick={() => apply({ ...NONE, q: f.q })}>Reset</button>
+            <button type="submit" className="btn btn-primary flex-[2]">Show events</button>
+          </div>
         </form>
       </Dropdown>
-      <Dropdown label={f.category ? eventCategoryLabels[f.category] : 'Category'} active={!!f.category}>
-        <MenuButtons label="Event category" onPick={(v) => apply({ ...f, category: v as EventCategory | '' })}
-          items={[{ value: '', label: 'All categories', current: !f.category }, ...Object.entries(eventCategoryLabels).map(([k, l]) => ({ value: k, label: l, current: f.category === k }))]} />
-      </Dropdown>
-      {!pristine && <button type="button" className="btn btn-ghost btn-sm" onClick={clearAll}>Clear all</button>}
     </div>
+    {!pristine && <p className="mt-2 text-right text-sm"><button type="button" className="font-semibold text-text-muted underline-offset-4 hover:text-forest hover:underline" onClick={clearAll}>Clear filters</button></p>}
     <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
       <aside className="space-y-4">
         <section className="card p-4" aria-label="Calendar">

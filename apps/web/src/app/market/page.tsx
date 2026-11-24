@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import type { Market } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { BusinessCardView, Empty, ProductCardView } from '@/components/ui';
-import { CountrySelectField } from '@/components/shop/CountrySelectField';
-import { Dropdown, MenuLinks } from '@/components/FilterMenu';
+import { Dropdown } from '@/components/FilterMenu';
+import { FiltersLabel, SearchPill } from '@/components/SearchPill';
 import { FxAttribution } from '@/components/commerce';
 
 export const dynamic = 'force-dynamic';
@@ -46,64 +46,53 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
     return `/market?${p.toString()}`;
   };
   const check = (k: keyof SP, label: string) => <label className="flex items-center gap-2 text-sm"><input type="checkbox" name={k} value="1" defaultChecked={on(k)} className="h-4 w-4 accent-[var(--forest)]" /> {label}</label>;
-  const filterKeys: (keyof SP)[] = view === 'products' ? ['min', 'max', 'ships', 'authentic', 'handmade', 'instock', 'buyable', 'rating', 'sort'] : ['city', 'state', 'zip', 'verified', 'trusted', 'selling', 'rating', 'sort'];
+  // Kept short on purpose: the few choices people need first. Older links with more filters still work.
+  const filterKeys: (keyof SP)[] = view === 'products' ? ['category', 'max', 'market', 'authentic', 'sort'] : ['category', 'city', 'market', 'verified', 'sort'];
   const activeFilters = filterKeys.filter((k) => (k === 'sort' ? sp.sort && sp.sort !== 'relevance' : sp[k])).length;
   const signals = view === 'businesses' && businesses?.length ? await api.market.signals(businesses.map((b) => b.id!)).catch(() => ({} as Awaited<ReturnType<typeof api.market.signals>>)) : {};
-  const category = categories.find((c) => c.id === sp.category);
   const results = view === 'businesses' ? businesses : products;
 
   return (
     <div className="container-x pb-16">
-      <div className="mt-8 flex flex-wrap items-end justify-between gap-4">
-        <div><h1 className="text-3xl font-bold">Adey Market</h1><p className="text-text-muted">Authentic products and trusted Habesha businesses.</p></div>
-        <div className="flex rounded-[14px] bg-surface-muted p-1 text-sm">
-          {([[undefined, 'All'], ['us', '🇺🇸 US'], ['et', '🇪🇹 Ethiopia']] as const).map(([m, l]) => <Link key={l} href={qs({ market: m, category: undefined })} className={`rounded-[10px] px-3 py-2 font-semibold ${market === m ? 'bg-surface' : 'text-text-muted'}`}>{l}</Link>)}
-        </div>
+      <div className="mt-8">
+        <h1 className="text-3xl font-bold">Adey Market</h1>
+        <p className="text-text-muted">Habesha-owned businesses near you.</p>
       </div>
-      <div className="mt-4 flex gap-2" role="tablist">
-        <Link role="tab" aria-selected={view === 'businesses'} href={qs({ view: undefined, sort: undefined, authentic: undefined, instock: undefined, handmade: undefined, buyable: undefined, min: undefined, max: undefined, ships: undefined })} className={`chip ${view === 'businesses' ? 'chip-on' : ''}`}>Businesses</Link>
-        <Link role="tab" aria-selected={view === 'products'} href={qs({ view: 'products', sort: undefined, verified: undefined, selling: undefined, trusted: undefined, city: undefined, state: undefined, zip: undefined })} className={`chip ${view === 'products' ? 'chip-on' : ''}`}>Products</Link>
+      <div className="mt-4 flex gap-6 border-b border-border text-sm font-semibold" role="tablist">
+        {([['businesses', 'Businesses'], ['products', 'Products']] as const).map(([v, l]) => (
+          <Link key={v} role="tab" aria-selected={view === v} href={v === 'businesses' ? '/market' : '/market?view=products'}
+            className={`-mb-px border-b-2 pb-2.5 ${view === v ? 'border-forest text-text' : 'border-transparent text-text-muted hover:text-text'}`}>{l}</Link>
+        ))}
       </div>
 
-      <div className="relative mt-4 flex flex-wrap items-center gap-2">
-        <form action="/market" role="search" className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto">
-          {Object.entries(sp).filter(([k, v]) => v && k !== 'q' && k !== 'page').map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
-          <input name="q" defaultValue={sp.q} placeholder={view === 'products' ? 'Search products…' : 'Search businesses by name or service…'} aria-label="Search" className="input" />
-          <button className="btn btn-primary">Search</button>
-        </form>
-        <Dropdown label="Filter" count={activeFilters}>
-          <form action="/market" className="space-y-3" aria-label={view === 'products' ? 'Filter products' : 'Filter businesses'}>
-            {(['view', 'market', 'category', 'q'] as const).map((k) => sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null)}
-            {view === 'products' ? (
-              <>
-                <div className="grid grid-cols-2 gap-2">
-                  <div><label htmlFor="mk-min" className="label">Min price</label><input id="mk-min" name="min" defaultValue={sp.min} inputMode="decimal" className="input" /></div>
-                  <div><label htmlFor="mk-max" className="label">Max price</label><input id="mk-max" name="max" defaultValue={sp.max} inputMode="decimal" className="input" /></div>
-                </div>
-                <div><span className="label">Ships to</span><CountrySelectField name="ships" defaultValue={sp.ships} label="Ships to" className="input" /></div>
-                {check('authentic', '🌼 Authentic Habesha')}{check('handmade', 'Handmade')}{check('instock', 'In stock')}{check('buyable', 'Buy online')}
-              </>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 gap-2">
-                  <div><label htmlFor="mk-city" className="label">City</label><input id="mk-city" name="city" defaultValue={sp.city} className="input" /></div>
-                  <div><label htmlFor="mk-state" className="label">State / region</label><input id="mk-state" name="state" defaultValue={sp.state} className="input" /></div>
-                </div>
-                <div><label htmlFor="mk-zip" className="label">ZIP code</label><input id="mk-zip" name="zip" defaultValue={sp.zip} inputMode="numeric" className="input" /></div>
-                {check('verified', '✓ Verified')}{check('trusted', '★ Trusted vendors')}{check('selling', 'Takes online orders')}
-              </>
-            )}
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="rating" value="4" defaultChecked={sp.rating === '4'} className="h-4 w-4 accent-[var(--forest)]" /> Rated 4★ and up</label>
-            <div><label htmlFor="mk-sort" className="label">Sort by</label>
-              <select id="mk-sort" name="sort" defaultValue={sp.sort ?? 'relevance'} className="input">{(view === 'products' ? PRODUCT_SORTS : BUSINESS_SORTS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select></div>
-            <div className="flex gap-2 pt-1"><button className="btn btn-primary btn-sm">Apply</button><Link href={qs(Object.fromEntries(filterKeys.map((k) => [k, undefined])))} className="btn btn-outline btn-sm">Clear</Link></div>
+      <div className="relative mt-5 flex items-center gap-2">
+        <SearchPill action="/market" defaultValue={sp.q} placeholder={view === 'products' ? 'Search products' : 'Search a business, food, service or city'}>
+          {(['view', ...filterKeys] as (keyof SP)[]).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
+        </SearchPill>
+        <Dropdown size="md" count={activeFilters} label={<FiltersLabel />}>
+          <form action="/market" aria-label={view === 'products' ? 'Filter products' : 'Filter businesses'}>
+            {(['view', 'q'] as const).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
+            <Field id="mk-category" label="Category">
+              <select id="mk-category" name="category" defaultValue={sp.category ?? ''} className="input"><option value="">All categories</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name_en}</option>)}</select>
+            </Field>
+            {view === 'products'
+              ? <Field id="mk-max" label="Max price"><input id="mk-max" name="max" defaultValue={sp.max} inputMode="decimal" placeholder="Any" className="input" /></Field>
+              : <Field id="mk-city" label="City"><input id="mk-city" name="city" defaultValue={sp.city} placeholder="Any city" className="input" /></Field>}
+            <Field id="mk-market" label="Country">
+              <select id="mk-market" name="market" defaultValue={sp.market ?? ''} className="input"><option value="">All</option><option value="us">United States</option><option value="et">Ethiopia</option></select>
+            </Field>
+            <Field id="mk-sort" label="Sort by">
+              <select id="mk-sort" name="sort" defaultValue={sp.sort ?? 'relevance'} className="input">{(view === 'products' ? PRODUCT_SORTS : BUSINESS_SORTS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+            </Field>
+            <div className="mt-4">{view === 'products' ? check('authentic', '🌼 Authentic Habesha only') : check('verified', 'Verified businesses only')}</div>
+            <div className="mt-5 flex gap-2 border-t border-border pt-4">
+              <Link href={qs({ q: sp.q, ...Object.fromEntries(filterKeys.map((k) => [k, undefined])) })} className="btn btn-ghost flex-1">Reset</Link>
+              <button className="btn btn-primary flex-[2]">Show results</button>
+            </div>
           </form>
         </Dropdown>
-        <Dropdown label={category?.name_en ?? 'Category'} active={!!category}>
-          <MenuLinks label="Category" items={[{ href: qs({ category: undefined }), label: 'All categories', current: !category }, ...categories.map((c) => ({ href: qs({ category: c.id }), label: c.name_en, current: c.id === category?.id }))]} />
-        </Dropdown>
-        {(activeFilters > 0 || category || sp.q) && <Link href={qs({ category: undefined, q: undefined, ...Object.fromEntries(filterKeys.map((k) => [k, undefined])) })} className="btn btn-ghost btn-sm">Clear all</Link>}
       </div>
+      {activeFilters > 0 && <p className="mt-2 text-right text-sm"><Link href={qs(Object.fromEntries(filterKeys.map((k) => [k, undefined])))} className="font-semibold text-text-muted underline-offset-4 hover:text-forest hover:underline">Clear filters</Link></p>}
 
       <div className="mt-6">
         {results === null ? <Empty title="Couldn't load results" body="Please try again in a moment." action={<Link href={qs({})} className="btn btn-primary btn-sm">Retry</Link>} />
@@ -117,4 +106,8 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
       </div>
     </div>
   );
+}
+
+function Field({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+  return <div className="mt-4 first-of-type:mt-0"><label htmlFor={id} className="label">{label}</label>{children}</div>;
 }

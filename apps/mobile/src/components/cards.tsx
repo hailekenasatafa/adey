@@ -39,9 +39,9 @@ export function BusinessCardItem({ b, horizontal, signals }: { b: BusinessCard; 
         </View>
         {(b.is_featured || signals?.is_new || signals?.is_trending) && (
           <View style={[styles.featured, { flexDirection: 'row', gap: 4 }]}>
-            {b.is_featured && <Badge label="Featured" tone="accent" icon="sparkles" />}
-            {signals?.is_new && <Badge label="New" tone="info" />}
-            {signals?.is_trending && <Badge label="Trending" tone="accent" icon="flame-outline" />}
+            {b.is_featured && <Badge label="Featured" tone="photo" icon="sparkles" />}
+            {signals?.is_new && <Badge label="New" tone="photo" />}
+            {signals?.is_trending && <Badge label="Trending" tone="photo" icon="flame-outline" />}
           </View>
         )}
         {signals?.deal_count ? (

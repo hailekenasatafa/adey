@@ -106,7 +106,7 @@ export function Nav() {
           {session ? (
             <>
               {checkoutEnabled && <Link href="/cart" className="btn btn-ghost btn-sm relative" aria-label={`Cart${cart.data?.count ? `, ${cart.data.count} items` : ''}`}>🛒<Count n={cart.data?.count ?? 0} /></Link>}
-              <Link href="/messages" className="btn btn-ghost btn-sm relative hidden sm:inline-flex" aria-label={`Messages${unread.data?.messages ? `, ${unread.data.messages} unread` : ''}`}>💬<Count n={unread.data?.messages ?? 0} /></Link>
+              <Link href="/messages" className="btn btn-ghost btn-sm relative max-sm:!hidden" aria-label={`Messages${unread.data?.messages ? `, ${unread.data.messages} unread` : ''}`}>💬<Count n={unread.data?.messages ?? 0} /></Link>
               <Link href="/notifications" className="btn btn-ghost btn-sm relative" aria-label={`Notifications${unread.data?.notifications ? `, ${unread.data.notifications} unread` : ''}`}>🔔<Count n={unread.data?.notifications ?? 0} /></Link>
               <Link href="/dashboard" className="btn btn-secondary btn-sm hidden md:inline-flex">{businesses.length ? 'Dashboard' : 'List business'}</Link>
               {isStaff && <Link href="/admin" className="btn btn-outline btn-sm hidden md:inline-flex">Admin</Link>}
@@ -124,8 +124,8 @@ export function Nav() {
             </>
           ) : (
             <>
-              <Link href="/auth/sign-in" className="btn btn-ghost btn-sm hidden sm:inline-flex">Sign in</Link>
-              <Link href="/auth/sign-up" className="btn btn-primary btn-sm">Get started</Link>
+              <Link href="/auth/sign-in" className="btn btn-ghost btn-sm max-sm:!hidden">Sign in</Link>
+              <Link href="/auth/sign-up" className="btn btn-primary btn-sm whitespace-nowrap">Get started</Link>
             </>
           )}
         </div>

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { formatMoney } from '@adey/shared';
 import { useTheme } from '@/lib/theme';
 import { useLocation } from '@/lib/location';
 import { api } from '@/lib/supabase';
-import { Button, Chip, EmptyState, ErrorState, Header, IconButton, Screen, Skeleton, Text } from '@/components/ui';
+import { Button, EmptyState, ErrorState, Header, Screen, Skeleton, Text } from '@/components/ui';
 import { ScreenCardItem } from '@/components/cards';
 import { ScreenFilters, type Filters, defaultFilters, filtersToArgs } from '@/components/ScreenFilters';
 
@@ -30,25 +30,19 @@ export default function ScreenDiscovery() {
     getNextPageParam: (last, all) => (last.length === PAGE ? all.length * PAGE : undefined),
   });
   const items = useMemo(() => q.data?.pages.flat() ?? [], [q.data]);
-  const activeCount = [filters.city, filters.categoryId, filters.priceMax, filters.minSize, filters.minVisitors, filters.verifiedOnly, filters.start].filter(Boolean).length;
+  const activeCount = [filters.categoryId, filters.priceMax, filters.radiusKm !== defaultFilters.radiusKm, filters.sort !== 'relevance'].filter(Boolean).length;
 
   const header = (
     <View>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
         <Pressable onPress={() => router.push({ pathname: '/search', params: { market: 'screens' } })} accessibilityRole="search" style={[styles.search, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.lg }]}>
           <Ionicons name="search" size={18} color={colors.textMuted} />
-          <Text color={filters.q ? 'text' : 'muted'} style={{ marginLeft: 8, flex: 1 }} numberOfLines={1}>{filters.q || 'Business, city, or area'}</Text>
+          <Text color={filters.q ? 'text' : 'muted'} style={{ marginLeft: 8, flex: 1 }} numberOfLines={1}>{filters.q || 'Search a business, screen or city'}</Text>
           {filters.q && <Pressable onPress={() => setFilters((f) => ({ ...f, q: '' }))} hitSlop={8}><Ionicons name="close-circle" size={18} color={colors.textMuted} /></Pressable>}
         </Pressable>
-        <IconButton icon="options-outline" accessibilityLabel="Filters" onPress={() => setShowFilters(true)} badge={activeCount || undefined} />
+        <Button title={activeCount ? `Filters (${activeCount})` : 'Filters'} icon="options-outline" variant={activeCount ? 'secondary' : 'outline'} size="sm" onPress={() => setShowFilters(true)} accessibilityLabel={`Filters${activeCount ? `, ${activeCount} on` : ''}`} />
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingBottom: 12 }}>
-        <Chip small icon="shield-checkmark-outline" label="Verified" selected={filters.verifiedOnly} onPress={() => setFilters((f) => ({ ...f, verifiedOnly: !f.verifiedOnly }))} />
-        <Chip small icon="navigate-outline" label={filters.radiusKm ? `${filters.radiusKm} km` : 'Any distance'} selected={!!filters.radiusKm} onPress={() => setFilters((f) => ({ ...f, radiusKm: f.radiusKm === 50 ? 15 : f.radiusKm === 15 ? null : 50 }))} />
-        <Chip small icon="swap-vertical-outline" label={`Sort: ${filters.sort.replace('_', ' ')}`} onPress={() => setFilters((f) => ({ ...f, sort: f.sort === 'relevance' ? 'distance' : f.sort === 'distance' ? 'price_asc' : f.sort === 'price_asc' ? 'rating' : f.sort === 'rating' ? 'traffic' : 'relevance' }))} />
-        {categories.data?.slice(0, 8).map((c) => <Chip key={c.id} small label={c.name_en} selected={filters.categoryId === c.id} onPress={() => setFilters((f) => ({ ...f, categoryId: f.categoryId === c.id ? null : c.id }))} />)}
-      </ScrollView>
-      <Text variant="caption" color="muted" style={{ marginBottom: 10 }}>{q.isLoading ? 'Searching…' : `${items.length}${q.hasNextPage ? '+' : ''} screen${items.length === 1 ? '' : 's'} near ${location.label}`}{filters.start ? ` · available ${filters.start} → ${filters.end}` : ''}</Text>
+      <Text variant="caption" color="muted" style={{ marginBottom: 10, marginTop: 2 }}>{q.isLoading ? 'Searching…' : `${items.length}${q.hasNextPage ? '+' : ''} screen${items.length === 1 ? '' : 's'} near ${location.label}`}{filters.start ? ` · available ${filters.start} → ${filters.end}` : ''}</Text>
     </View>
   );
 

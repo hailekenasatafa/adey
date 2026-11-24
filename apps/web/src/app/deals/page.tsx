@@ -3,7 +3,8 @@ import type { Metadata } from 'next';
 import type { DealFeedItem } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { Empty } from '@/components/ui';
-import { Dropdown, MenuLinks } from '@/components/FilterMenu';
+import { Dropdown } from '@/components/FilterMenu';
+import { FiltersLabel, SearchPill } from '@/components/SearchPill';
 import { CleanForm } from '@/components/CleanForm';
 import { DealCard } from '@/components/deals/DealCard';
 
@@ -21,7 +22,7 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
     api.deals.feed({ query: sp.q, city: sp.city, state: sp.state, categoryId: sp.category, limit: PAGE, offset: (page - 1) * PAGE }).catch(() => [] as DealFeedItem[]),
   ]);
   const category = categories.find((c) => c.id === sp.category);
-  const activeFilters = (sp.city ? 1 : 0) + (sp.state ? 1 : 0);
+  const activeFilters = (sp.city ? 1 : 0) + (sp.state ? 1 : 0) + (category ? 1 : 0);
   const qs = (patch: Partial<SP>) => { const p = new URLSearchParams(Object.fromEntries(Object.entries({ ...sp, ...patch }).filter(([, v]) => v)) as Record<string, string>); const s = p.toString(); return s ? `/deals?${s}` : '/deals'; };
   return (
     <div className="container-x pb-16">
@@ -36,27 +37,25 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
         <div className="mt-6 flex flex-wrap gap-2"><Link href="/deals/mine" className="btn btn-primary">My deals</Link><Link href="/dashboard" className="btn btn-outline">Post a deal for your business</Link></div>
       </section>
 
-      <div className="relative mt-8 flex flex-wrap items-center gap-2">
-        <CleanForm action="/deals" role="search" className="flex min-w-0 flex-1 basis-full gap-2 sm:basis-auto">
-          {(['city', 'state', 'category'] as const).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
-          <input name="q" defaultValue={sp.q} placeholder="Search deals or businesses" aria-label="Search deals" className="input" />
-          <button className="btn btn-primary">Search</button>
-        </CleanForm>
-        <Dropdown label="Filter" count={activeFilters}>
-          <CleanForm action="/deals" className="space-y-3" aria-label="Filter deals">
-            {(['q', 'category'] as const).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
-            <div className="grid grid-cols-2 gap-2">
-              <div><label htmlFor="dl-city" className="label">City</label><input id="dl-city" name="city" defaultValue={sp.city} className="input" /></div>
-              <div><label htmlFor="dl-state" className="label">State</label><input id="dl-state" name="state" defaultValue={sp.state} maxLength={30} className="input" /></div>
+      <div className="relative mt-8 flex items-center gap-2">
+        <SearchPill action="/deals" defaultValue={sp.q} placeholder="Search deals, businesses or cities">
+          {(['city', 'category'] as const).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
+        </SearchPill>
+        <Dropdown size="md" label={<FiltersLabel />} count={activeFilters}>
+          <CleanForm action="/deals" aria-label="Filter deals">
+            {sp.q ? <input type="hidden" name="q" value={sp.q} /> : null}
+            <label htmlFor="dl-category" className="label">Type of business</label>
+            <select id="dl-category" name="category" defaultValue={sp.category ?? ''} className="input"><option value="">All businesses</option>{categories.map((c) => <option key={c.id} value={c.id}>{c.name_en}</option>)}</select>
+            <label htmlFor="dl-city" className="label mt-4">City</label>
+            <input id="dl-city" name="city" defaultValue={sp.city} placeholder="Any city" className="input" />
+            <div className="mt-5 flex gap-2 border-t border-border pt-4">
+              <Link href={qs({ city: undefined, category: undefined, state: undefined, page: undefined })} className="btn btn-ghost flex-1">Reset</Link>
+              <button className="btn btn-primary flex-[2]">Show deals</button>
             </div>
-            <div className="flex gap-2 pt-1"><button className="btn btn-primary btn-sm">Apply</button><Link href={qs({ city: undefined, state: undefined, page: undefined })} className="btn btn-outline btn-sm">Clear</Link></div>
           </CleanForm>
         </Dropdown>
-        <Dropdown label={category?.name_en ?? 'Category'} active={!!category}>
-          <MenuLinks label="Business category" items={[{ href: qs({ category: undefined, page: undefined }), label: 'All categories', current: !category }, ...categories.map((c) => ({ href: qs({ category: c.id, page: undefined }), label: c.name_en, current: c.id === category?.id }))]} />
-        </Dropdown>
-        {(activeFilters > 0 || category || sp.q) && <Link href="/deals" className="px-1 text-sm font-semibold text-text-muted hover:text-forest hover:underline">Clear all</Link>}
       </div>
+      {activeFilters > 0 && <p className="mt-2 text-right text-sm"><Link href={qs({ city: undefined, category: undefined, state: undefined, page: undefined })} className="font-semibold text-text-muted underline-offset-4 hover:text-forest hover:underline">Clear filters</Link></p>}
 
       <div className="mt-6">
         {deals.length ? (
@@ -67,9 +66,9 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
             ))}
           </div>
         ) : (
-          <Empty title={sp.q || activeFilters || category ? 'No deals match' : 'No deals yet'}
-            body={sp.q || activeFilters || category ? 'Try another search or clear the filters.' : 'Businesses post deals here as they join Adey. Own a Habesha business? Post the first one — it’s free.'}
-            action={<Link href={sp.q || activeFilters || category ? '/deals' : '/dashboard'} className="btn btn-primary btn-sm">{sp.q || activeFilters || category ? 'Clear filters' : 'Post a deal'}</Link>} />
+          <Empty title={sp.q || activeFilters ? 'No deals match' : 'No deals yet'}
+            body={sp.q || activeFilters ? 'Try another search or clear the filters.' : 'Businesses post deals here as they join Adey. Own a Habesha business? Post the first one — it’s free.'}
+            action={<Link href={sp.q || activeFilters ? '/deals' : '/dashboard'} className="btn btn-primary btn-sm">{sp.q || activeFilters ? 'Clear filters' : 'Post a deal'}</Link>} />
         )}
       </div>
       <div className="mt-8 flex justify-center gap-2">{page > 1 && <Link href={qs({ page: String(page - 1) })} className="btn btn-outline btn-sm">← Previous</Link>}{deals.length === PAGE && <Link href={qs({ page: String(page + 1) })} className="btn btn-outline btn-sm">Next →</Link>}</div>

@@ -4,8 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Category, Database } from '@adey/shared';
 import { useTheme } from '@/lib/theme';
 import type { UserLocation } from '@/lib/location';
-import { addDays, toISODate } from '@/lib/format';
-import { Button, Chip, Input, Text } from '@/components/ui';
+import { Button, Chip, Text } from '@/components/ui';
 
 export type Filters = {
   q: string;
@@ -36,49 +35,38 @@ export function filtersToArgs(f: Filters, loc: UserLocation): Database['public']
 }
 
 const PRICE_PRESETS = [100, 250, 500, 1000];
-const SIZE_PRESETS = [32, 43, 55, 65];
-const TRAFFIC_PRESETS = [50, 100, 250, 500];
+const SORTS: [Filters['sort'], string][] = [['relevance', 'Recommended'], ['distance', 'Nearest'], ['price_asc', 'Lowest price'], ['rating', 'Top rated']];
 
 export function ScreenFilters({ visible, value, onChange, onClose, categories }: { visible: boolean; value: Filters; onChange: (f: Filters) => void; onClose: () => void; categories: Category[] }) {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const set = <K extends keyof Filters>(k: K, v: Filters[K]) => onChange({ ...value, [k]: v });
-  const today = toISODate(new Date());
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         <View style={[styles.head, { borderBottomColor: colors.border, paddingTop: 16 }]}>
           <Button title="Reset" variant="ghost" size="sm" onPress={() => onChange({ ...defaultFilters, q: value.q })} />
           <Text variant="subheading">Filters</Text>
-          <Button title="Done" size="sm" onPress={onClose} />
+          <Button title="Show screens" size="sm" onPress={onClose} />
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 18 }}>
-          <Section title="Location">
-            <Input placeholder="City" value={value.city} onChangeText={(t) => set('city', t)} />
-            <Input placeholder="State (e.g. MD)" value={value.state} onChangeText={(t) => set('state', t.toUpperCase())} autoCapitalize="characters" maxLength={20} />
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 22 }}>
+          <Section title="Type of business">
+            <Row>
+              <Chip small label="All" selected={!value.categoryId} onPress={() => set('categoryId', null)} />
+              {categories.map((c) => <Chip key={c.id} small label={c.name_en} selected={value.categoryId === c.id} onPress={() => set('categoryId', value.categoryId === c.id ? null : c.id)} />)}
+            </Row>
+          </Section>
+          <Section title="Distance">
             <Row>{[15, 50, 120, null].map((r) => <Chip key={String(r)} small label={r ? `Within ${r} km` : 'Any distance'} selected={value.radiusKm === r} onPress={() => set('radiusKm', r)} />)}</Row>
           </Section>
-          <Section title="Business category">
-            <Row>{categories.map((c) => <Chip key={c.id} small label={c.name_en} selected={value.categoryId === c.id} onPress={() => set('categoryId', value.categoryId === c.id ? null : c.id)} />)}</Row>
-          </Section>
-          <Section title="Price (for 30 days, or your dates)">
-            <Row>{PRICE_PRESETS.map((p) => <Chip key={p} small label={`≤ $${p}`} selected={value.priceMax === p} onPress={() => set('priceMax', value.priceMax === p ? null : p)} />)}</Row>
-          </Section>
-          <Section title="Screen size">
-            <Row>{SIZE_PRESETS.map((s) => <Chip key={s} small label={`${s}"+`} selected={value.minSize === s} onPress={() => set('minSize', value.minSize === s ? null : s)} />)}</Row>
-          </Section>
-          <Section title="Estimated daily visitors (owner-reported)">
-            <Row>{TRAFFIC_PRESETS.map((t) => <Chip key={t} small label={`${t}+/day`} selected={value.minVisitors === t} onPress={() => set('minVisitors', value.minVisitors === t ? null : t)} />)}</Row>
-          </Section>
-          <Section title="Availability">
+          <Section title="Budget for 30 days">
             <Row>
-              <Chip small label="Any time" selected={!value.start} onPress={() => { set('start', null); set('end', null); onChange({ ...value, start: null, end: null }); }} />
-              {[7, 14, 30].map((d) => <Chip key={d} small label={`Next ${d} days`} selected={value.start === today && value.end === addDays(today, d - 1)} onPress={() => onChange({ ...value, start: today, end: addDays(today, d - 1) })} />)}
+              <Chip small label="Any price" selected={value.priceMax == null} onPress={() => set('priceMax', null)} />
+              {PRICE_PRESETS.map((p) => <Chip key={p} small label={`Up to $${p}`} selected={value.priceMax === p} onPress={() => set('priceMax', p)} />)}
             </Row>
-            <Text variant="caption" color="muted">Blocks out screens with bookings or owner-blocked dates in that window.</Text>
           </Section>
-          <Section title="Trust">
-            <Row><Chip small icon="shield-checkmark-outline" label="Verified businesses only" selected={value.verifiedOnly} onPress={() => set('verifiedOnly', !value.verifiedOnly)} /></Row>
+          <Section title="Sort by">
+            <Row>{SORTS.map(([v, l]) => <Chip key={v} small label={l} selected={value.sort === v} onPress={() => set('sort', v)} />)}</Row>
           </Section>
         </ScrollView>
       </View>

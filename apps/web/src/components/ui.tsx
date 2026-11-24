@@ -54,7 +54,7 @@ export function BusinessCardView({ b, signals }: { b: BusinessCard; signals?: Bu
     <Link href={`/business/${b.slug}`} className="group card block overflow-hidden transition hover:shadow-md">
       <div className="relative h-44 bg-forest-soft">
         {img ? <img src={img} alt="" className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" loading="lazy" /> : <div className="grid h-full w-full place-items-center text-4xl text-forest">🏪</div>}
-        <span className="absolute left-2 top-2 flex flex-wrap gap-1">{b.is_featured && <Badge tone="accent">✨ Featured</Badge>}<SignalBadges s={s} /></span>
+        <span className="badges-on-photo absolute left-2 top-2 flex flex-wrap gap-1">{b.is_featured && <Badge tone="accent">✨ Featured</Badge>}<SignalBadges s={s} /></span>
         {s?.deal_count ? <span className="absolute inset-x-2 bottom-2 truncate rounded-[10px] bg-forest px-2.5 py-1 text-xs font-semibold text-[color:var(--on-forest)] shadow-sm">🏷️ {s.deal_title}{s.deal_count > 1 ? ` · +${s.deal_count - 1} more` : ''}</span> : null}
       </div>
       <div className="space-y-1 p-3">
