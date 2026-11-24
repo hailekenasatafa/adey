@@ -647,6 +647,7 @@ export type Database = {
           "advertises": boolean
           "authenticity_avg": number | null
           "category_id": string | null
+          "catalog_label": string | null
           "city": string | null
           "completed_orders": number
           "country": string
@@ -691,6 +692,7 @@ export type Database = {
           "advertises"?: boolean
           "authenticity_avg"?: number | null
           "category_id"?: string | null
+          "catalog_label"?: string | null
           "city"?: string | null
           "completed_orders"?: number
           "country"?: string
@@ -734,6 +736,7 @@ export type Database = {
           "advertises"?: boolean
           "authenticity_avg"?: number | null
           "category_id"?: string | null
+          "catalog_label"?: string | null
           "city"?: string | null
           "completed_orders"?: number
           "country"?: string
@@ -1371,6 +1374,113 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      },
+      "deal_claims": {
+        Row: {
+          "business_id": string
+          "claimed_at": string
+          "code": string
+          "deal_id": string
+          "id": string
+          "redeemed_at": string | null
+          "redeemed_by": string | null
+          "user_id": string
+        }
+        ComputedFields: never
+        Insert: {
+          "business_id": string
+          "claimed_at"?: string
+          "code": string
+          "deal_id": string
+          "id"?: string
+          "redeemed_at"?: string | null
+          "redeemed_by"?: string | null
+          "user_id": string
+        }
+        Update: {
+          "business_id"?: string
+          "claimed_at"?: string
+          "code"?: string
+          "deal_id"?: string
+          "id"?: string
+          "redeemed_at"?: string | null
+          "redeemed_by"?: string | null
+          "user_id"?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_claims_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_claims_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_claims_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      },
+      "deals": {
+        Row: {
+          "business_id": string
+          "created_at": string
+          "created_by": string | null
+          "description": string | null
+          "ended_at": string | null
+          "id": string
+          "image_path": string | null
+          "status": Database["public"]["Enums"]["deal_status"]
+          "terms": string | null
+          "title": string
+          "updated_at": string
+        }
+        ComputedFields: never
+        Insert: {
+          "business_id": string
+          "created_at"?: string
+          "created_by"?: string | null
+          "description"?: string | null
+          "ended_at"?: string | null
+          "id"?: string
+          "image_path"?: string | null
+          "status"?: Database["public"]["Enums"]["deal_status"]
+          "terms"?: string | null
+          "title": string
+          "updated_at"?: string
+        }
+        Update: {
+          "business_id"?: string
+          "created_at"?: string
+          "created_by"?: string | null
+          "description"?: string | null
+          "ended_at"?: string | null
+          "id"?: string
+          "image_path"?: string | null
+          "status"?: Database["public"]["Enums"]["deal_status"]
+          "terms"?: string | null
+          "title"?: string
+          "updated_at"?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deals_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           }
         ]
@@ -4275,10 +4385,14 @@ export type Database = {
           "description": string | null
           "duration_minutes": number | null
           "id": string
+          "image_path": string | null
           "is_active": boolean
+          "is_signature": boolean
           "name": string
           "price_cents": number | null
           "price_note": string | null
+          "section": string | null
+          "sort_order": number
           "updated_at": string
         }
         ComputedFields: never
@@ -4289,10 +4403,14 @@ export type Database = {
           "description"?: string | null
           "duration_minutes"?: number | null
           "id"?: string
+          "image_path"?: string | null
           "is_active"?: boolean
+          "is_signature"?: boolean
           "name": string
           "price_cents"?: number | null
           "price_note"?: string | null
+          "section"?: string | null
+          "sort_order"?: number
           "updated_at"?: string
         }
         Update: {
@@ -4302,10 +4420,14 @@ export type Database = {
           "description"?: string | null
           "duration_minutes"?: number | null
           "id"?: string
+          "image_path"?: string | null
           "is_active"?: boolean
+          "is_signature"?: boolean
           "name"?: string
           "price_cents"?: number | null
           "price_note"?: string | null
+          "section"?: string | null
+          "sort_order"?: number
           "updated_at"?: string
         }
         Relationships: [
@@ -5258,6 +5380,14 @@ export type Database = {
         Args: { "p_business_id": string; "p_permission": string }
         Returns: boolean
       },
+      "business_deal_claims": {
+        Args: { "p_business_id": string; "p_limit"?: number }
+        Returns: Json
+      },
+      "business_deals": {
+        Args: { "p_business_id": string }
+        Returns: Json
+      },
       "business_overview": {
         Args: { "p_business_id": string }
         Returns: Json
@@ -5269,6 +5399,10 @@ export type Database = {
       "business_role": {
         Args: { "p_business_id": string }
         Returns: Database["public"]["Enums"]["member_role"]
+      },
+      "business_signals": {
+        Args: { "p_business_ids": string[] }
+        Returns: { "business_id": string; "deal_count": number; "deal_title": string | null; "is_new": boolean; "is_trending": boolean; "review_author": string | null; "review_quote": string | null; "review_rating": number | null; "review_verified": boolean | null; "saves_count": number | null }[]
       },
       "buyer_update_order": {
         Args: { "p_action": string; "p_details"?: Json; "p_order_id": string }
@@ -5358,6 +5492,10 @@ export type Database = {
         Args: { "p_checkout_id": string }
         Returns: Json
       },
+      "claim_deal": {
+        Args: { "p_deal_id": string }
+        Returns: Json
+      },
       "commerce_housekeeping": {
         Args: Record<PropertyKey, never>
         Returns: Json
@@ -5378,6 +5516,10 @@ export type Database = {
       },
       "daily_housekeeping": {
         Args: Record<PropertyKey, never>
+        Returns: Json
+      },
+      "deals_feed": {
+        Args: { "p_category_id"?: string; "p_city"?: string; "p_lat"?: number; "p_limit"?: number; "p_lng"?: number; "p_market"?: Database["public"]["Enums"]["market"]; "p_offset"?: number; "p_query"?: string; "p_state"?: string }
         Returns: Json
       },
       "distance_km": {
@@ -5580,6 +5722,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: { "advertises": boolean; "badges": (Database["public"]["Enums"]["verification_level"])[]; "city": string; "id": string; "logo_url": string; "market": Database["public"]["Enums"]["market"]; "name": string; "offers_ad_screens": boolean; "role": Database["public"]["Enums"]["member_role"]; "screen_count": number; "slug": string; "state": string; "status": Database["public"]["Enums"]["business_status"] }[]
       },
+      "my_deals": {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      },
       "my_reviewable_items": {
         Args: { "p_order_id"?: string }
         Returns: Json
@@ -5642,6 +5788,10 @@ export type Database = {
         Args: { "p_order_id": string }
         Returns: undefined
       },
+      "owner_deals": {
+        Args: { "p_business_id": string }
+        Returns: Json
+      },
       "owns_business": {
         Args: { "p_business_id": string }
         Returns: boolean
@@ -5696,6 +5846,10 @@ export type Database = {
       },
       "quote_shipping": {
         Args: { "p_address_id": string; "p_currency"?: Database["public"]["Enums"]["currency"] }
+        Returns: Json
+      },
+      "redeem_deal_code": {
+        Args: { "p_business_id": string; "p_code": string }
         Returns: Json
       },
       "refresh_business_trust": {
@@ -6013,7 +6167,7 @@ export type Database = {
     }
     Enums: {
       "ad_format": "video" | "image"
-      "analytics_event": "business_view" | "contact_click" | "call_click" | "directions_click" | "website_click" | "share_click" | "product_view" | "service_view" | "screen_view" | "screen_inquiry" | "campaign_request_sent" | "search" | "save" | "add_to_cart" | "checkout_started" | "order_placed" | "event_view"
+      "analytics_event": "business_view" | "contact_click" | "call_click" | "directions_click" | "website_click" | "share_click" | "product_view" | "service_view" | "screen_view" | "screen_inquiry" | "campaign_request_sent" | "search" | "save" | "add_to_cart" | "checkout_started" | "order_placed" | "event_view" | "deal_view" | "deal_claim" | "deal_redeem"
       "availability": "in_stock" | "out_of_stock" | "preorder" | "made_to_order"
       "booking_status": "confirmed" | "in_progress" | "completed" | "cancelled" | "disputed"
       "business_status": "draft" | "pending" | "published" | "suspended"
@@ -6022,6 +6176,7 @@ export type Database = {
       "checkout_status": "pending" | "paid" | "cancelled" | "expired" | "refund_due"
       "conversation_context": "general" | "inquiry" | "product" | "campaign_request" | "booking" | "order"
       "currency": "USD" | "ETB" | "EUR" | "GBP" | "CAD" | "AUD" | "AED" | "SEK" | "NOK" | "CHF" | "SAR"
+      "deal_status": "active" | "paused" | "ended"
       "delivery_status": "awaiting_creative" | "creative_received" | "scheduled" | "running" | "completed"
       "dispute_status": "open" | "under_review" | "resolved" | "dismissed"
       "escrow_status": "none" | "held" | "released" | "refund_pending" | "refunded" | "partially_refunded"
@@ -6035,7 +6190,7 @@ export type Database = {
       "kyc_status": "draft" | "submitted" | "in_review" | "needs_info" | "approved" | "rejected" | "suspended"
       "market": "us" | "et"
       "member_role": "owner" | "manager" | "staff"
-      "notification_type": "inquiry_new" | "ad_request_new" | "offer_accepted" | "offer_countered" | "request_declined" | "booking_confirmed" | "verification_update" | "payment_update" | "campaign_completed" | "dispute_opened" | "message_new" | "moderation" | "system" | "order_new" | "order_update" | "shipment_update" | "escrow_released" | "payout_update" | "refund_update" | "order_dispute" | "kyc_update" | "certification_update" | "review_new" | "low_stock" | "event_reminder" | "event_update" | "rewards_update" | "support_reply" | "announcement"
+      "notification_type": "inquiry_new" | "ad_request_new" | "offer_accepted" | "offer_countered" | "request_declined" | "booking_confirmed" | "verification_update" | "payment_update" | "campaign_completed" | "dispute_opened" | "message_new" | "moderation" | "system" | "order_new" | "order_update" | "shipment_update" | "escrow_released" | "payout_update" | "refund_update" | "order_dispute" | "kyc_update" | "certification_update" | "review_new" | "low_stock" | "event_reminder" | "event_update" | "rewards_update" | "support_reply" | "announcement" | "deal_new"
       "offer_kind": "initial" | "counter" | "accept" | "decline" | "withdraw" | "expire"
       "offer_party": "advertiser" | "owner"
       "order_status": "pending_payment" | "paid" | "processing" | "shipped" | "delivered" | "completed" | "cancelled" | "refunded" | "disputed"
@@ -6292,7 +6447,7 @@ export const Constants = {
   "public": {
     Enums: {
       "ad_format": ["video", "image"],
-      "analytics_event": ["business_view", "contact_click", "call_click", "directions_click", "website_click", "share_click", "product_view", "service_view", "screen_view", "screen_inquiry", "campaign_request_sent", "search", "save", "add_to_cart", "checkout_started", "order_placed", "event_view"],
+      "analytics_event": ["business_view", "contact_click", "call_click", "directions_click", "website_click", "share_click", "product_view", "service_view", "screen_view", "screen_inquiry", "campaign_request_sent", "search", "save", "add_to_cart", "checkout_started", "order_placed", "event_view", "deal_view", "deal_claim", "deal_redeem"],
       "availability": ["in_stock", "out_of_stock", "preorder", "made_to_order"],
       "booking_status": ["confirmed", "in_progress", "completed", "cancelled", "disputed"],
       "business_status": ["draft", "pending", "published", "suspended"],
@@ -6301,6 +6456,7 @@ export const Constants = {
       "checkout_status": ["pending", "paid", "cancelled", "expired", "refund_due"],
       "conversation_context": ["general", "inquiry", "product", "campaign_request", "booking", "order"],
       "currency": ["USD", "ETB", "EUR", "GBP", "CAD", "AUD", "AED", "SEK", "NOK", "CHF", "SAR"],
+      "deal_status": ["active", "paused", "ended"],
       "delivery_status": ["awaiting_creative", "creative_received", "scheduled", "running", "completed"],
       "dispute_status": ["open", "under_review", "resolved", "dismissed"],
       "escrow_status": ["none", "held", "released", "refund_pending", "refunded", "partially_refunded"],
@@ -6314,7 +6470,7 @@ export const Constants = {
       "kyc_status": ["draft", "submitted", "in_review", "needs_info", "approved", "rejected", "suspended"],
       "market": ["us", "et"],
       "member_role": ["owner", "manager", "staff"],
-      "notification_type": ["inquiry_new", "ad_request_new", "offer_accepted", "offer_countered", "request_declined", "booking_confirmed", "verification_update", "payment_update", "campaign_completed", "dispute_opened", "message_new", "moderation", "system", "order_new", "order_update", "shipment_update", "escrow_released", "payout_update", "refund_update", "order_dispute", "kyc_update", "certification_update", "review_new", "low_stock", "event_reminder", "event_update", "rewards_update", "support_reply", "announcement"],
+      "notification_type": ["inquiry_new", "ad_request_new", "offer_accepted", "offer_countered", "request_declined", "booking_confirmed", "verification_update", "payment_update", "campaign_completed", "dispute_opened", "message_new", "moderation", "system", "order_new", "order_update", "shipment_update", "escrow_released", "payout_update", "refund_update", "order_dispute", "kyc_update", "certification_update", "review_new", "low_stock", "event_reminder", "event_update", "rewards_update", "support_reply", "announcement", "deal_new"],
       "offer_kind": ["initial", "counter", "accept", "decline", "withdraw", "expire"],
       "offer_party": ["advertiser", "owner"],
       "order_status": ["pending_payment", "paid", "processing", "shipped", "delivered", "completed", "cancelled", "refunded", "disputed"],

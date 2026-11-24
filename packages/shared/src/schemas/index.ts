@@ -48,6 +48,8 @@ export const notificationPrefsSchema = z.object({
   events: z.boolean().default(true),
   rewards: z.boolean().default(true),
   support: z.boolean().default(true),
+  // 2026-11-24: new deals from businesses the member saved
+  deals: z.boolean().default(true),
 });
 export type NotificationPrefs = z.infer<typeof notificationPrefsSchema>;
 
@@ -140,8 +142,19 @@ export const serviceSchema = z.object({
   price_note: z.string().trim().max(60).optional().or(z.literal('')),
   duration_minutes: z.number().int().positive().nullable().optional(),
   is_active: z.boolean(),
+  // menu / catalog presentation (2026-11-24)
+  section: z.string().trim().max(60, 'Keep the section name under 60 characters').optional().or(z.literal('')),
+  is_signature: z.boolean().optional(),
 });
 export type ServiceInput = z.infer<typeof serviceSchema>;
+
+/** A deal a business posts for members to claim (2026-11-24). */
+export const dealSchema = z.object({
+  title: z.string().trim().min(3, 'Give the deal a short title').max(80, 'Keep the title under 80 characters'),
+  description: z.string().trim().max(1000).optional().or(z.literal('')),
+  terms: z.string().trim().max(500, 'Keep conditions under 500 characters').optional().or(z.literal('')),
+});
+export type DealInput = z.infer<typeof dealSchema>;
 
 export const inquirySchema = z.object({
   type: z.enum(['contact', 'quote', 'advertising']),
@@ -256,7 +269,7 @@ export const reviewSchema = z.object({
 export const messageSchema = z.object({ body: z.string().trim().min(1).max(4000) });
 
 export const reportSchema = z.object({
-  target_type: z.enum(['business', 'product', 'screen', 'review', 'message', 'user', 'conversation']),
+  target_type: z.enum(['business', 'product', 'screen', 'review', 'message', 'user', 'conversation', 'deal', 'event']),
   target_id: z.string().uuid(),
   reason: z.string().trim().min(3).max(2000),
 });

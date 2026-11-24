@@ -179,6 +179,39 @@ export type SupportFacts = {
   checkout_enabled: boolean; currencies: Currency[]; buyer_confirmation_window_days: number; auto_delivered_after_days: number;
   payment_window_minutes: number; sellers_must_be_verified: boolean; support_email: string | null;
 };
+// ---------------------------------------------------------------- deals & profile signals (2026-11-24)
+export type Deal = Tables<'deals'>;
+export type DealStatus = Enums<'deal_status'>;
+/** The viewer's own claim on a deal, when signed in and claimed. */
+export type DealClaimRef = { id: string; code: string; redeemed_at: string | null };
+/** An active deal as shown on a business page. */
+export type BusinessDeal = Pick<Deal, 'id' | 'business_id' | 'title' | 'description' | 'terms' | 'image_path' | 'status' | 'created_at'> & {
+  claims_count: number; my_claim: DealClaimRef | null;
+};
+/** A deal in the Adey-wide deals feed, with the business it belongs to. */
+export type DealFeedItem = Pick<Deal, 'id' | 'title' | 'description' | 'terms' | 'image_path' | 'created_at'> & {
+  business_id: string; business_slug: string; business_name: string; city: string | null; state: string | null;
+  logo_url: string | null; cover_url: string | null; rating_avg: number | null; rating_count: number; category_name: string | null;
+  badges: VerificationLevel[] | null; distance_km: number | null; claims_count: number; my_claim: DealClaimRef | null;
+};
+/** One of the signed-in member's claimed deals (My deals). */
+export type MyDeal = {
+  id: string; code: string; claimed_at: string; redeemed_at: string | null;
+  deal: Pick<Deal, 'id' | 'title' | 'description' | 'terms' | 'image_path' | 'status' | 'ended_at'>;
+  business: { id: string; slug: string; name: string; city: string | null; state: string | null; logo_url: string | null; cover_url: string | null; phone: string | null; status: Enums<'business_status'>; address: string | null };
+};
+/** A deal as the business team sees it. */
+export type OwnerDeal = Pick<Deal, 'id' | 'business_id' | 'title' | 'description' | 'terms' | 'image_path' | 'status' | 'created_at' | 'ended_at'> & {
+  claims_count: number; redeemed_count: number; last_claim_at: string | null;
+};
+export type OwnerDealClaim = { id: string; deal_id: string; deal_title: string; customer_name: string; claimed_at: string; redeemed_at: string | null };
+export type DealRedeemResult = {
+  result: 'redeemed' | 'already_redeemed' | 'not_found' | 'deal_ended';
+  code: string; deal_title?: string; customer_name?: string; claimed_at?: string; redeemed_at?: string;
+};
+export type BusinessSignals = Database['public']['Functions']['business_signals']['Returns'][number];
+export type CatalogLabel = 'menu' | 'services' | 'catalog';
+
 export type CommerceSettings = {
   checkout_enabled: boolean; payment_provider: string; currencies: Currency[]; commission_bps: number; require_kyc: boolean;
   payment_window_minutes: number; auto_deliver_days: number; escrow_release_days: number; max_cart_items: number; max_quantity_per_item: number;
@@ -309,6 +342,13 @@ export function createAdeyApi(sb: AdeyClient) {
     respondToReview: (id: string, response: string) => run(sb.from('reviews').update({ response }).eq('id', id).select().single().then(unwrap)),
     createInquiry: (input: TablesInsert<'inquiries'>) => run(sb.from('inquiries').insert(input).select().single().then(unwrap)),
     track: (args: Database['public']['Functions']['track_event']['Args']): Promise<void> => run(sb.rpc('track_event', args)).then(() => undefined),
+    /** Social proof for business cards: New / Trending / saves / highlighted review / active deals. Missing ids = no signals. */
+    signals: async (businessIds: string[]): Promise<Record<string, BusinessSignals>> => {
+      const ids = [...new Set(businessIds.filter(Boolean))].slice(0, 60);
+      if (!ids.length) return {};
+      const rows = unwrap(await sb.rpc('business_signals', { p_business_ids: ids }));
+      return Object.fromEntries((rows ?? []).map((r) => [r.business_id, r]));
+    },
   };
 
   // ---------------------------------------------------------------- saved
@@ -342,6 +382,7 @@ export function createAdeyApi(sb: AdeyClient) {
     deleteProduct: (id: string) => run(sb.from('products').delete().eq('id', id).then(unwrap)),
     upsertService: (input: TablesInsert<'services'> & { id?: string }) => run(sb.from('services').upsert(input).select().single().then(unwrap)),
     deleteService: (id: string) => run(sb.from('services').delete().eq('id', id).then(unwrap)),
+    updateService: (id: string, patch: TablesUpdate<'services'>) => run(sb.from('services').update(patch).eq('id', id).select().single().then(unwrap)),
     members: (businessId: string) => run(sb.from('business_members').select('*, profile:public_profiles!business_members_user_id_fkey(display_name,avatar_url)').eq('business_id', businessId).then(unwrap)),
     // verification
     verificationRequests: (businessId: string) => run(sb.from('verification_requests').select('*, documents:verification_documents(*)').eq('business_id', businessId).order('created_at', { ascending: false }).then(unwrap)),
@@ -788,6 +829,31 @@ export function createAdeyApi(sb: AdeyClient) {
     requestHuman: (threadId: string, reason?: string) => run(sb.rpc('support_request_human', { p_thread_id: threadId, p_reason: reason }).then(unwrap)),
   };
 
+  // ---------------------------------------------------------------- deals
+  const deals = {
+    /** Active deals on a business page (with the viewer's own claim when signed in). */
+    forBusiness: (businessId: string) => rpcJson<BusinessDeal[]>(sb.rpc('business_deals', { p_business_id: businessId })),
+    feed: (args: { market?: Market; query?: string | null; city?: string | null; state?: string | null; categoryId?: string | null; lat?: number | null; lng?: number | null; limit?: number; offset?: number } = {}) =>
+      rpcJson<DealFeedItem[]>(sb.rpc('deals_feed', {
+        p_market: args.market ?? 'us', p_query: args.query || undefined, p_city: args.city || undefined, p_state: args.state || undefined,
+        p_category_id: args.categoryId || undefined, p_lat: args.lat ?? undefined, p_lng: args.lng ?? undefined, p_limit: args.limit ?? 24, p_offset: args.offset ?? 0,
+      })),
+    /** Claim (or re-open) a deal: returns the member's code. */
+    claim: (dealId: string) => rpcJson<MyDeal>(sb.rpc('claim_deal', { p_deal_id: dealId })),
+    mine: () => rpcJson<MyDeal[]>(sb.rpc('my_deals')),
+    // business team
+    owner: (businessId: string) => rpcJson<OwnerDeal[]>(sb.rpc('owner_deals', { p_business_id: businessId })),
+    claims: (businessId: string, limit = 50) => rpcJson<OwnerDealClaim[]>(sb.rpc('business_deal_claims', { p_business_id: businessId, p_limit: limit })),
+    redeem: (businessId: string, code: string) => rpcJson<DealRedeemResult>(sb.rpc('redeem_deal_code', { p_business_id: businessId, p_code: code })),
+    save: (input: Pick<TablesInsert<'deals'>, 'business_id' | 'title' | 'description' | 'terms' | 'image_path' | 'status'> & { id?: string }) => {
+      const { id, ...row } = input;
+      return id
+        ? run(sb.from('deals').update({ title: row.title, description: row.description, terms: row.terms, image_path: row.image_path }).eq('id', id).select().single().then(unwrap))
+        : run(sb.from('deals').insert(row).select().single().then(unwrap));
+    },
+    setStatus: (id: string, status: DealStatus) => run(sb.from('deals').update({ status }).eq('id', id).select().single().then(unwrap)),
+  };
+
   // ---------------------------------------------------------------- admin: marketplace operations (website console)
   const adminMarket = {
     overview: () => rpcJson<AdminOverview>(sb.rpc('admin_overview')),
@@ -913,7 +979,7 @@ export function createAdeyApi(sb: AdeyClient) {
   return {
     sb, auth, profile, settings, market, saved, owner, adconnect, campaigns, messaging, notifications, storage,
     admin: { ...admin, ...adminMarket },
-    account, fx, shop, cart, checkout, orders, seller, rewards, events, support,
+    account, fx, shop, cart, checkout, orders, seller, rewards, events, support, deals,
   };
 }
 
@@ -1043,7 +1109,36 @@ export const disputeCategoryLabels: Record<DisputeInput['category'], string> = {
 };
 export const helpCategoryLabels: Record<string, string> = {
   orders: 'Orders', shipping: 'Delivery', payments: 'Payments', returns: 'Refunds & problems', account: 'Account & privacy',
-  selling: 'Selling', verification: 'Badges & trust', rewards: 'Adey Rewards', events: 'Events', safety: 'Safety', other: 'More help',
+  selling: 'For businesses', verification: 'Badges & trust', rewards: 'Deals & rewards', events: 'Events', safety: 'Safety', other: 'More help',
+};
+export const dealStatusLabels: Record<Enums<'deal_status'>, string> = { active: 'Active', paused: 'Paused', ended: 'Ended' };
+export const catalogLabels: Record<CatalogLabel, string> = { menu: 'Menu', services: 'Services', catalog: 'Catalog' };
+const MENU_CATEGORIES = ['restaurants', 'coffee-shops', 'coffee-tea'];
+const CATALOG_CATEGORIES = ['groceries', 'clothing', 'cultural-shops', 'traditional-clothing', 'jewelry-accessories', 'art-crafts', 'books-music', 'spices-food'];
+/** How a business's list of offerings is titled: the owner's choice, else from the category. */
+export function catalogLabelFor(choice: string | null | undefined, categorySlug: string | null | undefined): CatalogLabel {
+  if (choice === 'menu' || choice === 'services' || choice === 'catalog') return choice;
+  if (categorySlug && MENU_CATEGORIES.includes(categorySlug)) return 'menu';
+  if (categorySlug && CATALOG_CATEGORIES.includes(categorySlug)) return 'catalog';
+  return 'services';
+}
+/** Group menu items by section in the owner's order; items without a section come first. */
+export function groupBySection<T extends { section?: string | null; sort_order?: number | null; created_at?: string | null }>(items: T[]): { section: string | null; items: T[] }[] {
+  const sorted = [...items].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || (a.created_at ?? '').localeCompare(b.created_at ?? ''));
+  const groups = new Map<string | null, T[]>();
+  for (const it of sorted) {
+    const key = it.section?.trim() || null;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(it);
+  }
+  return [...groups.entries()].map(([section, rows]) => ({ section, items: rows }));
+}
+/** Messages for the counter when a code is entered. */
+export const dealRedeemMessages: Record<DealRedeemResult['result'], string> = {
+  redeemed: 'Code accepted — the deal is now marked as used.',
+  already_redeemed: 'This code was already used.',
+  not_found: 'No deal of yours has this code. Check the letters and try again.',
+  deal_ended: 'This deal has ended, so the code can no longer be used.',
 };
 export const payoutStatusLabels: Record<Enums<'payout_status'>, string> = {
   scheduled: 'Scheduled', processing: 'Processing', paid: 'Paid', failed: 'Failed', cancelled: 'Cancelled', on_hold: 'On hold — add payout details',
