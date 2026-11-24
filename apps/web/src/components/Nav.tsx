@@ -140,7 +140,7 @@ export function Nav() {
             {session && <Link href="/messages" className="btn-icon max-sm:!hidden" aria-label={`Messages${unread.data?.messages ? `, ${unread.data.messages} unread` : ''}`}><MessageCircle aria-hidden className="h-5 w-5" /><Count n={unread.data?.messages ?? 0} /></Link>}
             {session && <Link href="/notifications" className="btn-icon" aria-label={`Notifications${unread.data?.notifications ? `, ${unread.data.notifications} unread` : ''}`}><Bell aria-hidden className="h-5 w-5" /><Count n={unread.data?.notifications ?? 0} /></Link>}
 
-            <div className="relative ml-1" ref={menuRef}>
+            <div className="relative z-50 ml-1" ref={menuRef}>
               <button type="button" onClick={() => setMenu((o) => !o)} aria-label="Menu" aria-expanded={menu} aria-haspopup="menu"
                 className={`flex h-11 items-center gap-2.5 rounded-full border border-border bg-surface pl-3.5 pr-1.5 transition hover:shadow-md ${menu ? 'shadow-md' : ''}`}>
                 <Menu aria-hidden className="h-4 w-4" />

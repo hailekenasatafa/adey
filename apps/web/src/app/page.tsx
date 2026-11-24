@@ -56,7 +56,7 @@ export default async function Home() {
 
       {/* For business owners: listing is fast and free */}
       <section className="relative mt-16 overflow-hidden rounded-[28px] bg-forest-deep px-6 py-10 text-ivory sm:px-12 sm:py-14">
-        <AdeyFlower size={340} center="#0F3227" className="pointer-events-none absolute -right-24 -top-24 opacity-[0.14]" />
+        <AdeyFlower size={300} center="#0F3227" className="pointer-events-none absolute -bottom-28 -left-24 opacity-[0.12]" />
         <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
           <div>
             <h2 className="max-w-lg text-3xl font-semibold leading-tight sm:text-4xl">Own a Habesha business? List it free in a few minutes.</h2>
