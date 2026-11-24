@@ -2,27 +2,36 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { Bell, CircleUser, Menu, MessageCircle, Monitor, Moon, Search, ShoppingCart, Sun, type LucideIcon } from 'lucide-react';
 import { AdeyFlower } from './ui';
 import { useAuth } from './Providers';
+import { SiteSearch, SiteSearchFallback, type SiteSearchHandle } from './SiteSearch';
 import { api, supabase } from '@/lib/supabase/client';
 import { useCart, useCommerce } from '@/lib/commerce';
 import { setTheme, useTheme, type ThemeChoice } from '@/lib/theme';
 import { useAdconnect, useAppSettings } from '@/lib/settings';
+import { sectionIcons } from '@/lib/icons';
+import { mediaUrlFromPath } from '@/lib/media';
 
-const links = [
-  { href: '/market', label: 'Adey Market' },
-  { href: '/deals', label: 'Deals' },
-  { href: '/events', label: 'Events' },
-  { href: '/adconnect', label: 'AdConnect' },
+const sections: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: '/market', label: 'Market', icon: sectionIcons.market },
+  { href: '/deals', label: 'Deals', icon: sectionIcons.deals },
+  { href: '/events', label: 'Events', icon: sectionIcons.events },
+  { href: '/adconnect', label: 'AdConnect', icon: sectionIcons.adconnect },
 ];
 /** [link, shown only when online checkout is on, shown only when AdConnect campaigns are on] */
 const ACCOUNT: { href: string; label: string; checkout?: boolean; campaigns?: boolean }[] = [
-  { href: '/deals/mine', label: 'My deals' }, { href: '/saved', label: 'Saved' }, { href: '/messages', label: 'Messages' },
+  { href: '/deals/mine', label: 'My deals' }, { href: '/saved', label: 'Saved' },
   { href: '/orders', label: 'Orders', checkout: true }, { href: '/rewards', label: 'Rewards', checkout: true }, { href: '/account/addresses', label: 'Addresses', checkout: true },
-  { href: '/account', label: 'Settings' }, { href: '/campaigns', label: 'My campaigns', campaigns: true }, { href: '/help', label: 'Help' },
+  { href: '/campaigns', label: 'My campaigns', campaigns: true }, { href: '/account', label: 'Account settings' },
 ];
-const item = 'block rounded-[10px] px-3 py-2 text-sm hover:bg-surface-muted';
+
+/** Pages that are about finding things show the search bar; account, owner and admin tools don't. */
+const NO_SEARCH = ['/auth', '/dashboard', '/account', '/admin', '/messages', '/notifications', '/checkout', '/cart', '/orders', '/campaigns', '/bookings', '/requests', '/support', '/rewards', '/help', '/legal', '/inquiry', '/saved', '/deals/mine', '/events/new', '/events/mine', '/verification'];
+const showsSearch = (path: string) => !NO_SEARCH.some((p) => path === p || path.startsWith(p + '/')) && !/^\/events\/[^/]+\/edit/.test(path);
+
+const item = 'flex w-full items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left text-sm hover:bg-surface-muted';
 
 /** Close a popover on Escape or a click outside it. */
 function useDismiss(open: boolean, close: () => void) {
@@ -38,14 +47,22 @@ function useDismiss(open: boolean, close: () => void) {
   return ref;
 }
 
-const Count = ({ n }: { n: number }) => (n > 0 ? <span className="absolute -top-1 -right-1 grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-bold text-[color:var(--on-danger)]">{n > 99 ? '99+' : n}</span> : null);
+const Count = ({ n }: { n: number }) => (n > 0 ? <span className="absolute -right-0.5 -top-0.5 grid h-[18px] min-w-[18px] place-items-center rounded-full border-2 border-background bg-danger px-1 text-[10px] font-bold leading-none text-[color:var(--on-danger)]">{n > 99 ? '99+' : n}</span> : null);
+const Pill = ({ n }: { n: number }) => (n > 0 ? <span className="rounded-full bg-danger px-1.5 text-[11px] font-bold text-[color:var(--on-danger)]">{n > 99 ? '99+' : n}</span> : null);
 
+const THEMES: [ThemeChoice, string, LucideIcon][] = [['light', 'Light', Sun], ['dark', 'Dark', Moon], ['system', 'System', Monitor]];
+
+/** Light / Dark / System, as icons with labels for screen readers and tooltips. */
 export function ThemeToggle({ className = '' }: { className?: string }) {
   const theme = useTheme();
-  const opts: [ThemeChoice, string][] = [['light', '☀️ Light'], ['dark', '🌙 Dark'], ['system', '💻 System']];
   return (
-    <div role="radiogroup" aria-label="Colour theme" className={`flex rounded-[10px] bg-surface-muted p-0.5 text-xs ${className}`}>
-      {opts.map(([v, l]) => <button key={v} type="button" role="radio" aria-checked={theme === v} onClick={() => setTheme(v)} className={`flex-1 rounded-[8px] px-2 py-1.5 font-semibold ${theme === v ? 'bg-surface text-text shadow-sm' : 'text-text-muted'}`}>{l}</button>)}
+    <div role="radiogroup" aria-label="Appearance" className={`inline-flex rounded-full border border-border bg-surface-muted p-0.5 ${className}`}>
+      {THEMES.map(([v, label, Icon]) => (
+        <button key={v} type="button" role="radio" aria-checked={theme === v} aria-label={label} title={label} onClick={() => setTheme(v)}
+          className={`grid h-8 w-9 place-items-center rounded-full transition ${theme === v ? 'bg-surface text-text shadow-sm' : 'text-text-muted hover:text-text'}`}>
+          <Icon aria-hidden className="h-4 w-4" />
+        </button>
+      ))}
     </div>
   );
 }
@@ -59,96 +76,146 @@ export function Nav() {
   const accountLinks = ACCOUNT.filter((l) => (!l.checkout || checkoutEnabled) && (!l.campaigns || campaignsEnabled));
   const cart = useCart();
   const [menu, setMenu] = useState(false);
-  const [mobile, setMobile] = useState(false);
   const [lastPath, setLastPath] = useState(path);
-  if (lastPath !== path) { setLastPath(path); setMenu(false); setMobile(false); }
+  if (lastPath !== path) { setLastPath(path); setMenu(false); }
   const menuRef = useDismiss(menu, () => setMenu(false));
-  const mobileRef = useDismiss(mobile, () => setMobile(false));
   const unread = useQuery({ queryKey: ['unread', session?.user.id], queryFn: () => api.notifications.unread(), enabled: !!session, refetchInterval: 60_000 });
   const signOut = async () => { await supabase.auth.signOut(); router.push('/'); router.refresh(); };
+
+  const search = showsSearch(path);
+  // Airbnb-style: the big search row tucks into a compact pill once you scroll (desktop).
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 72);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, []);
+  const compact = search && scrolled;
+  const searchRef = useRef<SiteSearchHandle>(null);
+  const expand = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchRef.current?.focus(), 350); };
+
+  const owner = businesses.length > 0;
+  const initial = (profile?.display_name ?? session?.user.email ?? '?').slice(0, 1).toUpperCase();
+  const avatar = mediaUrlFromPath('avatars', profile?.avatar_url);
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="container-x flex h-16 items-center justify-between gap-2">
-        <div className="flex items-center gap-1" ref={mobileRef}>
-          <button className="btn btn-ghost btn-sm md:hidden" aria-label="Menu" aria-expanded={mobile} aria-controls="mobile-nav" onClick={() => setMobile((o) => !o)}>{mobile ? '✕' : '☰'}</button>
-          <Link href="/" className="flex items-center gap-2" aria-label="Adey home">
+    <>
+      <header className={`fixed inset-x-0 top-0 z-40 border-b bg-background/95 backdrop-blur transition-[border-color,box-shadow] ${compact || !search ? 'border-border shadow-sm' : 'border-transparent'}`}>
+        <div className="container-x flex h-16 items-center gap-3">
+          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Adey home">
             <AdeyFlower size={30} />
-            <span className="text-lg font-bold tracking-[0.25em]">ADEY</span>
-            <span className="ethiopic text-sm text-text-muted hidden sm:inline">አደይ</span>
+            <span className="text-[17px] font-bold tracking-[0.22em]">ADEY</span>
+            <span className="ethiopic hidden text-sm text-text-muted sm:inline">አደይ</span>
           </Link>
-          {mobile && (
-            <nav id="mobile-nav" aria-label="Main" className="card absolute left-2 right-2 top-16 space-y-1 p-2 shadow-lg md:hidden">
-              {links.map((l) => <Link key={l.href} href={l.href} className={`${item} font-semibold ${path.startsWith(l.href) ? 'text-forest' : ''}`}>{l.label}</Link>)}
-              <hr className="border-border" />
-              {session ? (
-                <>
-                  <Link href="/dashboard" className={item}>{businesses.length ? 'Dashboard' : 'List your business'}</Link>
-                  {isStaff && <Link href="/admin" className={item}>Admin</Link>}
-                  {accountLinks.map((l) => <Link key={l.href} href={l.href} className={item}>{l.label}</Link>)}
-                  <button onClick={signOut} className={`${item} w-full text-left`}>Sign out</button>
-                </>
-              ) : (
-                <>
-                  <Link href="/auth/sign-in" className={item}>Sign in</Link>
-                  <Link href="/auth/sign-up" className={item}>Get started</Link>
-                  <Link href="/help" className={item}>Help</Link>
-                </>
+
+          <div className="hidden min-w-0 flex-1 justify-center md:flex">
+            {compact ? (
+              <button type="button" onClick={expand} className="flex h-11 w-full max-w-md items-center gap-3 rounded-full border border-border bg-surface pl-5 pr-1.5 text-sm shadow-sm transition hover:shadow-md">
+                <span className="flex-1 truncate text-left font-semibold">Search Adey</span>
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-forest text-[color:var(--on-forest)]"><Search aria-hidden className="h-4 w-4" strokeWidth={2.25} /></span>
+              </button>
+            ) : (
+              <nav aria-label="Main" className="flex items-center gap-1">
+                {sections.map(({ href, label, icon: Icon }) => {
+                  const on = path === href || path.startsWith(href + '/');
+                  return (
+                    <Link key={href} href={href} aria-current={on ? 'page' : undefined}
+                      className={`group relative flex h-16 items-center gap-2 px-3.5 text-sm font-semibold transition ${on ? 'text-text' : 'text-text-muted hover:text-text'}`}>
+                      <Icon aria-hidden className={`h-[18px] w-[18px] ${on ? 'text-forest' : ''}`} />
+                      {label}
+                      <span aria-hidden className={`absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-text transition ${on ? 'opacity-100' : 'opacity-0 group-hover:opacity-20'}`} />
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
+          </div>
+
+          <div className="ml-auto flex shrink-0 items-center gap-1 md:ml-0">
+            <Link href={owner ? '/dashboard' : '/dashboard/new'} className="hidden h-10 items-center rounded-full px-4 text-sm font-semibold transition hover:bg-surface-muted lg:flex">
+              {owner ? 'Dashboard' : 'List your business'}
+            </Link>
+            {session && checkoutEnabled && <Link href="/cart" className="btn-icon" aria-label={`Cart${cart.data?.count ? `, ${cart.data.count} items` : ''}`}><ShoppingCart aria-hidden className="h-5 w-5" /><Count n={cart.data?.count ?? 0} /></Link>}
+            {session && <Link href="/messages" className="btn-icon max-sm:!hidden" aria-label={`Messages${unread.data?.messages ? `, ${unread.data.messages} unread` : ''}`}><MessageCircle aria-hidden className="h-5 w-5" /><Count n={unread.data?.messages ?? 0} /></Link>}
+            {session && <Link href="/notifications" className="btn-icon" aria-label={`Notifications${unread.data?.notifications ? `, ${unread.data.notifications} unread` : ''}`}><Bell aria-hidden className="h-5 w-5" /><Count n={unread.data?.notifications ?? 0} /></Link>}
+
+            <div className="relative ml-1" ref={menuRef}>
+              <button type="button" onClick={() => setMenu((o) => !o)} aria-label="Menu" aria-expanded={menu} aria-haspopup="menu"
+                className={`flex h-11 items-center gap-2.5 rounded-full border border-border bg-surface pl-3.5 pr-1.5 transition hover:shadow-md ${menu ? 'shadow-md' : ''}`}>
+                <Menu aria-hidden className="h-4 w-4" />
+                {session ? (
+                  avatar ? <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" /> : <span className="grid h-8 w-8 place-items-center rounded-full bg-forest text-sm font-bold text-[color:var(--on-forest)]">{initial}</span>
+                ) : <CircleUser aria-hidden className="h-8 w-8 text-text-muted" strokeWidth={1.5} />}
+              </button>
+              {menu && (
+                <div role="menu" className="absolute right-0 top-[calc(100%+8px)] w-72 max-w-[calc(100vw-2.5rem)] overflow-hidden rounded-[20px] border border-border bg-surface-raised p-2 shadow-lg">
+                  <nav aria-label="Sections" className="border-b border-border pb-2 md:hidden">
+                    {sections.map(({ href, label, icon: Icon }) => (
+                      <Link key={href} role="menuitem" href={href} className={`${item} !justify-start font-semibold`}><Icon aria-hidden className="h-[18px] w-[18px] text-text-muted" />{label}</Link>
+                    ))}
+                  </nav>
+                  {session ? (
+                    <>
+                      <p className="truncate px-3 pb-1 pt-2.5 text-sm font-semibold">{profile?.display_name ?? session.user.email}</p>
+                      <Link role="menuitem" href="/messages" className={`${item} sm:hidden`}>Messages<Pill n={unread.data?.messages ?? 0} /></Link>
+                      <Link role="menuitem" href="/notifications" className={item}>Notifications<Pill n={unread.data?.notifications ?? 0} /></Link>
+                      {accountLinks.map((l) => <Link key={l.href} role="menuitem" href={l.href} className={item}>{l.label}</Link>)}
+                      <div className="my-1.5 border-t border-border" />
+                      <Link role="menuitem" href={owner ? '/dashboard' : '/dashboard/new'} className={item}>{owner ? 'Business dashboard' : 'List your business'}</Link>
+                      {isStaff && <Link role="menuitem" href="/admin" className={item}>Admin</Link>}
+                      <Link role="menuitem" href="/help" className={item}>Help centre</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link role="menuitem" href={`/auth/sign-in${path.startsWith('/auth') ? '' : `?next=${encodeURIComponent(path)}`}`} className={`${item} mt-1 font-semibold`}>Sign in</Link>
+                      <Link role="menuitem" href="/auth/sign-up" className={item}>Create an account</Link>
+                      <div className="my-1.5 border-t border-border" />
+                      <Link role="menuitem" href="/dashboard/new" className={item}>List your business</Link>
+                      <Link role="menuitem" href="/help" className={item}>Help centre</Link>
+                    </>
+                  )}
+                  <div className="my-1.5 border-t border-border" />
+                  <div className="flex items-center justify-between gap-3 px-3 py-1.5 text-sm">Appearance<ThemeToggle /></div>
+                  {session && <><div className="my-1.5 border-t border-border" /><button role="menuitem" type="button" onClick={signOut} className={item}>Sign out</button></>}
+                </div>
               )}
-              <ThemeToggle className="mt-1" />
-            </nav>
-          )}
+            </div>
+          </div>
         </div>
-        <nav aria-label="Main" className="hidden md:flex items-center gap-1">
-          {links.map((l) => <Link key={l.href} href={l.href} aria-current={path.startsWith(l.href) ? 'page' : undefined} className={`rounded-[10px] px-3 py-2 text-sm font-semibold transition hover:bg-surface-muted ${path.startsWith(l.href) ? 'text-forest' : 'text-text'}`}>{l.label}</Link>)}
-        </nav>
-        <div className="flex items-center gap-1 sm:gap-2">
-          <Link href="/search" className="btn btn-ghost btn-sm" aria-label="Search">🔍</Link>
-          {session ? (
-            <>
-              {checkoutEnabled && <Link href="/cart" className="btn btn-ghost btn-sm relative" aria-label={`Cart${cart.data?.count ? `, ${cart.data.count} items` : ''}`}>🛒<Count n={cart.data?.count ?? 0} /></Link>}
-              <Link href="/messages" className="btn btn-ghost btn-sm relative max-sm:!hidden" aria-label={`Messages${unread.data?.messages ? `, ${unread.data.messages} unread` : ''}`}>💬<Count n={unread.data?.messages ?? 0} /></Link>
-              <Link href="/notifications" className="btn btn-ghost btn-sm relative" aria-label={`Notifications${unread.data?.notifications ? `, ${unread.data.notifications} unread` : ''}`}>🔔<Count n={unread.data?.notifications ?? 0} /></Link>
-              <Link href="/dashboard" className="btn btn-secondary btn-sm hidden md:inline-flex">{businesses.length ? 'Dashboard' : 'List business'}</Link>
-              {isStaff && <Link href="/admin" className="btn btn-outline btn-sm hidden md:inline-flex">Admin</Link>}
-              <div className="relative" ref={menuRef}>
-                <button onClick={() => setMenu((o) => !o)} className="h-9 w-9 rounded-full bg-forest-soft text-forest font-bold grid place-items-center" aria-label="Account menu" aria-expanded={menu} aria-haspopup="menu">{(profile?.display_name ?? session.user.email ?? '?').slice(0, 1).toUpperCase()}</button>
-                {menu && (
-                  <div role="menu" className="card absolute right-0 top-11 w-60 p-2 shadow-lg">
-                    <p className="px-3 py-2 text-sm font-semibold truncate">{profile?.display_name ?? session.user.email}</p>
-                    {accountLinks.map((l) => <Link key={l.href} role="menuitem" href={l.href} className={item}>{l.label}</Link>)}
-                    <div className="px-1 py-2"><ThemeToggle /></div>
-                    <button role="menuitem" onClick={signOut} className={`${item} w-full text-left`}>Sign out</button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <>
-              <Link href="/auth/sign-in" className="btn btn-ghost btn-sm max-sm:!hidden">Sign in</Link>
-              <Link href="/auth/sign-up" className="btn btn-primary btn-sm whitespace-nowrap">Get started</Link>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
+
+        {search && (
+          <div className={`container-x pb-3 transition-[opacity] md:pb-4 ${compact ? 'md:hidden' : ''}`}>
+            <Suspense fallback={<SiteSearchFallback />}><SiteSearch ref={searchRef} /></Suspense>
+          </div>
+        )}
+      </header>
+      {/* Reserves the header's height (it is fixed so that tucking the search away never moves the page). */}
+      <div aria-hidden className={search ? 'h-[124px] md:h-[144px]' : 'h-16'} />
+    </>
   );
 }
 
 export function Footer() {
   const app = useAppSettings();
   const support = app?.support_email ?? 'support@adey.app';
+  const col = 'space-y-2.5 text-sm text-text-muted [&_a:hover]:text-text [&_a:hover]:underline [&_a]:underline-offset-4';
   return (
-    <footer className="mt-20 border-t border-border bg-surface">
-      <div className="container-x grid gap-8 py-12 sm:grid-cols-4">
-        <div className="sm:col-span-2">
-          <div className="flex items-center gap-2"><AdeyFlower size={28} /><span className="font-bold tracking-[0.25em]">ADEY</span><span className="ethiopic text-text-muted">አደይ</span></div>
-          <p className="mt-3 max-w-sm text-sm text-text-muted">Connecting Communities. Growing Businesses. Find Habesha-owned businesses, see their menus and photos, and claim their deals. Listing a business is free.</p>
-          <div className="mt-4 max-w-xs"><p className="mb-1 text-xs font-semibold text-text-muted">Theme</p><ThemeToggle /></div>
+    <footer className="mt-24 border-t border-border bg-surface-muted/60">
+      <div className="container-x grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="lg:col-span-2">
+          <div className="flex items-center gap-2"><AdeyFlower size={28} /><span className="font-bold tracking-[0.22em]">ADEY</span><span className="ethiopic text-text-muted">አደይ</span></div>
+          <p className="mt-4 max-w-sm text-sm text-text-muted">Find Habesha-owned businesses, see their menus and photos, and claim their deals. Listing a business is free.</p>
         </div>
-        <div className="text-sm"><p className="font-semibold">Marketplace</p><ul className="mt-2 space-y-1 text-text-muted"><li><Link href="/market">Find businesses</Link></li><li><Link href="/deals">Deals</Link></li><li><Link href="/events">Events</Link></li><li><Link href="/adconnect">AdConnect</Link></li><li><Link href="/dashboard/new">List your business — free</Link></li><li><Link href="/market?market=et">Ethiopian Market</Link></li></ul></div>
-        <div className="text-sm"><p className="font-semibold">Company</p><ul className="mt-2 space-y-1 text-text-muted"><li><Link href="/help">Help centre</Link></li><li><Link href="/verification">How verification works</Link></li><li><Link href="/legal/terms">Terms</Link></li><li><Link href="/legal/privacy">Privacy</Link></li><li><a href={`mailto:${support}`}>{support}</a></li></ul></div>
+        <nav aria-label="Marketplace"><h2 className="mb-4 text-sm font-semibold">Marketplace</h2><ul className={col}><li><Link href="/market">Find businesses</Link></li><li><Link href="/deals">Deals</Link></li><li><Link href="/events">Events</Link></li><li><Link href="/adconnect">AdConnect</Link></li><li><Link href="/dashboard/new">List your business for free</Link></li><li><Link href="/market?market=et">Ethiopian Market</Link></li></ul></nav>
+        <nav aria-label="Company"><h2 className="mb-4 text-sm font-semibold">Support</h2><ul className={col}><li><Link href="/help">Help centre</Link></li><li><Link href="/verification">How verification works</Link></li><li><Link href="/legal/terms">Terms</Link></li><li><Link href="/legal/privacy">Privacy</Link></li><li><a href={`mailto:${support}`}>{support}</a></li></ul></nav>
       </div>
-      <div className="border-t border-border py-4 text-center text-xs text-text-muted">© {new Date().getFullYear()} Adey. Apps for iPhone and Android are on the way.</div>
+      <div className="border-t border-border">
+        <div className="container-x flex flex-col-reverse items-center justify-between gap-4 py-5 text-sm text-text-muted sm:flex-row">
+          <p>© {new Date().getFullYear()} Adey. Apps for iPhone and Android are on the way.</p>
+          <ThemeToggle />
+        </div>
+      </div>
     </footer>
   );
 }

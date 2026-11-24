@@ -8,6 +8,7 @@ import { api } from '@/lib/supabase/client';
 import { useAuth } from '@/components/Providers';
 import { fmtDate, mediaUrlFromPath } from '@/lib/media';
 import { ReportButton } from '@/components/ReportButton';
+import { Check, TicketPercent } from 'lucide-react';
 
 /** What every deal card needs, whether it comes from a business page or the deals feed. */
 export type DealView = {
@@ -20,21 +21,21 @@ export type DealView = {
 export function DealCard({ deal, showBusiness = false }: { deal: DealView; showBusiness?: boolean }) {
   const img = mediaUrlFromPath('business-media', deal.image_path) ?? (showBusiness ? mediaUrlFromPath('business-media', deal.business.cover_url) : null);
   return (
-    <article className="card flex flex-col overflow-hidden" aria-label={deal.title}>
+    <article className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface" aria-label={deal.title}>
       {(img || showBusiness) && (
-        <div className="relative h-36 bg-gold-soft">
-          {img ? <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="grid h-full place-items-center text-4xl">🏷️</div>}
-          <span className="absolute left-2 top-2 rounded-full bg-forest px-2.5 py-0.5 text-xs font-bold text-[color:var(--on-forest)]">Deal</span>
+        <div className="relative aspect-[16/9] bg-gold-soft">
+          {img ? <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="grid h-full place-items-center text-gold-deep"><TicketPercent aria-hidden className="h-10 w-10" strokeWidth={1.25} /></div>}
+          <span className="badges-on-photo absolute left-3 top-3"><span className="badge"><TicketPercent aria-hidden className="h-3.5 w-3.5" />Deal</span></span>
         </div>
       )}
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col p-5">
         {showBusiness && (
           <Link href={`/business/${deal.business.slug}#deals`} className="text-xs font-semibold text-forest hover:underline">
             {deal.business.name}{deal.business.place ? <span className="font-normal text-text-muted"> · {deal.business.place}</span> : null}
             {deal.business.distance_km != null ? <span className="font-normal text-text-muted"> · {deal.business.distance_km.toFixed(deal.business.distance_km < 10 ? 1 : 0)} km</span> : null}
           </Link>
         )}
-        <h3 className="mt-0.5 text-lg font-bold leading-snug">{!img && !showBusiness && <span aria-hidden>🏷️ </span>}{deal.title}</h3>
+        <h3 className="mt-1 flex items-start gap-2 text-lg font-semibold leading-snug">{!img && !showBusiness && <TicketPercent aria-hidden className="mt-1 h-5 w-5 text-forest" />}{deal.title}</h3>
         {deal.description && <p className="mt-1 line-clamp-3 whitespace-pre-line text-sm text-text-muted">{deal.description}</p>}
         {deal.terms && <p className="mt-2 text-xs text-text-muted"><b className="font-semibold text-text">Conditions:</b> {deal.terms}</p>}
         <div className="mt-auto pt-4">
@@ -76,7 +77,7 @@ export function ClaimButton({ deal }: { deal: DealView }) {
   return (
     <>
       <button type="button" onClick={onClick} disabled={go.isPending} className={`btn w-full ${claim ? 'btn-secondary' : 'btn-primary'}`}>
-        {go.isPending ? 'Claiming…' : claim ? (claim.redeemed_at ? '✓ Used — view code' : 'Show my code') : 'Claim deal'}
+        {go.isPending ? 'Claiming…' : claim ? (claim.redeemed_at ? 'Used, view code' : 'Show my code') : 'Claim deal'}
       </button>
       {error && <p className="mt-2 text-sm text-danger" role="alert">{error}</p>}
       {open && claim && <CodeDialog code={claim.code} redeemedAt={claim.redeemed_at} title={deal.title} businessName={deal.business.name} onClose={() => setOpen(false)} />}
@@ -98,7 +99,7 @@ export function CodeDialog({ code, redeemedAt, title, businessName, onClose }: {
           <p className={`select-all font-mono text-4xl font-bold tracking-[0.18em] ${redeemedAt ? 'text-text-muted line-through' : 'text-forest'}`} aria-label={code.split('').join(' ')}>{code}</p>
           <p className="mt-3 text-sm text-text-muted">{redeemedAt ? `${businessName} marked this code as used on ${fmtDate(redeemedAt)}.` : `Show this code at ${businessName}. They enter it to mark the deal as used.`}</p>
           <div className="mt-5 grid grid-cols-2 gap-2">
-            <button type="button" onClick={copy} className="btn btn-outline btn-sm">{copied ? '✓ Copied' : 'Copy code'}</button>
+            <button type="button" onClick={copy} className="btn btn-outline btn-sm">{copied ? <><Check aria-hidden className="h-4 w-4" />Copied</> : 'Copy code'}</button>
             <Link href="/deals/mine" className="btn btn-outline btn-sm">My deals</Link>
           </div>
           <button type="button" onClick={onClose} className="btn btn-primary mt-2 w-full" autoFocus>Done</button>

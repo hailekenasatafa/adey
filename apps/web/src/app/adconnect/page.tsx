@@ -5,7 +5,7 @@ import { serverApi } from '@/lib/supabase/server';
 import { Empty, ScreenCardView } from '@/components/ui';
 import { Dropdown } from '@/components/FilterMenu';
 import { CleanForm } from '@/components/CleanForm';
-import { FiltersLabel, SearchPill } from '@/components/SearchPill';
+import { FiltersLabel } from '@/components/SearchPill';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Adey AdConnect', description: 'Find TV screens inside Habesha businesses that take local ads, and contact the owners directly.' };
@@ -57,19 +57,18 @@ export default async function AdConnectPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="container-x pb-16">
-      <section className="mt-6 rounded-[28px] bg-gold-soft p-6 sm:mt-8 sm:p-10">
-        <p className="text-xs font-bold tracking-[0.3em] text-gold-deep">ADEY ADCONNECT</p>
-        <h1 className="mt-2 max-w-2xl text-3xl font-bold leading-tight sm:text-4xl">Advertise where your community already gathers.</h1>
+      <section className="mt-6 rounded-[24px] border border-border bg-surface-muted/60 p-6 sm:p-10">
+        <h1 className="max-w-2xl text-3xl font-semibold leading-tight sm:text-4xl">Advertise where your community already gathers.</h1>
         <p className="mt-3 max-w-xl text-sm text-text-muted sm:text-base">Find a TV screen in a Habesha business, then contact the owner to agree dates and price. No commission.</p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <Link href="/dashboard" className="btn btn-outline">List my screens — free</Link>
+          <Link href="/dashboard" className="btn btn-outline">List my screens for free</Link>
           <Link href="/help/advertise-on-screens" className="btn btn-ghost">How it works</Link>
           {campaignsEnabled && <><Link href="/campaigns/new" className="btn btn-ghost">Create campaign</Link><Link href="/campaigns" className="btn btn-ghost">My campaigns</Link></>}
         </div>
       </section>
 
       <div id="screens" className="relative mt-8 flex scroll-mt-24 items-center gap-2">
-        <SearchPill action="/adconnect" defaultValue={st.q} placeholder="Search a business, screen or city">{keep(['category', 'max', 'sort'])}</SearchPill>
+        <p className="mr-auto min-w-0 truncate text-sm text-text-muted">{st.q ? <>Results for <b className="text-text">{st.q}</b></> : null}</p>
 
         <Dropdown size="md" count={active} label={<FiltersLabel />}>
           <CleanForm action="/adconnect" aria-label="Filter screens">

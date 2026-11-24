@@ -1,5 +1,6 @@
 'use client';
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { Fragment, useMemo, useState, useSyncExternalStore } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +19,7 @@ const NONE: Filters = { q: '', category: '', city: '', state: '', free: false, o
 const pad = (n: number) => String(n).padStart(2, '0');
 const key = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
-export function EventsBrowser({ initial, regions, region, tag, canPost }: { initial: EventCard[]; regions: { key: string; name: string }[]; region: string; tag: string; canPost: boolean }) {
+export function EventsBrowser({ initial, regions, region, tag, canPost, q = '', city = '' }: { initial: EventCard[]; regions: { key: string; name: string }[]; region: string; tag: string; canPost: boolean; q?: string; city?: string }) {
   const { session } = useAuth();
   const router = useRouter();
   const go = (next: { region?: string; tag?: string }) => {
@@ -30,9 +31,12 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
   };
   const regionName = regions.find((r) => r.key === region)?.name;
   const now = new Date();
-  const [draft, setDraft] = useState<Filters>(NONE);
-  const [f, setF] = useState<Filters>(NONE);
-  const [query, setQuery] = useState('');
+  // The header search sets `q` and `city` in the address; filters set the rest.
+  const fromUrl = { ...NONE, q, city };
+  const [draft, setDraft] = useState<Filters>(fromUrl);
+  const [f, setF] = useState<Filters>(fromUrl);
+  const [urlKey, setUrlKey] = useState(`${q}|${city}`);
+  if (urlKey !== `${q}|${city}`) { setUrlKey(`${q}|${city}`); setF((x) => ({ ...x, q, city })); setDraft((x) => ({ ...x, q, city })); }
   const [cursor, setCursor] = useState({ y: now.getFullYear(), m: now.getMonth() });
   const [day, setDay] = useState<string | null>(null);
   const args = useMemo(() => ({
@@ -61,17 +65,12 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
   const today = key(now.getFullYear(), now.getMonth(), now.getDate());
   const activeFilters = [f.category, f.city.trim(), f.state.trim(), f.free, f.online, f.mine].filter(Boolean).length;
   const apply = (next: Filters) => { setF(next); setDraft(next); setDay(null); };
-  const clearAll = () => { setQuery(''); apply(NONE); };
+  const clearAll = () => { apply(NONE); if (q || city) router.push(region || tag ? `/events?${new URLSearchParams({ ...(region ? { region } : {}), ...(tag ? { tag } : {}) })}` : '/events'); };
 
   return (
     <>
-    <div className="relative mt-6 flex items-center gap-2">
-      <form role="search" aria-label="Search events" className="flex min-w-0 flex-1 items-center rounded-full border border-border bg-surface p-1.5 pl-5 shadow-sm focus-within:ring-2 focus-within:ring-forest" onSubmit={(e) => { e.preventDefault(); apply({ ...f, q: query }); }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search events, venues or cities" aria-label="Search events, venues or cities" className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-text-muted" />
-        <button type="submit" aria-label="Search" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-forest text-[color:var(--on-forest)] transition hover:brightness-110">
-          <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="h-4 w-4"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>
-        </button>
-      </form>
+    <div className="relative mt-6 flex items-center justify-end gap-2">
+      {f.q && <p className="mr-auto min-w-0 truncate text-sm text-text-muted">Results for <b className="text-text">{f.q}</b></p>}
       <Dropdown size="md" label={<FiltersLabel />} count={activeFilters}>
         <form onSubmit={(e) => { e.preventDefault(); apply({ ...draft, q: f.q }); }} aria-label="Filter events">
           <label htmlFor="ev-category" className="label">Category</label>
@@ -97,9 +96,9 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
       <aside className="space-y-4">
         <section className="card p-4" aria-label="Calendar">
           <div className="flex items-center justify-between">
-            <button type="button" className="btn btn-ghost btn-sm" aria-label="Previous month" onClick={() => shift(-1)}>‹</button>
+            <button type="button" className="btn btn-ghost btn-sm" aria-label="Previous month" onClick={() => shift(-1)}><ChevronLeft aria-hidden className="h-4 w-4" /></button>
             <h2 className="font-semibold" aria-live="polite">{from.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
-            <button type="button" className="btn btn-ghost btn-sm" aria-label="Next month" onClick={() => shift(1)}>›</button>
+            <button type="button" className="btn btn-ghost btn-sm" aria-label="Next month" onClick={() => shift(1)}><ChevronRight aria-hidden className="h-4 w-4" /></button>
           </div>
           <div className="mt-2 grid grid-cols-7 text-center text-[11px] text-text-muted">{['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <span key={i} aria-hidden>{d}</span>)}</div>
           <div className="mt-1 grid grid-cols-7 gap-1">
@@ -134,12 +133,40 @@ export function EventsBrowser({ initial, regions, region, tag, canPost }: { init
           {busy ? <><div className="skeleton h-28" /><div className="skeleton h-28" /></>
             : err ? <ErrorLine error={err} retry={() => (day ? month : upcoming).refetch()} />
             : !list.length ? <Empty title={f.mine ? 'Nothing here yet' : 'No events found'} body={pristine && !region && !tag ? 'No upcoming events are listed right now.' : 'Try different filters.'} action={canPost ? <Link href="/events/new" className="btn btn-primary btn-sm">Submit an event</Link> : undefined} />
-            : list.map((e) => <EventTile key={e.id} e={e} />)}
+            : day ? list.map((e) => <EventTile key={e.id} e={e} grouped />)
+            : groupByDay(list).map(([k, items]) => (
+              <Fragment key={k}>
+                <h3 className="sticky top-16 z-10 -mx-1 flex items-baseline gap-2 bg-background/95 px-1 pb-1 pt-4 backdrop-blur first:pt-0">
+                  <span className="font-semibold">{dayLabel(k)}</span>
+                  {k !== 'tba' && <span className="text-sm text-text-muted">{new Date(k + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })}</span>}
+                </h3>
+                {items.map((e) => <EventTile key={e.id} e={e} grouped />)}
+              </Fragment>
+            ))}
         </div>
       </section>
     </div>
     </>
   );
+}
+
+/** Upcoming events grouped by the viewer's calendar day, in order. */
+function groupByDay(list: EventCard[]) {
+  const out: [string, EventCard[]][] = [];
+  for (const e of list) {
+    const k = e.starts_at ? dayKey(e.starts_at) : 'tba';
+    const last = out[out.length - 1];
+    if (last && last[0] === k) last[1].push(e); else out.push([k, [e]]);
+  }
+  return out;
+}
+function dayLabel(k: string) {
+  if (k === 'tba') return 'Date to be announced';
+  const d = new Date(k + 'T00:00:00'); const t = new Date(); t.setHours(0, 0, 0, 0);
+  const diff = Math.round((d.getTime() - t.getTime()) / 86_400_000);
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(d.getFullYear() !== t.getFullYear() ? { year: 'numeric' } : {}) });
 }
 
 function Subscribe({ region, regionName, category, tag }: { region: string; regionName?: string; category: string; tag: string }) {

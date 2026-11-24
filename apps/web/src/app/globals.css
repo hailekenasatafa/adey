@@ -1,69 +1,100 @@
 @import "tailwindcss";
 
-/* ADEY brand tokens — mirrors packages/shared/src/tokens.ts */
+/*
+ * ADEY website tokens.
+ * Brand colours mirror packages/shared/src/tokens.ts (gold, forest). The neutrals, surfaces and
+ * dark theme below are website-only, so changing them does not change the mobile app.
+ */
 :root {
   --gold: #e8b923;
-  --gold-soft: #fdf8e6;
-  --gold-deep: #8f6d0e;
+  --gold-soft: #fbf3d9;
+  --gold-deep: #7a5c0b;
   --forest: #174b3a;
-  --forest-soft: #e8f1ee;
+  --forest-soft: #e9f2ee;
   --forest-deep: #0f3227;
   --ivory: #faf8f2;
-  --charcoal: #202522;
-  --background: #faf8f2;
+  --charcoal: #1d211f;
+
+  --background: #ffffff;
   --surface: #ffffff;
-  --surface-muted: #f2efe6;
-  --border: #e4e0d4;
-  --text: #202522;
-  --text-muted: #7e7a6f;
+  --surface-raised: #ffffff;
+  --surface-muted: #f5f4f0;
+  --border: #e7e4dc;
+  --border-strong: #cfcbc0;
+  --text: #1d211f;
+  --text-muted: #5f645f;
+  --ring: #174b3a;
+
   --success: #2e7d4f;
-  --warning: #b26a00;
+  --warning: #9a5c00;
   --danger: #b3261e;
   --info: #1f5f8b;
   /* text on filled forest / danger buttons */
   --on-forest: #ffffff;
   --on-danger: #ffffff;
+
+  --shadow-sm: 0 1px 2px rgb(16 24 20 / 0.06);
+  --shadow-md: 0 6px 16px rgb(16 24 20 / 0.10);
+  --shadow-lg: 0 12px 32px rgb(16 24 20 / 0.14), 0 2px 6px rgb(16 24 20 / 0.06);
+  --photo-edge: rgb(0 0 0 / 0.04);
   color-scheme: light;
 }
 
-/* Dark theme: an explicit choice (data-theme="dark"), or the system setting when nothing is saved. */
+/* Dark theme: an explicit choice (data-theme="dark"), or the system setting when nothing is saved.
+   Layered charcoal surfaces (never pure black), hairline white borders, brand green lifted for contrast. */
 :root[data-theme="dark"] {
-  --background: #15181a;
-  --surface: #202522;
-  --surface-muted: #2c2a25;
-  --border: #3f3d36;
-  --text: #faf8f2;
-  --text-muted: #a8a396;
-  --forest: #6fa393;
-  --forest-soft: #0b251d;
-  --gold-soft: #4a3807;
-  --gold-deep: #e8b923;
+  --background: #121514;
+  --surface: #191d1b;
+  --surface-raised: #1f2422;
+  --surface-muted: #232826;
+  --border: rgb(255 255 255 / 0.09);
+  --border-strong: rgb(255 255 255 / 0.18);
+  --text: #eef0ee;
+  --text-muted: #a6aca8;
+  --ring: #63bb98;
+  --forest: #63bb98;
+  --forest-soft: rgb(99 187 152 / 0.14);
+  --forest-deep: #0d2a20;
+  --gold-soft: rgb(232 185 35 / 0.14);
+  --gold-deep: #f0c94a;
   --success: #5bcb8a;
   --warning: #f5b041;
   --danger: #f28b82;
   --info: #7fb8e6;
-  --on-forest: #0f1a15;
+  --on-forest: #08130e;
   --on-danger: #2a0e0b;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 8px 20px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.06);
+  --photo-edge: rgb(255 255 255 / 0.06);
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --background: #15181a;
-    --surface: #202522;
-    --surface-muted: #2c2a25;
-    --border: #3f3d36;
-    --text: #faf8f2;
-    --text-muted: #a8a396;
-    --forest: #6fa393;
-    --forest-soft: #0b251d;
-    --gold-soft: #4a3807;
-    --gold-deep: #e8b923;
+    --background: #121514;
+    --surface: #191d1b;
+    --surface-raised: #1f2422;
+    --surface-muted: #232826;
+    --border: rgb(255 255 255 / 0.09);
+    --border-strong: rgb(255 255 255 / 0.18);
+    --text: #eef0ee;
+    --text-muted: #a6aca8;
+    --ring: #63bb98;
+    --forest: #63bb98;
+    --forest-soft: rgb(99 187 152 / 0.14);
+    --forest-deep: #0d2a20;
+    --gold-soft: rgb(232 185 35 / 0.14);
+    --gold-deep: #f0c94a;
     --success: #5bcb8a;
     --warning: #f5b041;
     --danger: #f28b82;
     --info: #7fb8e6;
-    --on-forest: #0f1a15;
+    --on-forest: #08130e;
     --on-danger: #2a0e0b;
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-md: 0 8px 20px rgb(0 0 0 / 0.45);
+    --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(255 255 255 / 0.06);
+    --photo-edge: rgb(255 255 255 / 0.06);
     color-scheme: dark;
   }
 }
@@ -79,47 +110,71 @@
   --color-charcoal: var(--charcoal);
   --color-background: var(--background);
   --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
   --color-surface-muted: var(--surface-muted);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-info: var(--info);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, "Noto Sans", "Noto Sans Ethiopic", sans-serif;
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
+  --font-sans: var(--font-jakarta), var(--font-ethiopic), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
 }
 
-html { scroll-behavior: smooth; }
-body { background: var(--background); color: var(--text); font-family: var(--font-sans); }
-.ethiopic { font-family: "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala", var(--font-sans); }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+body { background: var(--background); color: var(--text); font-family: var(--font-sans); font-size: 15px; line-height: 1.5; font-feature-settings: "ss01" off; }
+h1, h2, h3 { letter-spacing: -0.015em; }
+h1 { letter-spacing: -0.025em; }
+.ethiopic { font-family: var(--font-ethiopic), "Noto Sans Ethiopic", "Abyssinica SIL", "Nyala", var(--font-sans); }
+::selection { background: color-mix(in srgb, var(--forest) 22%, transparent); }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+input:focus-visible, textarea:focus-visible, select:focus-visible { outline: none; }
+
+/* Icons (Lucide): one stroke weight everywhere. */
+svg.lucide { stroke-width: 1.75; flex-shrink: 0; }
 
 /* Components */
-.btn { @apply inline-flex items-center justify-center gap-2 rounded-[14px] px-5 h-12 font-semibold text-base transition disabled:opacity-50 disabled:pointer-events-none; }
-.btn-sm { @apply h-9 px-3 text-sm rounded-[10px]; }
+.btn { @apply inline-flex items-center justify-center gap-2 rounded-[12px] px-5 h-12 font-semibold text-[15px] transition active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none; }
+.btn-sm { @apply h-9 gap-1.5 px-3.5 text-sm rounded-[10px]; }
 .btn-primary { @apply bg-forest hover:brightness-110; color: var(--on-forest); }
 .btn-accent { @apply bg-gold text-charcoal hover:brightness-105; }
 .btn-secondary { @apply bg-forest-soft text-forest hover:brightness-95; }
-.btn-outline { @apply border border-border text-text hover:bg-surface-muted; }
-.btn-ghost { @apply text-forest hover:bg-forest-soft; }
+.btn-outline { @apply border border-border-strong bg-surface text-text hover:bg-surface-muted; }
+.btn-ghost { @apply text-text hover:bg-surface-muted; }
 .btn-danger { @apply bg-danger; color: var(--on-danger); }
-.card { @apply bg-surface border border-border rounded-[20px]; }
-.input { @apply w-full rounded-[14px] border border-border bg-surface px-4 py-3 text-base outline-none focus:border-forest transition; }
+.btn-icon { @apply relative grid h-10 w-10 shrink-0 place-items-center rounded-full text-text transition hover:bg-surface-muted; }
+.card { @apply bg-surface border border-border rounded-[16px]; }
+.input { @apply w-full rounded-[12px] border border-border-strong bg-surface px-4 py-3 text-base text-text outline-none transition placeholder:text-text-muted focus:border-forest focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--forest)_18%,transparent)]; }
 .label { @apply block text-sm font-semibold mb-1.5; }
 .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
-.badge-success { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success); }
-.badge-warning { background: color-mix(in srgb, var(--warning) 15%, transparent); color: var(--warning); }
-.badge-danger { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
-.badge-info { background: color-mix(in srgb, var(--info) 15%, transparent); color: var(--info); }
+.badge-success { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success); }
+.badge-warning { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning); }
+.badge-danger { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+.badge-info { background: color-mix(in srgb, var(--info) 14%, transparent); color: var(--info); }
 .badge-neutral { @apply bg-surface-muted text-text-muted; }
 .badge-accent { background: var(--gold-soft); color: var(--gold-deep); }
 .badge-primary { background: var(--forest-soft); color: var(--forest); }
 /* Labels that sit on top of a photo: solid, so they read on any image. */
-.badges-on-photo .badge { background: #fff; color: #1f2420; box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
-.chip { @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-2 text-sm font-semibold transition hover:bg-surface-muted; }
-.chip-on { @apply bg-forest border-forest hover:bg-forest; color: var(--on-forest); }
-.container-x { @apply mx-auto w-full max-w-6xl px-4 sm:px-6; }
-.skeleton { @apply animate-pulse rounded-[14px] bg-surface-muted; }
+.badges-on-photo .badge { background: #fff; color: #1d211f; box-shadow: 0 1px 3px rgb(0 0 0 / 0.18); }
+.chip { @apply inline-flex items-center gap-1.5 rounded-full border border-border-strong bg-surface px-3.5 py-2 text-sm font-semibold transition hover:border-text; }
+.chip-on { @apply bg-text border-text hover:border-text; color: var(--background); }
+.container-x { @apply mx-auto w-full max-w-7xl px-5 sm:px-8; }
+.skeleton { @apply animate-pulse rounded-[12px] bg-surface-muted; }
+/* A photo frame: rounded, with a hairline edge so light photos don't melt into the page. */
+.photo { @apply relative overflow-hidden rounded-[16px] bg-surface-muted; }
+.photo::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--photo-edge); pointer-events: none; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

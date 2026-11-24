@@ -4,7 +4,7 @@ import type { DealFeedItem } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { Empty } from '@/components/ui';
 import { Dropdown } from '@/components/FilterMenu';
-import { FiltersLabel, SearchPill } from '@/components/SearchPill';
+import { FiltersLabel } from '@/components/SearchPill';
 import { CleanForm } from '@/components/CleanForm';
 import { DealCard } from '@/components/deals/DealCard';
 
@@ -26,21 +26,18 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
   const qs = (patch: Partial<SP>) => { const p = new URLSearchParams(Object.fromEntries(Object.entries({ ...sp, ...patch }).filter(([, v]) => v)) as Record<string, string>); const s = p.toString(); return s ? `/deals?${s}` : '/deals'; };
   return (
     <div className="container-x pb-16">
-      <section className="mt-8 rounded-[28px] bg-forest-soft p-8 sm:p-12">
-        <p className="text-xs font-bold tracking-[0.3em] text-forest">ADEY DEALS</p>
-        <h1 className="mt-2 max-w-2xl text-4xl font-bold leading-tight">Deals from Habesha-owned businesses.</h1>
+      <section className="mt-6">
+        <h1 className="max-w-2xl text-3xl font-semibold sm:text-4xl">Deals from Habesha-owned businesses</h1>
         <ol className="mt-5 grid max-w-3xl gap-3 text-sm sm:grid-cols-3">
-          {[['1', 'Claim a deal on Adey', 'Free, and it goes to My deals.'], ['2', 'Show your code', 'At the counter or when you order.'], ['3', 'The business marks it used', 'That’s it — enjoy.']].map(([n, t, d]) => (
-            <li key={n} className="flex gap-3 rounded-[16px] bg-surface p-3"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-forest text-xs font-bold text-[color:var(--on-forest)]">{n}</span><span><b className="block">{t}</b><span className="text-text-muted">{d}</span></span></li>
+          {[['1', 'Claim a deal on Adey', 'Free, and it goes to My deals.'], ['2', 'Show your code', 'At the counter or when you order.'], ['3', 'The business marks it used', 'Then enjoy it.']].map(([n, t, d]) => (
+            <li key={n} className="flex gap-3 rounded-[16px] border border-border bg-surface p-4"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-forest text-xs font-bold text-[color:var(--on-forest)]">{n}</span><span><b className="block">{t}</b><span className="text-text-muted">{d}</span></span></li>
           ))}
         </ol>
         <div className="mt-6 flex flex-wrap gap-2"><Link href="/deals/mine" className="btn btn-primary">My deals</Link><Link href="/dashboard" className="btn btn-outline">Post a deal for your business</Link></div>
       </section>
 
-      <div className="relative mt-8 flex items-center gap-2">
-        <SearchPill action="/deals" defaultValue={sp.q} placeholder="Search deals, businesses or cities">
-          {(['city', 'category'] as const).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
-        </SearchPill>
+      <div className="relative mt-10 flex items-center gap-2">
+        <p className="mr-auto min-w-0 truncate text-sm text-text-muted">{sp.q ? <>Results for <b className="text-text">{sp.q}</b></> : null}</p>
         <Dropdown size="md" label={<FiltersLabel />} count={activeFilters}>
           <CleanForm action="/deals" aria-label="Filter deals">
             {sp.q ? <input type="hidden" name="q" value={sp.q} /> : null}

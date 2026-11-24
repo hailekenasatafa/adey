@@ -20,11 +20,11 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
   const canPost = await api.events.canSubmit().then((c) => c.allowed).catch(() => null);
   return (
     <div className="container-x pb-16">
-      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
-        <div><h1 className="text-3xl font-bold">Community events</h1><p className="mt-1 text-text-muted">Festivals, markets, music and gatherings near you and online.</p></div>
+      <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
+        <div><h1 className="text-3xl font-semibold">Community events</h1><p className="mt-1 text-text-muted">Festivals, markets, music and gatherings near you and online.</p></div>
         <div className="flex gap-2"><Link href="/events/mine" className="btn btn-outline btn-sm">My submissions</Link>{canPost && <Link href="/events/new" className="btn btn-primary btn-sm">Submit an event</Link>}</div>
       </div>
-      <EventsBrowser initial={initial} regions={regions} region={region} tag={tag} canPost={!!canPost} />
+      <EventsBrowser initial={initial} regions={regions} region={region} tag={tag} canPost={!!canPost} q={one(sp.q).slice(0, 100)} city={one(sp.city).slice(0, 80)} />
     </div>
   );
 }

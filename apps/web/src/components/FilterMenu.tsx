@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, type ReactNode, type SyntheticEvent } from 'react';
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
 
 /**
  * A toolbar button that opens a panel (filters, categories) instead of showing every option on the page.
@@ -32,11 +33,11 @@ export function Dropdown({ label, count = 0, active = false, align = 'end', wide
     <details ref={ref} className="group sm:relative">
       <summary className={`chip cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden ${on ? 'chip-on' : ''}`}>
         <span className="flex max-w-[14rem] items-center gap-1.5 truncate">{label}</span>
-        {count > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-surface px-1 text-[11px] font-bold text-forest" aria-label={`${count} active`}>{count}</span>}
-        <span aria-hidden className="text-xs transition group-open:rotate-180">▾</span>
+        {count > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-background px-1 text-[11px] font-bold text-text" aria-label={`${count} active`}>{count}</span>}
+        <ChevronDown aria-hidden className="h-4 w-4 transition group-open:rotate-180" />
       </summary>
       <div onClick={close} onSubmit={close}
-        className={`absolute inset-x-0 z-40 mt-2 max-h-[70vh] overflow-auto rounded-[20px] border border-border bg-surface p-4 shadow-xl sm:inset-x-auto ${align === 'end' ? 'sm:right-0' : 'sm:left-0'} ${width}`}>
+        className={`absolute inset-x-0 z-40 mt-2 max-h-[70vh] overflow-auto rounded-[20px] border border-border bg-surface-raised p-5 shadow-lg sm:inset-x-auto ${align === 'end' ? 'sm:right-0' : 'sm:left-0'} ${width}`}>
         {children}
       </div>
     </details>

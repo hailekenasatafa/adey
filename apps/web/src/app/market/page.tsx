@@ -4,7 +4,7 @@ import type { Market } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { BusinessCardView, Empty, ProductCardView } from '@/components/ui';
 import { Dropdown } from '@/components/FilterMenu';
-import { FiltersLabel, SearchPill } from '@/components/SearchPill';
+import { FiltersLabel } from '@/components/SearchPill';
 import { FxAttribution } from '@/components/commerce';
 
 export const dynamic = 'force-dynamic';
@@ -54,21 +54,19 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="container-x pb-16">
-      <div className="mt-8">
-        <h1 className="text-3xl font-bold">Adey Market</h1>
-        <p className="text-text-muted">Habesha-owned businesses near you.</p>
+      <div className="mt-6">
+        <h1 className="text-3xl font-semibold">Adey Market</h1>
+        <p className="mt-1 text-text-muted">Habesha-owned businesses near you.</p>
       </div>
       <div className="mt-4 flex gap-6 border-b border-border text-sm font-semibold" role="tablist">
         {([['businesses', 'Businesses'], ['products', 'Products']] as const).map(([v, l]) => (
           <Link key={v} role="tab" aria-selected={view === v} href={v === 'businesses' ? '/market' : '/market?view=products'}
-            className={`-mb-px border-b-2 pb-2.5 ${view === v ? 'border-forest text-text' : 'border-transparent text-text-muted hover:text-text'}`}>{l}</Link>
+            className={`-mb-px border-b-2 pb-3 ${view === v ? 'border-text text-text' : 'border-transparent text-text-muted hover:text-text'}`}>{l}</Link>
         ))}
       </div>
 
       <div className="relative mt-5 flex items-center gap-2">
-        <SearchPill action="/market" defaultValue={sp.q} placeholder={view === 'products' ? 'Search products' : 'Search a business, food, service or city'}>
-          {(['view', ...filterKeys] as (keyof SP)[]).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
-        </SearchPill>
+        <p className="mr-auto min-w-0 truncate text-sm text-text-muted">{sp.q ? <>Results for <b className="text-text">{sp.q}</b></> : null}</p>
         <Dropdown size="md" count={activeFilters} label={<FiltersLabel />}>
           <form action="/market" aria-label={view === 'products' ? 'Filter products' : 'Filter businesses'}>
             {(['view', 'q'] as const).map((k) => (sp[k] ? <input key={k} type="hidden" name={k} value={sp[k]} /> : null))}
@@ -84,7 +82,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
             <Field id="mk-sort" label="Sort by">
               <select id="mk-sort" name="sort" defaultValue={sp.sort ?? 'relevance'} className="input">{(view === 'products' ? PRODUCT_SORTS : BUSINESS_SORTS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
             </Field>
-            <div className="mt-4">{view === 'products' ? check('authentic', '🌼 Authentic Habesha only') : check('verified', 'Verified businesses only')}</div>
+            <div className="mt-4">{view === 'products' ? check('authentic', 'Authentic Habesha only') : check('verified', 'Verified businesses only')}</div>
             <div className="mt-5 flex gap-2 border-t border-border pt-4">
               <Link href={qs({ q: sp.q, ...Object.fromEntries(filterKeys.map((k) => [k, undefined])) })} className="btn btn-ghost flex-1">Reset</Link>
               <button className="btn btn-primary flex-[2]">Show results</button>
@@ -96,8 +94,8 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
 
       <div className="mt-6">
         {results === null ? <Empty title="Couldn't load results" body="Please try again in a moment." action={<Link href={qs({})} className="btn btn-primary btn-sm">Retry</Link>} />
-          : view === 'businesses' ? (businesses?.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{businesses.map((b) => <BusinessCardView key={b.id} b={b} signals={signals[b.id!]} />)}</div> : <Empty title="No businesses match" body="Try another category or clear filters." action={<Link href="/market" className="btn btn-primary btn-sm">Clear filters</Link>} />)
-          : products?.length ? <><div className="grid grid-cols-2 gap-4 lg:grid-cols-4">{products.map((p) => <ProductCardView key={p.id} p={p} />)}</div><FxAttribution className="mt-3 text-[11px] text-text-muted" /></>
+          : view === 'businesses' ? (businesses?.length ? <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{businesses.map((b) => <BusinessCardView key={b.id} b={b} signals={signals[b.id!]} />)}</div> : <Empty title="No businesses match" body="Try another category or clear filters." action={<Link href="/market" className="btn btn-primary btn-sm">Clear filters</Link>} />)
+          : products?.length ? <><div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">{products.map((p) => <ProductCardView key={p.id} p={p} />)}</div><FxAttribution className="mt-3 text-[11px] text-text-muted" /></>
           : <Empty title="No products match" body="Try fewer filters. Only items listed by real sellers appear here." action={<Link href="/market" className="btn btn-primary btn-sm">Clear filters</Link>} />}
       </div>
       <div className="mt-8 flex justify-center gap-2">
