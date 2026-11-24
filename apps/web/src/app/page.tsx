@@ -30,12 +30,12 @@ export default async function Home() {
       </section>
 
       {cats.length > 0 && (
-        <nav aria-label="Browse by category" className="no-scrollbar -mx-5 mt-8 flex gap-1 overflow-x-auto border-b border-border px-5 sm:-mx-8 sm:px-8">
+        <nav aria-label="Browse by category" className="no-scrollbar relative -mx-5 mt-8 flex gap-1 overflow-x-auto border-b border-border px-5 sm:-mx-8 sm:px-8">
           {cats.map((c) => {
             const Icon = categoryIcon(c.icon);
             const n = counts.get(c.id);
             return (
-              <Link key={c.id} href={`/market?category=${c.id}`} className="group flex shrink-0 flex-col items-center gap-2 border-b-2 border-transparent px-3 pb-3 pt-1 text-text-muted transition hover:border-border-strong hover:text-text">
+              <Link key={c.id} href={`/market?category=${c.id}`} className="group relative flex shrink-0 flex-col items-center gap-2 border-b-2 border-transparent px-3 pb-3 pt-1 text-text-muted transition hover:border-border-strong hover:text-text">
                 <Icon aria-hidden className="h-6 w-6" />
                 <span className="whitespace-nowrap text-xs font-semibold">{c.name_en}{n ? <span className="sr-only">, {n} businesses</span> : null}</span>
               </Link>
