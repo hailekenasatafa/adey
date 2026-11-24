@@ -1,4 +1,5 @@
 'use client';
+import { ArrowLeft, MessageCircle, ShoppingBag } from 'lucide-react';
 import { use, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -59,7 +60,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
   return (
     <div className="container-x max-w-5xl pb-16">
-      <Link href="/orders" className="btn btn-ghost btn-sm mt-6">← Orders</Link>
+      <Link href="/orders" className="btn btn-ghost btn-sm mt-6"><ArrowLeft aria-hidden className="h-4 w-4" />Orders</Link>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
         <div><h1 className="text-2xl font-bold">Order {o.order_number}</h1><p className="text-sm text-text-muted">{o.business ? <Link href={`/business/${o.business.slug}`} className="text-forest font-semibold">{o.business.name}</Link> : 'Seller'} · placed {fmtDate(o.created_at)}</p></div>
         <OrderStatusBadge status={o.status} />
@@ -72,7 +73,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             <h2 id="items-h" className="font-semibold">Items</h2>
             <ul className="mt-3 divide-y divide-border">{o.items.map((i) => { const img = mediaUrlFromPath('product-media', i.image); return (
               <li key={i.id} className="flex gap-3 py-3">
-                <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-surface-muted">{img ? <img src={img} alt="" className="h-full w-full object-cover" /> : '🛍️'}</span>
+                <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[10px] bg-surface-muted">{img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <ShoppingBag aria-hidden className="h-5 w-5 text-text-muted" />}</span>
                 <div className="flex-1 text-sm">{i.product_id ? <Link href={`/product/${i.product_id}`} className="font-semibold">{i.name}</Link> : <p className="font-semibold">{i.name}</p>}{i.variant_title && <p className="text-text-muted">{i.variant_title}</p>}<p className="text-text-muted">{i.quantity} × {formatMoney(i.unit_price_cents, o.currency)}</p></div>
                 <p className="text-sm font-semibold">{formatMoney(i.line_total_cents, o.currency)}</p>
               </li>
@@ -147,7 +148,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
               </div>
             )}
             {canReport && !reporting && <button className="btn btn-outline w-full" onClick={() => setReporting(true)}>Report a problem</button>}
-            {o.status !== 'pending_payment' && <button className="btn btn-secondary w-full" disabled={message.isPending} onClick={() => message.mutate()}>💬 Message seller</button>}
+            {o.status !== 'pending_payment' && <button className="btn btn-secondary w-full" disabled={message.isPending} onClick={() => message.mutate()}><MessageCircle aria-hidden className="h-4 w-4" />Message seller</button>}
             <Link href="/help" className="btn btn-ghost w-full">Get help</Link>
             {err && <p role="alert" className="text-sm text-danger">{friendlyError(err)}</p>}
           </section>

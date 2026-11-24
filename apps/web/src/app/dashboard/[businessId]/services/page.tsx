@@ -1,4 +1,5 @@
 'use client';
+import { ArrowDown, ArrowUp, Star } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -84,7 +85,7 @@ export default function MenuAndServices() {
           <div className="flex items-center gap-3 sm:col-span-2">
             <label className="relative grid h-20 w-20 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-[14px] border border-dashed border-border text-xs text-text-muted">{d.image_path ? <img src={mediaUrlFromPath('business-media', d.image_path)!} alt="" className="h-full w-full object-cover" /> : busy ? '…' : '+ Photo'}<input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && photo(e.target.files[0])} /></label>
             <div className="space-y-1.5 text-sm">
-              <label className="flex items-center gap-2"><input type="checkbox" checked={d.is_signature} onChange={(e) => set({ is_signature: e.target.checked })} className="h-4 w-4 accent-[var(--forest)]" /> ★ Signature — something you’re known for</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={d.is_signature} onChange={(e) => set({ is_signature: e.target.checked })} className="h-4 w-4 accent-[var(--forest)]" /> Signature: something you’re known for</label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={d.is_active} onChange={(e) => set({ is_active: e.target.checked })} className="h-4 w-4 accent-[var(--forest)]" /> Visible on your page</label>
               {d.image_path && <button type="button" onClick={() => set({ image_path: null })} className="text-xs font-semibold text-text-muted hover:text-danger">Remove photo</button>}
             </div>
@@ -106,12 +107,12 @@ export default function MenuAndServices() {
                 <li key={s.id} className="flex items-center gap-3 p-3">
                   {s.image_path ? <img src={mediaUrlFromPath('business-media', s.image_path)!} alt="" className="h-12 w-12 shrink-0 rounded-[10px] object-cover" /> : <div className="grid h-12 w-12 shrink-0 place-items-center rounded-[10px] bg-surface-muted text-text-muted">—</div>}
                   <button onClick={() => open(s)} className="min-w-0 flex-1 text-left">
-                    <p className="truncate font-semibold">{s.name}{s.is_signature && <Badge tone="accent" className="ml-2">★ Signature</Badge>}{!s.is_active && <Badge tone="neutral" className="ml-2">Hidden</Badge>}</p>
+                    <p className="truncate font-semibold">{s.name}{s.is_signature && <Badge tone="accent" className="ml-2"><Star aria-hidden className="h-3 w-3 fill-current" />Signature</Badge>}{!s.is_active && <Badge tone="neutral" className="ml-2">Hidden</Badge>}</p>
                     <p className="text-sm text-forest">{s.price_cents == null ? <span className="text-text-muted">Ask for price</span> : `${s.price_note ? s.price_note + ' ' : ''}${formatMoney(s.price_cents, s.currency)}`}{s.duration_minutes ? ` · ${s.duration_minutes} min` : ''}</p>
                   </button>
                   <div className="flex shrink-0 flex-col">
-                    <button onClick={() => move(s.id, -1)} disabled={busy || idx === 0} aria-label={`Move ${s.name} up`} className="btn btn-ghost btn-sm h-7 px-2">↑</button>
-                    <button onClick={() => move(s.id, 1)} disabled={busy || idx === g.items.length - 1} aria-label={`Move ${s.name} down`} className="btn btn-ghost btn-sm h-7 px-2">↓</button>
+                    <button onClick={() => move(s.id, -1)} disabled={busy || idx === 0} aria-label={`Move ${s.name} up`} className="btn btn-ghost btn-sm h-7 px-2"><ArrowUp aria-hidden className="h-4 w-4" /></button>
+                    <button onClick={() => move(s.id, 1)} disabled={busy || idx === g.items.length - 1} aria-label={`Move ${s.name} down`} className="btn btn-ghost btn-sm h-7 px-2"><ArrowDown aria-hidden className="h-4 w-4" /></button>
                   </div>
                 </li>
               ))}
@@ -119,7 +120,7 @@ export default function MenuAndServices() {
           </section>
         ))}
       </div>
-      {biz.data?.slug && <p className="mt-6 text-xs text-text-muted"><Link href={`/business/${biz.data.slug}`} className="font-semibold text-forest hover:underline">See how it looks on your page →</Link></p>}
+      {biz.data?.slug && <p className="mt-6 text-xs text-text-muted"><Link href={`/business/${biz.data.slug}`} className="font-semibold text-forest hover:underline">See how it looks on your page</Link></p>}
     </div>
   );
 }

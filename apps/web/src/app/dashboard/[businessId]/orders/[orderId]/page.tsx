@@ -1,4 +1,5 @@
 'use client';
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -35,7 +36,7 @@ export default function SellerOrder() {
   const o = q.data;
   if (!permsLoading && !can('orders.fulfill')) return <NoAccess what="Orders" />;
   if (q.isLoading) return <ListSkeleton />;
-  if (q.error || !o || o.business_id !== businessId) return <div><Link href={`/dashboard/${businessId}/orders`} className="text-sm font-semibold text-forest">← Orders</Link><p role="alert" className="mt-4 text-sm text-danger">{q.error ? friendlyError(q.error) : 'Order not found.'}</p></div>;
+  if (q.error || !o || o.business_id !== businessId) return <div><Link href={`/dashboard/${businessId}/orders`} className="inline-flex items-center gap-1 text-sm font-semibold text-forest"><ArrowLeft aria-hidden className="h-4 w-4" />Orders</Link><p role="alert" className="mt-4 text-sm text-danger">{q.error ? friendlyError(q.error) : 'Order not found.'}</p></div>;
 
   const next = sellerNextAction(o);
   const addr = o.shipping_address as unknown as AddressSnapshot | null;
@@ -53,7 +54,7 @@ export default function SellerOrder() {
 
   return (
     <div className="space-y-4">
-      <Link href={`/dashboard/${businessId}/orders`} className="text-sm font-semibold text-forest">← Orders</Link>
+      <Link href={`/dashboard/${businessId}/orders`} className="inline-flex items-center gap-1 text-sm font-semibold text-forest"><ArrowLeft aria-hidden className="h-4 w-4" />Orders</Link>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div><h1 className="text-2xl font-bold">Order #{o.order_number}</h1><p className="text-sm text-text-muted">{o.buyer?.display_name ?? 'Buyer'} · placed {fmtDate(o.paid_at ?? o.created_at)}</p></div>
         <div className="flex items-center gap-2"><OrderStatusBadge status={o.status} seller /><button onClick={message} className="btn btn-outline btn-sm">Message buyer</button></div>

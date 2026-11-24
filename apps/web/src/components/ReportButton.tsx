@@ -1,4 +1,5 @@
 'use client';
+import { Flag } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -23,10 +24,10 @@ export function ReportButton({ targetType, targetId, label = 'Report', className
     onError: (e) => setError(friendlyError(e)),
   });
   const cls = `text-xs font-semibold text-text-muted underline-offset-4 hover:text-danger hover:underline ${className}`;
-  if (!session) return <Link href={`/auth/sign-in?next=${encodeURIComponent(path)}`} className={cls}>⚑ {label}</Link>;
+  if (!session) return <Link href={`/auth/sign-in?next=${encodeURIComponent(path)}`} className={cls}><Flag aria-hidden className="h-3.5 w-3.5" />{label}</Link>;
   return (
     <>
-      <button type="button" onClick={() => { setOpen(true); send.reset(); setError(null); }} className={cls}>⚑ {label}</button>
+      <button type="button" onClick={() => { setOpen(true); send.reset(); setError(null); }} className={cls}><Flag aria-hidden className="h-3.5 w-3.5" />{label}</button>
       {open && (
         <div className="fixed inset-0 z-[60] grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="Report">
           <div className="card w-full max-w-md p-5">

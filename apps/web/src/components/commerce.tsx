@@ -1,4 +1,5 @@
 'use client';
+import { Award, BadgeCheck, Flower2, Star } from 'lucide-react';
 import React from 'react';
 import {
   certificationLabels, countriesForPicker, estimateConversion, formatMoney, orderStatusLabels, orderStatusTone, payablePrice, sellerOrderStatusLabels, trustTierLabels,
@@ -49,18 +50,18 @@ export function OrderStatusBadge({ status, seller }: { status: OrderStatus; sell
 export function TrustBadge({ tier }: { tier: string | null | undefined }) {
   const label = trustTierLabels[(tier ?? 'new') as TrustTier];
   if (!label) return null;
-  return <Badge tone={tier === 'verified' ? 'success' : 'accent'}>{tier === 'verified' ? '✓' : '★'} {label}</Badge>;
+  return <Badge tone={tier === 'verified' ? 'success' : 'accent'}>{tier === 'verified' ? <BadgeCheck aria-hidden className="h-3.5 w-3.5" /> : <Award aria-hidden className="h-3.5 w-3.5" />}{label}</Badge>;
 }
 
 /** Product badge backed by an approved, still-valid certification record. */
 export function CertificationBadge({ type = 'authentic_habesha' }: { type?: CertificationType }) {
-  return <Badge tone="accent">🌼 {certificationLabels[type]}</Badge>;
+  return <Badge tone="accent"><Flower2 aria-hidden className="h-3.5 w-3.5" />{certificationLabels[type]}</Badge>;
 }
 
 export function Stars({ value, size = 'text-sm' }: { value: number | null | undefined; size?: string }) {
   if (value == null) return null;
   const rounded = Math.round(Number(value));
-  return <span className={`${size} text-gold`} aria-label={`${Number(value).toFixed(1)} out of 5`}>{'★'.repeat(rounded)}<span className="text-border">{'★'.repeat(5 - rounded)}</span></span>;
+  return <span role="img" className={`${size} inline-flex items-center gap-0.5`} aria-label={`${Number(value).toFixed(1)} out of 5`}>{[1, 2, 3, 4, 5].map((n) => <Star key={n} aria-hidden className={`h-[1em] w-[1em] ${n <= rounded ? 'fill-current text-gold' : 'text-border-strong'}`} />)}</span>;
 }
 
 export function StarInput({ value, onChange, label }: { value: number | null; onChange: (v: number) => void; label: string }) {
@@ -68,7 +69,7 @@ export function StarInput({ value, onChange, label }: { value: number | null; on
     <div role="radiogroup" aria-label={label} className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
         <button key={n} type="button" role="radio" aria-checked={value === n} aria-label={`${n} star${n > 1 ? 's' : ''}`} onClick={() => onChange(n)}
-          className={`text-2xl leading-none transition ${value != null && n <= value ? 'text-gold' : 'text-border hover:text-gold'}`}>★</button>
+          className={`grid h-9 w-9 place-items-center rounded-full transition hover:bg-surface-muted ${value != null && n <= value ? 'text-gold' : 'text-border-strong hover:text-gold'}`}><Star aria-hidden className={`h-7 w-7 ${value != null && n <= value ? 'fill-current' : ''}`} /></button>
       ))}
     </div>
   );

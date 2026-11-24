@@ -1,4 +1,5 @@
 'use client';
+import { Paperclip } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -39,12 +40,12 @@ export default function Thread() {
         {list.map((m) => { const mine = m.sender_id === session?.user.id; const atts = (Array.isArray(m.attachments) ? m.attachments : []) as unknown as { path: string; type: string; name: string }[]; return (
           <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}><div className={`max-w-[80%] rounded-[16px] px-4 py-2 text-sm ${mine ? 'bg-forest text-[var(--on-forest)]' : 'bg-surface-muted'}`}>{atts.map((a) => <Attachment key={a.path} a={a} />)}{m.body && <p className="whitespace-pre-wrap">{m.body}</p>}<p className={`mt-1 text-[10px] ${mine ? 'opacity-70' : 'text-text-muted'}`}>{new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</p></div></div>
         ); })}
-        {!list.length && !msgs.isLoading && <p className="text-center text-sm text-text-muted">Say hello 👋</p>}
+        {!list.length && !msgs.isLoading && <p className="text-center text-sm text-text-muted">No messages yet. Say hello.</p>}
         <div ref={bottom} />
       </div>
       {error && <p className="mt-2 text-sm text-danger">{error}</p>}
       <form onSubmit={(e) => { e.preventDefault(); if (text.trim()) send.mutate(); }} className="flex gap-2 py-4">
-        <label className="btn btn-outline cursor-pointer">📎<input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} /></label>
+        <label className="btn btn-outline cursor-pointer" aria-label="Attach a file" title="Attach a file"><Paperclip aria-hidden className="h-5 w-5" /><input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} /></label>
         <input value={text} onChange={(e) => setText(e.target.value)} className="input" placeholder="Message…" maxLength={4000} />
         <button className="btn btn-primary" disabled={!text.trim() || send.isPending}>Send</button>
       </form>

@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import type { Market } from '@adey/shared';
@@ -99,8 +100,8 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
           : <Empty title="No products match" body="Try fewer filters. Only items listed by real sellers appear here." action={<Link href="/market" className="btn btn-primary btn-sm">Clear filters</Link>} />}
       </div>
       <div className="mt-8 flex justify-center gap-2">
-        {page > 1 && <Link href={qs({ page: String(page - 1) })} className="btn btn-outline btn-sm">← Previous</Link>}
-        {(results?.length ?? 0) === limit && <Link href={qs({ page: String(page + 1) })} className="btn btn-outline btn-sm">Next →</Link>}
+        {page > 1 && <Link href={qs({ page: String(page - 1) })} className="btn btn-outline btn-sm"><ChevronLeft aria-hidden className="h-4 w-4" />Previous</Link>}
+        {(results?.length ?? 0) === limit && <Link href={qs({ page: String(page + 1) })} className="btn btn-outline btn-sm">Next<ChevronRight aria-hidden className="h-4 w-4" /></Link>}
       </div>
     </div>
   );

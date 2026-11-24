@@ -1,4 +1,5 @@
 'use client';
+import { TicketPercent } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -52,7 +53,7 @@ function Group({ title, rows, onShow, empty }: { title: string; rows: MyDeal[]; 
             return (
               <li key={d.id} className={`card flex flex-col gap-4 p-4 sm:flex-row sm:items-center ${ok ? '' : 'opacity-75'}`}>
                 <div className="flex min-w-0 flex-1 gap-3">
-                  <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-[14px] bg-forest-soft text-xl">{logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : '🏷️'}</div>
+                  <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-[14px] bg-forest-soft text-xl">{logo ? <img src={logo} alt="" className="h-full w-full object-cover" /> : <TicketPercent aria-hidden className="h-6 w-6" />}</div>
                   <div className="min-w-0">
                     <Link href={`/business/${d.business.slug}`} className="text-xs font-semibold text-forest hover:underline">{d.business.name}</Link>
                     <p className="font-semibold leading-snug">{d.deal.title}</p>

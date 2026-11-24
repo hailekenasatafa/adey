@@ -1,4 +1,5 @@
 'use client';
+import { FileText, Globe, Heart, MessageCircle, Navigation, Phone, Share2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -25,14 +26,14 @@ export function BusinessActions({ business: b }: { business: B }) {
     <div className="card p-4 space-y-2">
       {mine && <div className="rounded-[12px] bg-forest-soft p-3 text-sm"><p className="font-semibold text-forest">This is your business</p><div className="mt-2 flex flex-wrap gap-2"><Link href={`/dashboard/${b.id}`} className="btn btn-primary btn-sm">Dashboard</Link><Link href={`/dashboard/${b.id}/deals`} className="btn btn-secondary btn-sm">Deals</Link></div></div>}
       <div className="grid grid-cols-2 gap-2">
-        {b.phone ? <a href={`tel:${b.phone}`} onClick={() => track('call_click')} className="btn btn-primary btn-sm">📞 Call</a> : <button disabled className="btn btn-primary btn-sm">📞 Call</button>}
-        <a href={`https://www.google.com/maps/search/?api=1&query=${b.lat != null ? `${b.lat},${b.lng}` : encodeURIComponent(b.address)}`} target="_blank" rel="noreferrer" onClick={() => track('directions_click')} className="btn btn-secondary btn-sm">🧭 Directions</a>
-        <button onClick={() => requireAuth(() => router.push(`/inquiry/${b.id}?type=contact`))} className="btn btn-secondary btn-sm">💬 Contact</button>
-        <button onClick={() => requireAuth(() => router.push(`/inquiry/${b.id}?type=quote`))} className="btn btn-secondary btn-sm">📄 Request Quote</button>
-        <button onClick={() => requireAuth(() => toggle.mutate())} className="btn btn-outline btn-sm">{isSaved ? '❤️ Saved' : '🤍 Save'}</button>
-        <button onClick={share} className="btn btn-outline btn-sm">↗ Share</button>
+        {b.phone ? <a href={`tel:${b.phone}`} onClick={() => track('call_click')} className="btn btn-primary btn-sm"><Phone aria-hidden className="h-4 w-4" />Call</a> : <button disabled className="btn btn-primary btn-sm"><Phone aria-hidden className="h-4 w-4" />Call</button>}
+        <a href={`https://www.google.com/maps/search/?api=1&query=${b.lat != null ? `${b.lat},${b.lng}` : encodeURIComponent(b.address)}`} target="_blank" rel="noreferrer" onClick={() => track('directions_click')} className="btn btn-secondary btn-sm"><Navigation aria-hidden className="h-4 w-4" />Directions</a>
+        <button onClick={() => requireAuth(() => router.push(`/inquiry/${b.id}?type=contact`))} className="btn btn-secondary btn-sm"><MessageCircle aria-hidden className="h-4 w-4" />Contact</button>
+        <button onClick={() => requireAuth(() => router.push(`/inquiry/${b.id}?type=quote`))} className="btn btn-secondary btn-sm"><FileText aria-hidden className="h-4 w-4" />Request a quote</button>
+        <button onClick={() => requireAuth(() => toggle.mutate())} className="btn btn-outline btn-sm" aria-pressed={isSaved}><Heart aria-hidden className={`h-4 w-4 ${isSaved ? 'fill-[#e0484d] text-[#e0484d]' : ''}`} />{isSaved ? 'Saved' : 'Save'}</button>
+        <button onClick={share} className="btn btn-outline btn-sm"><Share2 aria-hidden className="h-4 w-4" />Share</button>
       </div>
-      {b.website && <a href={/^https?:/.test(b.website) ? b.website : `https://${b.website}`} target="_blank" rel="noreferrer" onClick={() => track('website_click')} className="btn btn-ghost btn-sm w-full">🌐 {b.website.replace(/^https?:\/\//, '')}</a>}
+      {b.website && <a href={/^https?:/.test(b.website) ? b.website : `https://${b.website}`} target="_blank" rel="noreferrer" onClick={() => track('website_click')} className="btn btn-ghost btn-sm w-full"><Globe aria-hidden className="h-4 w-4" />{b.website.replace(/^https?:\/\//, '')}</a>}
     </div>
   );
 }

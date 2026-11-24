@@ -1,4 +1,5 @@
 'use client';
+import { Banknote, Bell, CalendarDays, Flower2, Gift, IdCard, Mail, Megaphone, MessageCircle, Package, ShoppingBag, Star, TicketPercent, TrendingDown, TriangleAlert, Truck, Undo2, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationRoute } from '@adey/shared';
@@ -9,9 +10,9 @@ import { timeAgo } from '@/lib/media';
 import { ErrorLine, SignedIn } from '@/components/community/common';
 
 const PAGE = 30;
-const ICON: Record<string, string> = {
-  order_new: '🛍️', order_update: '📦', shipment_update: '🚚', escrow_released: '💸', payout_update: '💸', refund_update: '↩️', order_dispute: '⚠️', kyc_update: '🪪', certification_update: '🌼',
-  review_new: '⭐', deal_new: '🏷️', low_stock: '📉', event_reminder: '📅', event_update: '📅', rewards_update: '🎁', support_reply: '💬', announcement: '📣', message_new: '✉️',
+const ICON: Record<string, LucideIcon> = {
+  order_new: ShoppingBag, order_update: Package, shipment_update: Truck, escrow_released: Banknote, payout_update: Banknote, refund_update: Undo2, order_dispute: TriangleAlert, kyc_update: IdCard, certification_update: Flower2,
+  review_new: Star, deal_new: TicketPercent, low_stock: TrendingDown, event_reminder: CalendarDays, event_update: CalendarDays, rewards_update: Gift, support_reply: MessageCircle, announcement: Megaphone, message_new: Mail,
 };
 /** Only same-site paths are followed; older notification types are translated to this site's pages. */
 const safeRoute = (data: unknown) => notificationRoute(data, 'web');
@@ -49,7 +50,7 @@ function List() {
                 const route = safeRoute(n.data);
                 const inner = (
                   <div className="flex gap-3">
-                    <span className="text-xl" aria-hidden>{ICON[n.type] ?? '🔔'}</span>
+                    {(() => { const Icon = ICON[n.type] ?? Bell; return <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface-muted text-text-muted"><Icon className="h-5 w-5" /></span>; })()}
                     <div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><p className={`text-sm ${n.read_at ? '' : 'font-bold'}`}>{n.title}</p><span className="shrink-0 text-xs text-text-muted">{timeAgo(n.created_at)}</span></div>{n.body && <p className="mt-0.5 text-sm text-text-muted">{n.body}</p>}</div>
                     {!n.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gold" aria-label="Unread" />}
                   </div>

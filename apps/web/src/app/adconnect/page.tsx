@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
@@ -100,7 +101,7 @@ export default async function AdConnectPage({ searchParams }: { searchParams: Pr
       {active > 0 && <p className="mt-2 text-right text-sm"><Link href={hrefFor({ q: st.q, category: '', max: '', sort: 'relevance', page: 1 })} className="font-semibold text-text-muted underline-offset-4 hover:text-forest hover:underline">Clear filters</Link></p>}
 
       <div className="mt-6">{screens.length ? <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{screens.map((s) => <ScreenCardView key={s.id} s={s} />)}</div> : <Empty title="No screens yet" body={st.q || active ? 'Nothing matches — try another search or clear the filters.' : 'Screens appear here as soon as businesses list them.'} action={<Link href={st.q || active ? '/adconnect' : '/dashboard'} className="btn btn-primary btn-sm">{st.q || active ? 'Clear search' : 'List your screen'}</Link>} />}</div>
-      <div className="mt-8 flex justify-center gap-2">{st.page > 1 && <Link href={hrefFor({ ...st, page: st.page - 1 })} className="btn btn-outline btn-sm">← Previous</Link>}{screens.length === PAGE_SIZE && <Link href={hrefFor({ ...st, page: st.page + 1 })} className="btn btn-outline btn-sm">Next →</Link>}</div>
+      <div className="mt-8 flex justify-center gap-2">{st.page > 1 && <Link href={hrefFor({ ...st, page: st.page - 1 })} className="btn btn-outline btn-sm"><ChevronLeft aria-hidden className="h-4 w-4" />Previous</Link>}{screens.length === PAGE_SIZE && <Link href={hrefFor({ ...st, page: st.page + 1 })} className="btn btn-outline btn-sm">Next<ChevronRight aria-hidden className="h-4 w-4" /></Link>}</div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 'use client';
+import { ChevronLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -109,7 +110,7 @@ function Chat({ id }: { id: string }) {
   return (
     <div className="container-x max-w-3xl pb-16">
       <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
-        <div><Link href="/support" className="text-sm text-forest hover:underline">‹ All conversations</Link><h1 className="mt-1 text-2xl font-bold">{t.subject ?? 'Conversation'}</h1></div>
+        <div><Link href="/support" className="inline-flex items-center gap-1 text-sm text-forest hover:underline"><ChevronLeft aria-hidden className="h-4 w-4" />All conversations</Link><h1 className="mt-1 text-2xl font-bold">{t.subject ?? 'Conversation'}</h1></div>
         <div className="flex items-center gap-2"><Badge tone={STATUS[t.status][1]}>{STATUS[t.status][0]}</Badge>{t.order_id && <Link href={`/orders/${t.order_id}`} className="btn btn-outline btn-sm">View order</Link>}</div>
       </div>
       <p className="mt-2 text-xs text-text-muted">Replies marked “automated” come from the Adey Assistant, not a person. Do not share passwords or card numbers.</p>

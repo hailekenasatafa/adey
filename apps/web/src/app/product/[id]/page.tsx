@@ -1,3 +1,4 @@
+import { BadgeCheck, Store } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -57,9 +58,9 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <Rating avg={p.rating_avg} count={p.rating_count} />
           </div>
           <Link href={`/business/${b.slug}`} className="card mt-5 flex items-center gap-3 p-4 hover:shadow-md">
-            <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-[10px] bg-forest-soft">{b.logo_url ? <img src={mediaUrlFromPath('business-media', b.logo_url)!} alt="" className="h-full w-full object-cover" /> : '🏪'}</div>
+            <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-[10px] bg-forest-soft">{b.logo_url ? <img src={mediaUrlFromPath('business-media', b.logo_url)!} alt="" className="h-full w-full object-cover" /> : <Store aria-hidden className="h-5 w-5 text-forest" />}</div>
             <div className="min-w-0 flex-1"><p className="font-semibold">{b.name}</p><p className="text-xs text-text-muted">{[b.city, b.state, b.country ? countryName(b.country) : null].filter(Boolean).join(', ')}</p></div>
-            <div className="flex flex-col items-end gap-1"><TrustBadge tier={b.trust_tier} />{verified && b.trust_tier === 'new' && <Badge tone="success">✓ Verified seller</Badge>}</div>
+            <div className="flex flex-col items-end gap-1"><TrustBadge tier={b.trust_tier} />{verified && b.trust_tier === 'new' && <Badge tone="success"><BadgeCheck aria-hidden className="h-3.5 w-3.5" />Verified seller</Badge>}</div>
           </Link>
           <BuyBox
             product={{ id: p.id, name: p.name, price_cents: p.price_cents, currency: p.currency, alt_price_cents: p.alt_price_cents, alt_currency: p.alt_currency, track_inventory: p.track_inventory, stock_quantity: p.stock_quantity, max_per_order: p.max_per_order, low_stock_threshold: p.low_stock_threshold }}

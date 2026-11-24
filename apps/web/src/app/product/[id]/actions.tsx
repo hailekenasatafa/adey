@@ -1,4 +1,5 @@
 'use client';
+import { FileText, Heart, MessageCircle, Share2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,10 +17,10 @@ export function ProductActions({ productId, businessId, name }: { productId: str
   const go = (type: 'contact' | 'quote') => (session ? router.push(`/inquiry/${businessId}?type=${type}&productId=${productId}`) : router.push(`/auth/sign-in?next=/product/${productId}`));
   return (
     <div className="mt-3 grid gap-2 grid-cols-2">
-      <button onClick={() => go('contact')} className="btn btn-outline">💬 Contact seller</button>
-      <button onClick={() => go('quote')} className="btn btn-outline">📄 Request quotation</button>
-      <button onClick={() => (session ? toggle.mutate() : router.push(`/auth/sign-in?next=/product/${productId}`))} className="btn btn-ghost" aria-pressed={isSaved}>{isSaved ? '❤️ Saved' : '🤍 Save'}</button>
-      <button onClick={async () => { const url = window.location.href; if (navigator.share) await navigator.share({ title: name, url }).catch(() => {}); else { await navigator.clipboard.writeText(url); alert('Link copied'); } }} className="btn btn-ghost">↗ Share</button>
+      <button onClick={() => go('contact')} className="btn btn-outline"><MessageCircle aria-hidden className="h-4 w-4" />Contact seller</button>
+      <button onClick={() => go('quote')} className="btn btn-outline"><FileText aria-hidden className="h-4 w-4" />Request a quote</button>
+      <button onClick={() => (session ? toggle.mutate() : router.push(`/auth/sign-in?next=/product/${productId}`))} className="btn btn-ghost" aria-pressed={isSaved}><Heart aria-hidden className={`h-4 w-4 ${isSaved ? 'fill-[#e0484d] text-[#e0484d]' : ''}`} />{isSaved ? 'Saved' : 'Save'}</button>
+      <button onClick={async () => { const url = window.location.href; if (navigator.share) await navigator.share({ title: name, url }).catch(() => {}); else { await navigator.clipboard.writeText(url); alert('Link copied'); } }} className="btn btn-ghost"><Share2 aria-hidden className="h-4 w-4" />Share</button>
     </div>
   );
 }

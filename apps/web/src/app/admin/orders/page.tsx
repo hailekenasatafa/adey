@@ -1,4 +1,5 @@
 'use client';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -44,7 +45,7 @@ function Page() {
 function Detail({ id, onBack }: { id: string; onBack: () => void }) {
   const q = useQuery({ queryKey: ['admin-order', id], queryFn: () => api.admin.order(id) });
   const o = q.data;
-  const back = <button type="button" onClick={onBack} className="btn btn-outline btn-sm mb-3">← All orders</button>;
+  const back = <button type="button" onClick={onBack} className="btn btn-outline btn-sm mb-3"><ArrowLeft aria-hidden className="h-4 w-4" />All orders</button>;
   if (q.isLoading) return <div>{back}<Loading /></div>;
   if (!o) return <div>{back}<ErrorLine error={q.error ?? 'Order not found.'} /></div>;
   const c = o.currency;

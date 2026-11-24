@@ -44,7 +44,7 @@ function SuccessInner({ id }: { id: string }) {
   return (
     <div className="container-x max-w-xl py-12">
       <div className="card space-y-4 p-6">
-        <h1 className="text-2xl font-bold">{s.status === 'paid' ? '✓ Thank you — your order is confirmed' : pending ? 'Confirming your payment…' : 'Payment not completed'}</h1>
+        <h1 className="text-2xl font-bold">{s.status === 'paid' ? 'Thank you, your order is confirmed' : pending ? 'Confirming your payment…' : 'Payment not completed'}</h1>
         <p className="text-sm text-text-muted">{s.status === 'paid' ? 'Adey holds your payment safely until you confirm delivery. Sellers have been notified.' : pending ? 'This can take a moment. You can leave this page — your orders update automatically.' : 'No payment was taken. Your items are back in your cart.'}</p>
         <ul className="divide-y divide-border">
           {s.orders.map((o) => <li key={o.id} className="flex items-center justify-between py-2 text-sm"><Link href={`/orders/${o.id}`} className="font-semibold text-forest">Order {o.order_number}</Link><span className="text-text-muted">{orderStatusLabels[o.status]} · {formatMoney(o.total_cents, s.currency)}</span></li>)}

@@ -21,7 +21,7 @@ function SignUpInner() {
   return (
     <AuthCard title="Create your account" subtitle="Browse without an account. Sign up to save, message, list a business or advertise."
       footer={<>Already have an account? <Link href={`/auth/sign-in${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-text underline underline-offset-4">Sign in</Link></>}>
-      <GoogleSignIn next={next} />
+      <GoogleSignIn next={next} terms />
       <form onSubmit={handleSubmit(async (v) => { setError(null); try { const r = await api.auth.signUp(v.email, v.password, v.displayName, `${SITE_URL}/auth/callback`); if (r.session) { router.push(next); router.refresh(); } else setSent(v.email); } catch (e) { setError(friendlyError(e)); } })} className="space-y-4" noValidate>
         <div><label className="label">Your name</label><input {...register('displayName')} className="input" />{formState.errors.displayName && <p className="text-sm text-danger">{formState.errors.displayName.message}</p>}</div>
         <div><label className="label">Email</label><input {...register('email')} type="email" className="input" />{formState.errors.email && <p className="text-sm text-danger">{formState.errors.email.message}</p>}</div>
@@ -31,7 +31,6 @@ function SignUpInner() {
         <button className="btn btn-primary w-full" disabled={formState.isSubmitting}>Create account</button>
         <p className="text-center text-xs text-text-muted">By creating an account you agree to Adey's <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
       </form>
-      <p className="mt-4 text-center text-xs text-text-muted">Continuing with Google also means you agree to Adey’s <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
     </AuthCard>
   );
 }

@@ -1,4 +1,5 @@
 'use client';
+import { Circle, Paperclip, ShieldCheck, X } from 'lucide-react';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -45,7 +46,7 @@ export default function Verification() {
           <h2 className="font-semibold">{badgeLabels[applying]}</h2>
           <p className="text-sm text-text-muted">{LEVELS.find((l) => l.level === applying)?.docs}</p>
           <div className="flex flex-wrap gap-2">{LEVELS.find((l) => l.level === applying)?.types.concat('other').map((t) => <label key={t} className="chip cursor-pointer">+ {t.replace('_', ' ')}<input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && setFiles((f) => [...f, { file: e.target.files![0], type: t }])} /></label>)}</div>
-          <ul className="text-sm">{files.map((f, i) => <li key={i} className="flex items-center gap-2">📎 {f.file.name} <Badge tone="neutral">{f.type.replace('_', ' ')}</Badge><button onClick={() => setFiles((x) => x.filter((_, j) => j !== i))} className="text-text-muted">✕</button></li>)}</ul>
+          <ul className="text-sm">{files.map((f, i) => <li key={i} className="flex items-center gap-2"><Paperclip aria-hidden className="h-4 w-4 text-text-muted" />{f.file.name} <Badge tone="neutral">{f.type.replace('_', ' ')}</Badge><button onClick={() => setFiles((x) => x.filter((_, j) => j !== i))} aria-label="Remove file" className="grid h-7 w-7 place-items-center rounded-full text-text-muted hover:bg-surface-muted"><X aria-hidden className="h-4 w-4" /></button></li>)}</ul>
           <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="input min-h-20" placeholder="Notes for the reviewer (optional)" />
           {error && <p className="text-sm text-danger">{error}</p>}
           <div className="flex gap-2"><button onClick={() => { setApplying(null); setFiles([]); }} className="btn btn-ghost btn-sm">Cancel</button><button onClick={submit} className="btn btn-primary btn-sm" disabled={busy || (applying !== 'fulfillment' && files.length === 0)}>Submit request</button></div>
@@ -53,7 +54,7 @@ export default function Verification() {
       )}
       <div className="mt-4 space-y-3">{LEVELS.map((l) => { const req = reqs.data?.find((r) => r.level === l.level && ['submitted', 'in_review', 'needs_info'].includes(r.status)); const last = reqs.data?.find((r) => r.level === l.level); const ok = approved.has(l.level); return (
         <div key={l.level} className="card p-4">
-          <div className="flex flex-wrap items-center gap-2"><span className="text-xl">{ok ? '🛡️' : '○'}</span><div className="flex-1"><p className="font-semibold">{badgeLabels[l.level]}</p><p className="text-xs text-text-muted">{l.what}</p></div>{ok ? <Badge tone="success">Approved</Badge> : req ? <Badge tone={req.status === 'needs_info' ? 'warning' : 'info'}>{req.status.replace('_', ' ')}</Badge> : last?.status === 'rejected' ? <Badge tone="danger">Not approved</Badge> : null}</div>
+          <div className="flex flex-wrap items-center gap-2"><span aria-hidden>{ok ? <ShieldCheck className="h-6 w-6 text-success" /> : <Circle className="h-6 w-6 text-text-muted" />}</span><div className="flex-1"><p className="font-semibold">{badgeLabels[l.level]}</p><p className="text-xs text-text-muted">{l.what}</p></div>{ok ? <Badge tone="success">Approved</Badge> : req ? <Badge tone={req.status === 'needs_info' ? 'warning' : 'info'}>{req.status.replace('_', ' ')}</Badge> : last?.status === 'rejected' ? <Badge tone="danger">Not approved</Badge> : null}</div>
           {req?.admin_notes && <p className="mt-2 text-sm">Reviewer: {req.admin_notes}</p>}{last?.status === 'rejected' && last.admin_notes && <p className="mt-2 text-sm text-danger">Reason: {last.admin_notes}</p>}
           {req && <p className="mt-1 text-xs text-text-muted">Submitted {fmtDate(req.created_at)} · {req.documents?.length ?? 0} document(s)</p>}
           {!ok && <div className="mt-3 flex flex-wrap gap-2">{!req && <button onClick={() => setApplying(l.level)} className="btn btn-primary btn-sm">{last?.status === 'rejected' ? 'Apply again' : 'Apply'}</button>}{req && <label className="btn btn-secondary btn-sm cursor-pointer">Add document<input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => e.target.files?.[0] && addDoc(req.id, e.target.files[0])} /></label>}{req?.status === 'needs_info' && <button onClick={() => resubmit.mutate(req.id)} className="btn btn-primary btn-sm">Resubmit</button>}{req && <button onClick={() => withdraw.mutate(req.id)} className="btn btn-ghost btn-sm">Withdraw</button>}</div>}

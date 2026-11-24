@@ -1,4 +1,5 @@
 'use client';
+import { ArrowLeft, Lock, MapPin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -112,7 +113,7 @@ export function CheckoutFlow({ currency: given }: { currency?: Currency }) {
   const p = preview.data;
   return (
     <div className="container-x max-w-5xl pb-16">
-      <div className="mt-8 flex items-center justify-between"><h1 className="text-3xl font-bold">Checkout</h1><Link href="/cart" className="btn btn-ghost btn-sm">← Cart</Link></div>
+      <div className="mt-8 flex items-center justify-between"><h1 className="text-3xl font-bold">Checkout</h1><Link href="/cart" className="btn btn-ghost btn-sm"><ArrowLeft aria-hidden className="h-4 w-4" />Cart</Link></div>
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           <section className="card p-5" aria-labelledby="addr-h">
@@ -147,7 +148,7 @@ export function CheckoutFlow({ currency: given }: { currency?: Currency }) {
                       {s.options.map((o) => (
                         <label key={o.quote_id} className={`flex cursor-pointer items-center gap-3 rounded-[14px] border p-3 text-sm ${shipping[s.business_id] === o.quote_id ? 'border-forest bg-forest-soft' : 'border-border'}`}>
                           <input type="radio" name={`ship-${s.business_id}`} checked={shipping[s.business_id] === o.quote_id} onChange={() => setChosen({ ...chosen, [s.business_id]: optionKey(o) })} className="accent-[var(--forest)]" />
-                          <span className="flex-1">{o.kind === 'pickup' ? '📍 ' : ''}{o.name}{o.carrier ? ` · ${o.carrier}` : ''}{o.kind === 'pickup' ? ' (pick up from the seller)' : ''}{eta(o.eta_min_days, o.eta_max_days) && <span className="block text-xs text-text-muted">{eta(o.eta_min_days, o.eta_max_days)}</span>}</span>
+                          <span className="flex flex-1 items-center gap-1.5">{o.kind === 'pickup' && <MapPin aria-hidden className="h-4 w-4" />}{o.name}{o.carrier ? ` · ${o.carrier}` : ''}{o.kind === 'pickup' ? ' (pick up from the seller)' : ''}{eta(o.eta_min_days, o.eta_max_days) && <span className="block text-xs text-text-muted">{eta(o.eta_min_days, o.eta_max_days)}</span>}</span>
                           <b>{o.amount_cents === 0 ? 'Free' : formatMoney(o.amount_cents, o.currency)}</b>
                         </label>
                       ))}
@@ -190,7 +191,7 @@ export function CheckoutFlow({ currency: given }: { currency?: Currency }) {
                 ]} total={p.total_cents} />
                 {p.tax_pending && <p className="text-xs text-text-muted">Tax is calculated on the secure payment page.</p>}
                 {p.problems.length > 0 && <ul role="alert" className="space-y-1 text-sm text-danger">{p.problems.map((x) => <li key={x}>• {x}</li>)}</ul>}
-                <button className="btn btn-primary w-full" disabled={!p.ok || pay.isPending || leaving || preview.isFetching || quotes.isFetching} onClick={() => pay.mutate()}>{pay.isPending || leaving ? 'Opening secure payment…' : '🔒 Pay securely'}</button>
+                <button className="btn btn-primary w-full" disabled={!p.ok || pay.isPending || leaving || preview.isFetching || quotes.isFetching} onClick={() => pay.mutate()}>{pay.isPending || leaving ? 'Opening secure payment…' : <><Lock aria-hidden className="h-4 w-4" />Pay securely</>}</button>
                 {pay.error && <p role="alert" className="text-sm text-danger">{friendlyError(pay.error)}</p>}
                 <p className="text-xs text-text-muted">Adey holds your payment until you confirm delivery.</p>
               </>

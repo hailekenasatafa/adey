@@ -45,7 +45,7 @@ function Orders() {
                 <p className="truncate text-sm text-text-muted">{o.items.map((i) => `${i.quantity}× ${i.name}${i.variant_title ? ` (${i.variant_title})` : ''}`).join(', ')}</p>
                 <p className="text-xs text-text-muted">{fmtDate(o.paid_at ?? o.created_at)} · {o.fulfillment === 'pickup' ? 'Pickup' : 'Delivery'}</p>
               </div>
-              <div className="text-right"><p className="font-semibold">{formatMoney(o.total_cents, o.currency)}</p><OrderStatusBadge status={o.status} seller />{next && <p className="mt-1 text-xs font-semibold text-forest">{ACTION_TEXT[next]} →</p>}</div>
+              <div className="text-right"><p className="font-semibold">{formatMoney(o.total_cents, o.currency)}</p><OrderStatusBadge status={o.status} seller />{next && <p className="mt-1 text-xs font-semibold text-forest">{ACTION_TEXT[next]}</p>}</div>
             </Link>
           );
         })}

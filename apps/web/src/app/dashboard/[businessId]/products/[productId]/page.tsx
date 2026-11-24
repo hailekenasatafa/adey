@@ -1,4 +1,5 @@
 'use client';
+import { ArrowLeft, Paperclip, X } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -22,10 +23,10 @@ export default function ProductPage() {
   const p = useQuery({ queryKey: ['product', productId], queryFn: () => api.market.product(productId) });
   if (p.isLoading || loading) return <ListSkeleton />;
   const prod = p.data;
-  if (p.error || !prod || prod.business_id !== businessId) return <div><Link href={`/dashboard/${businessId}/products`} className="text-sm font-semibold text-forest">← Products</Link><p role="alert" className="mt-4 text-sm text-danger">{p.error ? friendlyError(p.error) : 'Product not found.'}</p></div>;
+  if (p.error || !prod || prod.business_id !== businessId) return <div><Link href={`/dashboard/${businessId}/products`} className="inline-flex items-center gap-1 text-sm font-semibold text-forest"><ArrowLeft aria-hidden className="h-4 w-4" />Products</Link><p role="alert" className="mt-4 text-sm text-danger">{p.error ? friendlyError(p.error) : 'Product not found.'}</p></div>;
   return (
     <div className="space-y-4">
-      <Link href={`/dashboard/${businessId}/products`} className="text-sm font-semibold text-forest">← Products</Link>
+      <Link href={`/dashboard/${businessId}/products`} className="inline-flex items-center gap-1 text-sm font-semibold text-forest"><ArrowLeft aria-hidden className="h-4 w-4" />Products</Link>
       <div className="flex flex-wrap items-center gap-2"><h1 className="text-2xl font-bold">{prod.name}</h1>{prod.is_authentic && <CertificationBadge />}</div>
       {(can('inventory.manage') || can('catalog.manage')) ? <><Stock businessId={businessId} productId={productId} product={prod} /><Variants businessId={businessId} productId={productId} /></> : <NoAccess what="Stock and options" />}
       {can('catalog.manage') ? <Authenticity businessId={businessId} productId={productId} isAuthentic={prod.is_authentic} product={prod} /> : null}
@@ -172,7 +173,7 @@ function Authenticity({ businessId, productId, isAuthentic, product }: { busines
             <Field label="What makes it authentic?" className="sm:col-span-2"><textarea value={f.statement} onChange={(e) => setF({ ...f, statement: e.target.value })} className="input min-h-24" /></Field>
           </div>
           <div><label className="btn btn-secondary btn-sm cursor-pointer">+ Add evidence (photos, receipts, certificates)<input type="file" multiple accept="image/*,application/pdf" className="hidden" onChange={(e) => { setFiles((x) => [...x, ...Array.from(e.target.files ?? [])]); e.target.value = ''; }} /></label>
-            <ul className="mt-1 text-sm">{files.map((x, i) => <li key={i}>📎 {x.name} <button aria-label={`Remove ${x.name}`} onClick={() => setFiles((l) => l.filter((_, j) => j !== i))} className="text-text-muted">✕</button></li>)}</ul></div>
+            <ul className="mt-1 text-sm">{files.map((x, i) => <li key={i} className="flex items-center gap-1.5"><Paperclip aria-hidden className="h-4 w-4 text-text-muted" />{x.name} <button aria-label={`Remove ${x.name}`} onClick={() => setFiles((l) => l.filter((_, j) => j !== i))} className="grid h-7 w-7 place-items-center rounded-full text-text-muted hover:bg-surface-muted"><X aria-hidden className="h-4 w-4" /></button></li>)}</ul></div>
           <div className="flex gap-2"><button onClick={() => setShow(false)} className="btn btn-ghost btn-sm">Cancel</button><button onClick={submit} disabled={busy} className="btn btn-primary btn-sm">{busy ? 'Sending…' : 'Send for review'}</button></div>
         </div>
       )}

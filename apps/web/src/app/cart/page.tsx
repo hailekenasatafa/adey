@@ -1,4 +1,5 @@
 'use client';
+import { ShoppingBag, Store } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -35,7 +36,7 @@ export default function CartPage() {
                     {sellers.map((s) => (
                       <div key={s.business_id} className="card p-4">
                         <Link href={`/business/${s.business_slug}`} className="flex items-center gap-2 font-semibold">
-                          <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-[8px] bg-forest-soft">{s.business_logo ? <img src={mediaUrlFromPath('business-media', s.business_logo)!} alt="" className="h-full w-full object-cover" /> : '🏪'}</span>{s.business_name}
+                          <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-[8px] bg-forest-soft">{s.business_logo ? <img src={mediaUrlFromPath('business-media', s.business_logo)!} alt="" className="h-full w-full object-cover" /> : <Store aria-hidden className="h-4 w-4 text-forest" />}</span>{s.business_name}
                         </Link>
                         <ul className="mt-3 divide-y divide-border">{items.filter((i) => i.business_id === s.business_id).map((i) => <Line key={i.id} item={i} />)}</ul>
                       </div>
@@ -71,7 +72,7 @@ function Line({ item }: { item: CartItem }) {
   const max = item.available ?? undefined;
   return (
     <li className="flex gap-3 py-3">
-      <Link href={`/product/${item.product_id}`} className="h-20 w-20 shrink-0 overflow-hidden rounded-[12px] bg-surface-muted">{img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-2xl">🛍️</span>}</Link>
+      <Link href={`/product/${item.product_id}`} className="h-20 w-20 shrink-0 overflow-hidden rounded-[12px] bg-surface-muted">{img ? <img src={img} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-text-muted"><ShoppingBag aria-hidden className="h-6 w-6" /></span>}</Link>
       <div className="min-w-0 flex-1 space-y-1.5">
         <div className="flex justify-between gap-2">
           <div className="min-w-0"><Link href={`/product/${item.product_id}`} className="font-semibold line-clamp-2">{item.name}</Link>{item.variant_title && <p className="text-xs text-text-muted">{item.variant_title}</p>}</div>

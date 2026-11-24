@@ -1,4 +1,5 @@
 'use client';
+import { ArrowLeft, Check, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -33,7 +34,7 @@ export default function CampaignDetail() {
   const unavailable = requests.filter((r) => ['declined', 'expired', 'cancelled', 'withdrawn'].includes(r.status)).length;
   return (
     <div className="container-x pb-16">
-      <Link href="/campaigns" className="mt-6 inline-block text-sm font-semibold text-forest">← My campaigns</Link>
+      <Link href="/campaigns" className="mt-6 inline-flex items-center gap-1 text-sm font-semibold text-forest"><ArrowLeft aria-hidden className="h-4 w-4" />My campaigns</Link>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-3xl font-bold">{c.name}</h1><p className="text-text-muted">{c.start_date && c.end_date ? fmtRange(c.start_date, c.end_date) : 'Dates not set'}</p></div><div className="flex items-center gap-2"><Badge tone={c.status === 'active' ? 'success' : c.status === 'submitted' ? 'info' : c.status === 'completed' ? 'primary' : c.status === 'cancelled' ? 'danger' : 'neutral'}>{c.status}</Badge>{!!s.data?.awaiting_my_response && <Badge tone="warning">{s.data.awaiting_my_response} counteroffer(s) to review</Badge>}</div></div>
       {s.data && <div className="mt-4 grid gap-3 sm:grid-cols-4"><Stat label="Budget" value={formatMoney(s.data.budget_total_cents)} /><Stat label="Accepted total" value={formatMoney(s.data.accepted_total_cents)} /><Stat label="Open proposals" value={formatMoney(s.data.proposed_total_cents)} /><Stat label="Requests" value={Object.entries(s.data.requests_by_status).map(([k, v]) => `${v} ${k}`).join(' · ') || '0'} /></div>}
       {c.objective && <p className="mt-4 text-text-muted">{c.objective}</p>}
@@ -50,7 +51,7 @@ export default function CampaignDetail() {
       {error && <p className="mt-4 text-sm text-danger">{error}</p>}
       {adding && (
         <div className="card mt-6 p-5"><div className="flex items-center justify-between"><h3 className="font-semibold">Add screens (same dates)</h3><button onClick={() => addMore.mutate()} disabled={!picked.size || addMore.isPending} className="btn btn-primary btn-sm">Send {picked.size} request(s)</button></div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">{candidates.map((x: ScreenCard) => <div key={x.id} className="relative"><ScreenCardView s={x} /><button onClick={() => setPicked((p) => { const n = new Set(p); if (n.has(x.id!)) n.delete(x.id!); else n.add(x.id!); return n; })} className={`btn btn-sm absolute right-2 top-2 ${picked.has(x.id!) ? 'btn-secondary' : 'btn-primary'}`}>{picked.has(x.id!) ? '✓ Selected' : '+ Add'}</button></div>)}{inventory.isSuccess && !candidates.length && <p className="text-sm text-text-muted">No additional screens are available for these dates.</p>}</div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">{candidates.map((x: ScreenCard) => <div key={x.id} className="relative"><ScreenCardView s={x} /><button onClick={() => setPicked((p) => { const n = new Set(p); if (n.has(x.id!)) n.delete(x.id!); else n.add(x.id!); return n; })} className={`btn btn-sm absolute right-2 top-2 ${picked.has(x.id!) ? 'btn-secondary' : 'btn-primary'}`}>{picked.has(x.id!) ? <><Check aria-hidden className="h-4 w-4" />Selected</> : <><Plus aria-hidden className="h-4 w-4" />Add</>}</button></div>)}{inventory.isSuccess && !candidates.length && <p className="text-sm text-text-muted">No additional screens are available for these dates.</p>}</div>
         </div>
       )}
       <div className="mt-6 flex flex-wrap gap-2">

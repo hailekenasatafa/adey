@@ -1,4 +1,5 @@
 'use client';
+import { BadgeCheck, MapPin, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,7 +17,7 @@ export function Gallery({ images, name }: { images: string[]; name: string }) {
   const [i, setI] = useState(0);
   return (
     <div className="grid gap-2">
-      <div className="aspect-square overflow-hidden rounded-[24px] bg-surface-muted">{images[i] ? <img src={images[i]} alt={name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-6xl">🛍️</div>}</div>
+      <div className="aspect-square overflow-hidden rounded-[24px] bg-surface-muted">{images[i] ? <img src={images[i]} alt={name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-text-muted"><ShoppingBag aria-hidden className="h-14 w-14" strokeWidth={1.25} /></div>}</div>
       {images.length > 1 && (
         <div className="grid grid-cols-5 gap-2" role="tablist" aria-label="Product photos">
           {images.slice(0, 10).map((src, n) => (
@@ -83,7 +84,7 @@ export function BuyBox({ product: p, variants, buyable, reason }: { product: Buy
       </div>
       <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Note to the seller (optional)" aria-label="Note to the seller" className="input py-2 text-sm" />
       <div className="grid grid-cols-2 gap-2">
-        <button className="btn btn-primary" disabled={needsVariant || add.isPending} onClick={() => buy(false)}>🛒 Add to cart</button>
+        <button className="btn btn-primary" disabled={needsVariant || add.isPending} onClick={() => buy(false)}><ShoppingCart aria-hidden className="h-4 w-4" />Add to cart</button>
         <button className="btn btn-accent" disabled={needsVariant || add.isPending} onClick={() => buy(true)}>Buy now</button>
       </div>
       {needsVariant && <p className="text-xs text-text-muted">Choose an option first.</p>}
@@ -107,7 +108,7 @@ export function ShippingCalculator({ productId }: { productId: string }) {
           <ul className="space-y-1">
             {e.options.map((o) => <li key={o.name} className="flex justify-between gap-2"><span>{o.name}{o.eta_min_days != null ? <span className="text-text-muted"> · {o.eta_min_days}–{o.eta_max_days ?? o.eta_min_days} days</span> : null}</span><b>{o.amount_cents === 0 ? 'Free' : formatMoney(o.amount_cents, o.currency)}</b></li>)}
             {!e.options.length && <li className="text-text-muted">No delivery to this country.</li>}
-            {e.pickup && <li>📍 Pickup from the seller is available</li>}
+            {e.pickup && <li className="flex items-center gap-1.5"><MapPin aria-hidden className="h-4 w-4" />Pickup from the seller is available</li>}
             {e.carrier_rates && <li className="text-text-muted">Carrier prices are shown at checkout.</li>}
             {e.ships_from?.country && <li className="text-xs text-text-muted">Ships from {[e.ships_from.city, e.ships_from.country].filter(Boolean).join(', ')}{e.handling_days_min != null ? ` · prepared in ${e.handling_days_min}–${e.handling_days_max ?? e.handling_days_min} days` : ''}</li>}
           </ul>
@@ -129,7 +130,7 @@ export function ProductReviews({ productId, businessId, name }: { productId: str
         <div key={r.id} className="card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-semibold">{r.author?.display_name ?? 'Adey member'} <span className="text-xs font-normal text-text-muted">· {fmtDate(r.created_at)}</span></p><Stars value={r.rating} /></div>
           <div className="mt-1 flex flex-wrap gap-2 text-xs">
-            {r.is_verified_purchase && <Badge tone="success">✓ Verified purchase</Badge>}
+            {r.is_verified_purchase && <Badge tone="success"><BadgeCheck aria-hidden className="h-3.5 w-3.5" />Verified purchase</Badge>}
             {r.authenticity_rating != null && <span className="text-text-muted">Authenticity {r.authenticity_rating}/5</span>}
             {r.service_rating != null && <span className="text-text-muted">Service {r.service_rating}/5</span>}
           </div>

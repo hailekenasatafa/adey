@@ -1,4 +1,5 @@
 'use client';
+import { Check, Heart, MessageCircle, Phone, Plus } from 'lucide-react';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -36,16 +37,16 @@ export function ScreenActions({ screen }: { screen: CartItem & { phone: string |
   if (isMine) return <Link href={`/dashboard/${screen.business_id}/screens/${screen.id}`} className="btn btn-primary w-full">Manage this screen</Link>;
   return (
     <div className="card space-y-2 p-4">
-      <button onClick={contact} className="btn btn-primary w-full">💬 Contact screen owner</button>
+      <button onClick={contact} className="btn btn-primary w-full"><MessageCircle aria-hidden className="h-4 w-4" />Contact screen owner</button>
       <p className="text-xs text-text-muted">Ask about dates, price and the ad you want to run. You and the owner agree everything directly; Adey takes no commission.</p>
       <div className="grid grid-cols-2 gap-2">
-        {phone ? <a href={`tel:${phone}`} className="btn btn-outline btn-sm">📞 Call owner</a> : <button disabled className="btn btn-outline btn-sm">📞 Call owner</button>}
-        <button onClick={() => signedIn(() => toggleSave.mutate())} className="btn btn-outline btn-sm">{isSaved ? '❤️ Saved' : '🤍 Save'}</button>
+        {phone ? <a href={`tel:${phone}`} className="btn btn-outline btn-sm"><Phone aria-hidden className="h-4 w-4" />Call owner</a> : <button disabled className="btn btn-outline btn-sm"><Phone aria-hidden className="h-4 w-4" />Call owner</button>}
+        <button onClick={() => signedIn(() => toggleSave.mutate())} className="btn btn-outline btn-sm" aria-pressed={isSaved}><Heart aria-hidden className={`h-4 w-4 ${isSaved ? 'fill-[#e0484d] text-[#e0484d]' : ''}`} />{isSaved ? 'Saved' : 'Save'}</button>
       </div>
       {campaignsEnabled && (
         <div className="space-y-2 border-t border-border pt-2">
-          <button onClick={() => gate(() => cart.toggle(item))} className={`btn btn-sm w-full ${cart.has(screen.id!) ? 'btn-secondary' : 'btn-outline'}`}>{cart.has(screen.id!) ? '✓ Added to campaign' : '+ Add to campaign'}</button>
-          {cart.items.length > 0 && <Link href="/campaigns/new" className="btn btn-ghost btn-sm w-full">Review selection ({cart.items.length}) →</Link>}
+          <button onClick={() => gate(() => cart.toggle(item))} className={`btn btn-sm w-full ${cart.has(screen.id!) ? 'btn-secondary' : 'btn-outline'}`}>{cart.has(screen.id!) ? <><Check aria-hidden className="h-4 w-4" />Added to campaign</> : <><Plus aria-hidden className="h-4 w-4" />Add to campaign</>}</button>
+          {cart.items.length > 0 && <Link href="/campaigns/new" className="btn btn-ghost btn-sm w-full">Review selection ({cart.items.length})</Link>}
         </div>
       )}
     </div>

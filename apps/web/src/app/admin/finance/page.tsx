@@ -129,7 +129,7 @@ function TaxRules() {
   const remove = useMutation({ mutationFn: (id: string) => api.admin.deleteTaxRule(id), onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-tax'] }); setDel(null); }, onError: (e) => { setError(friendlyError(e)); setDel(null); } });
   return (
     <div className="space-y-3">
-      <p className="text-sm text-text-muted">Rules apply only when the tax setting’s provider is “manual” (see Settings → tax). A region-specific rule is used before the country rule.</p>
+      <p className="text-sm text-text-muted">Rules apply only when the tax setting’s provider is “manual” (see Settings, then tax). A region-specific rule is used before the country rule.</p>
       <ErrorLine error={q.error ?? error} />
       {!f && <button type="button" className="btn btn-primary btn-sm" onClick={() => { setError(null); setF(blank); }}>Add tax rule</button>}
       {f && (

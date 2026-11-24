@@ -1,4 +1,5 @@
 'use client';
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -64,7 +65,7 @@ export default function Products() {
       {editing && d && (
         <div className="card mt-4 p-5 space-y-4">
           <h2 className="font-semibold">{editing.id ? 'Edit product' : 'New product'}</h2>
-          <div className="flex flex-wrap gap-2">{d.images.map((p) => <div key={p} className="relative h-20 w-20 overflow-hidden rounded-[10px]"><img src={mediaUrlFromPath('product-media', p)!} alt="" className="h-full w-full object-cover" /><button aria-label="Remove photo" onClick={() => set({ images: d.images.filter((x) => x !== p) })} className="absolute right-1 top-1 h-5 w-5 rounded-full bg-surface text-xs">✕</button></div>)}<label className="grid h-20 w-20 cursor-pointer place-items-center rounded-[10px] border-2 border-dashed border-border">+<input type="file" accept="image/*" multiple className="hidden" aria-label="Add photos" onChange={async (e) => { try { const paths: string[] = []; for (const f of Array.from(e.target.files ?? [])) paths.push(await uploadFile('product-media', `${businessId}/products`, f, 'image')); set({ images: [...d.images, ...paths].slice(0, 8) }); } catch (err) { setError(errMsg(err)); } }} /></label></div>
+          <div className="flex flex-wrap gap-2">{d.images.map((p) => <div key={p} className="relative h-20 w-20 overflow-hidden rounded-[10px]"><img src={mediaUrlFromPath('product-media', p)!} alt="" className="h-full w-full object-cover" /><button aria-label="Remove photo" onClick={() => set({ images: d.images.filter((x) => x !== p) })} className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-surface shadow-sm"><X aria-hidden className="h-3.5 w-3.5" /></button></div>)}<label className="grid h-20 w-20 cursor-pointer place-items-center rounded-[10px] border-2 border-dashed border-border">+<input type="file" accept="image/*" multiple className="hidden" aria-label="Add photos" onChange={async (e) => { try { const paths: string[] = []; for (const f of Array.from(e.target.files ?? [])) paths.push(await uploadFile('product-media', `${businessId}/products`, f, 'image')); set({ images: [...d.images, ...paths].slice(0, 8) }); } catch (err) { setError(errMsg(err)); } }} /></label></div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Name" className="sm:col-span-2"><input value={d.name} onChange={(e) => set({ name: e.target.value })} className="input" /></Field>
             <Field label="Description" className="sm:col-span-2"><textarea value={d.description ?? ''} onChange={(e) => set({ description: e.target.value })} className="input min-h-24" /></Field>

@@ -1,4 +1,5 @@
 'use client';
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -59,7 +60,7 @@ export default function Overview() {
             {steps.map((s) => (
               <li key={s.label}>
                 <Link href={s.href} className={`flex items-start gap-2 rounded-[10px] px-2 py-1.5 text-sm hover:bg-surface-muted ${s.done ? 'text-text-muted' : ''}`}>
-                  <span aria-hidden className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-bold ${s.done ? 'bg-forest text-[color:var(--on-forest)]' : 'border border-border'}`}>{s.done ? '✓' : ''}</span>
+                  <span aria-hidden className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[11px] font-bold ${s.done ? 'bg-forest text-[color:var(--on-forest)]' : 'border border-border'}`}>{s.done ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : null}</span>
                   <span><span className={s.done ? 'line-through' : 'font-semibold'}>{s.label}</span>{!s.done && s.note ? <span className="text-text-muted"> · {s.note}</span> : null}<span className="sr-only">{s.done ? ' (done)' : ' (to do)'}</span></span>
                 </Link>
               </li>

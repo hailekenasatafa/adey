@@ -1,3 +1,4 @@
+import { BadgeCheck, Flower2 } from 'lucide-react';
 import Link from 'next/link';
 import { badgeLabels, trustTierLabels } from '@adey/shared';
 
@@ -20,12 +21,12 @@ export default function VerificationInfo() {
       <p className="mt-2 text-text-muted">A business can list products and take enquiries straight away, but it can take paid orders only after seller verification is approved. The seller gives their legal details and a government ID, and registered companies add a registration number and a licence or tax document. Adey staff review the application. Payments are held by Adey until the buyer confirms delivery.</p>
 
       <h2 className="mt-10 text-xl font-bold">Verification badges</h2>
-      <div className="mt-4 space-y-3">{levels.map(([k, what, docs]) => <div key={k} className="card p-5"><p className="font-semibold text-success">✓ {badgeLabels[k]}</p><p className="mt-1">{what}</p><p className="text-sm text-text-muted">{docs}</p></div>)}</div>
+      <div className="mt-4 space-y-3">{levels.map(([k, what, docs]) => <div key={k} className="card p-5"><p className="flex items-center gap-1.5 font-semibold text-success"><BadgeCheck aria-hidden className="h-5 w-5" />{badgeLabels[k]}</p><p className="mt-1">{what}</p><p className="text-sm text-text-muted">{docs}</p></div>)}</div>
       <p className="mt-4 text-sm text-text-muted">Documents are stored in a private bucket readable only by you and the staff reviewing your request, and are kept only as long as needed to decide and audit the request.</p>
 
       <h2 className="mt-10 text-xl font-bold">The Authentic Habesha badge</h2>
       <div className="card mt-4 space-y-2 p-5">
-        <p className="font-semibold">🌼 {'Authentic Habesha'}</p>
+        <p className="flex items-center gap-1.5 font-semibold"><Flower2 aria-hidden className="h-5 w-5 text-gold-deep" />Authentic Habesha</p>
         <p>This badge appears on individual products that the Adey team has reviewed. The seller explains where and how the item is made, who made it and what it is made of, and provides supporting evidence.</p>
         <p className="text-sm text-text-muted">The badge belongs to the listing exactly as it was reviewed. If the seller later changes the name, description, photos or origin details, the badge is paused until the listing is checked again. Buyers can also rate cultural authenticity in their reviews.</p>
       </div>

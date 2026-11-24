@@ -1,4 +1,5 @@
 'use client';
+import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatMoney, friendlyError } from '@adey/shared';
@@ -48,7 +49,7 @@ function OrderCard({ o }: { o: OrderRow }) {
         <OrderStatusBadge status={o.status} />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="flex -space-x-2">{o.items.slice(0, 5).map((i) => { const img = mediaUrlFromPath('product-media', i.image); return <span key={i.id} title={i.name} className="grid h-12 w-12 place-items-center overflow-hidden rounded-[10px] border-2 border-surface bg-surface-muted">{img ? <img src={img} alt={i.name} className="h-full w-full object-cover" /> : '🛍️'}</span>; })}{o.items.length > 5 && <span className="grid h-12 w-12 place-items-center rounded-[10px] border-2 border-surface bg-surface-muted text-xs">+{o.items.length - 5}</span>}</div>
+        <div className="flex -space-x-2">{o.items.slice(0, 5).map((i) => { const img = mediaUrlFromPath('product-media', i.image); return <span key={i.id} title={i.name} className="grid h-12 w-12 place-items-center overflow-hidden rounded-[10px] border-2 border-surface bg-surface-muted">{img ? <img src={img} alt={i.name} className="h-full w-full object-cover" /> : <ShoppingBag aria-hidden className="h-4 w-4 text-text-muted" />}</span>; })}{o.items.length > 5 && <span className="grid h-12 w-12 place-items-center rounded-[10px] border-2 border-surface bg-surface-muted text-xs">+{o.items.length - 5}</span>}</div>
         <p className="font-semibold">{formatMoney(o.total_cents, o.currency)}</p>
       </div>
     </Link>

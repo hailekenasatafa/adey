@@ -1,3 +1,4 @@
+import { MonitorPlay } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { estimatePrice, formatMoney } from '@adey/shared';
@@ -5,6 +6,7 @@ import { serverApi } from '@/lib/supabase/server';
 import { fmtRange, mediaUrlFromPath } from '@/lib/media';
 import { Badge, Rating, VerificationBadges, place } from '@/components/ui';
 import { ScreenActions } from './actions';
+import { Stars } from '@/components/commerce';
 
 export const dynamic = 'force-dynamic';
 const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']] as const;
@@ -24,7 +26,7 @@ export default async function ScreenPage({ params }: { params: Promise<{ id: str
   const packages = (s.packages ?? []).filter((p) => p.is_active);
   return (
     <div className="container-x pb-16">
-      <div className="mt-6 grid gap-2 md:grid-cols-3 overflow-hidden rounded-[24px] bg-gold-soft min-h-60">{s.images.length ? s.images.slice(0, 3).map((i, idx) => <img key={i} src={mediaUrlFromPath('screen-media', i)!} alt="" className={`h-60 w-full object-cover ${idx === 0 && s.images.length > 1 ? 'md:col-span-2' : s.images.length === 1 ? 'md:col-span-3' : ''}`} />) : <div className="grid h-60 place-items-center text-6xl md:col-span-3">📺</div>}</div>
+      <div className="mt-6 grid gap-2 md:grid-cols-3 overflow-hidden rounded-[24px] bg-gold-soft min-h-60">{s.images.length ? s.images.slice(0, 3).map((i, idx) => <img key={i} src={mediaUrlFromPath('screen-media', i)!} alt="" className={`h-60 w-full object-cover ${idx === 0 && s.images.length > 1 ? 'md:col-span-2' : s.images.length === 1 ? 'md:col-span-3' : ''}`} />) : <div className="grid h-60 place-items-center text-gold-deep md:col-span-3"><MonitorPlay aria-hidden className="h-12 w-12" strokeWidth={1.25} /></div>}</div>
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted">{b.category?.name_en ?? 'Business'} · {place(b)}</p>
@@ -42,7 +44,7 @@ export default async function ScreenPage({ params }: { params: Promise<{ id: str
           <h2 className="mt-8 text-xl font-bold">Availability</h2>
           <div className="card mt-3 p-4 text-sm">{blocks.length ? <ul className="space-y-1">{blocks.map((d) => <li key={d.id}>• Unavailable {fmtRange(d.start_date, d.end_date)}{d.reason ? ` — ${d.reason}` : ''}</li>)}</ul> : <p className="text-success">No blocked dates ahead. Ask the owner to confirm your dates.</p>}</div>
           <h2 className="mt-8 text-xl font-bold">Advertiser reviews ({reviews.length})</h2>
-          <div className="mt-3 space-y-2">{reviews.length ? reviews.map((r) => <div key={r.id} className="card p-4 text-sm"><div className="flex justify-between"><b>{r.author?.display_name ?? 'Advertiser'}</b><span className="text-gold">{'★'.repeat(r.rating)}</span></div>{r.body && <p className="mt-1">{r.body}</p>}<Badge tone="info" className="mt-2">From a completed booking</Badge></div>) : <p className="text-sm text-text-muted">No reviews yet. Reviews can only be left after a completed booking.</p>}</div>
+          <div className="mt-3 space-y-2">{reviews.length ? reviews.map((r) => <div key={r.id} className="card p-4 text-sm"><div className="flex justify-between"><b>{r.author?.display_name ?? 'Advertiser'}</b><Stars value={r.rating} /></div>{r.body && <p className="mt-1">{r.body}</p>}<Badge tone="info" className="mt-2">From a completed booking</Badge></div>) : <p className="text-sm text-text-muted">No reviews yet. Reviews can only be left after a completed booking.</p>}</div>
         </div>
         <aside className="lg:sticky lg:top-20 lg:self-start space-y-4">
           <div className="card p-5">

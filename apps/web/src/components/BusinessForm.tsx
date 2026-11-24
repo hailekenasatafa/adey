@@ -1,4 +1,5 @@
 'use client';
+import { MapPin } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,7 +30,7 @@ export function BusinessForm({ initial, onSubmit, submitLabel = 'Save' }: { init
   const err = (k: keyof BusinessInput) => formState.errors[k]?.message as string | undefined;
   return (
     <form onSubmit={handleSubmit(async (v) => { setError(null); try { await onSubmit({ ...v, lat: geo.lat, lng: geo.lng }); } catch (e) { setError(friendlyError(e)); } })} className="space-y-5">
-      <div className="flex gap-2"><button type="button" onClick={() => { setValue('market', 'us'); setValue('category_id', ''); setValue('state', ''); }} className={`chip ${market === 'us' ? 'chip-on' : ''}`}>🇺🇸 US Market</button><button type="button" onClick={() => { setValue('market', 'et'); setValue('category_id', ''); setValue('state', ''); }} className={`chip ${market === 'et' ? 'chip-on' : ''}`}>🇪🇹 Ethiopian Market (seller)</button></div>
+      <div className="flex gap-2"><button type="button" onClick={() => { setValue('market', 'us'); setValue('category_id', ''); setValue('state', ''); }} className={`chip ${market === 'us' ? 'chip-on' : ''}`}>US Market</button><button type="button" onClick={() => { setValue('market', 'et'); setValue('category_id', ''); setValue('state', ''); }} className={`chip ${market === 'et' ? 'chip-on' : ''}`}>Ethiopian Market (seller)</button></div>
       <div className="grid gap-4 sm:grid-cols-2">
         <F label="Business name" error={err('name')}><input {...register('name')} className="input" /></F>
         <F label="Name in Amharic (optional)"><input {...register('name_am')} className="input ethiopic" /></F>
@@ -46,7 +47,7 @@ export function BusinessForm({ initial, onSubmit, submitLabel = 'Save' }: { init
         <F label={market === 'us' ? 'ZIP code' : 'Postal code (optional)'}><input {...register('postal_code')} className="input" /></F>
         <F label="Service area (optional)"><input {...register('service_area')} className="input" placeholder="e.g. DMV area" /></F>
       </div>
-      <div className="flex items-center gap-3"><button type="button" onClick={geocode} className="btn btn-secondary btn-sm">📍 Pin on map from address</button>{geo.status && <span className="text-xs text-text-muted">{geo.status}</span>}</div>
+      <div className="flex items-center gap-3"><button type="button" onClick={geocode} className="btn btn-secondary btn-sm"><MapPin aria-hidden className="h-4 w-4" />Pin on map from address</button>{geo.status && <span className="text-xs text-text-muted">{geo.status}</span>}</div>
       <h3 className="font-semibold">Contact</h3>
       <div className="grid gap-4 sm:grid-cols-3">
         <F label="Phone" error={err('phone')}><input {...register('phone')} className="input" /></F>

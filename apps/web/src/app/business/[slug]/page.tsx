@@ -1,3 +1,4 @@
+import { Heart, MonitorPlay, ShoppingBag, ShoppingCart, Star, Store } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
@@ -5,7 +6,7 @@ import { catalogLabelFor, catalogLabels, formatMoney, groupBySection, type Busin
 import { serverApi } from '@/lib/supabase/server';
 import { mediaUrlFromPath } from '@/lib/media';
 import { Badge, Rating, Section, SignalBadges, VerificationBadges, place } from '@/components/ui';
-import { CertificationBadge, FxAttribution, Price, TrustBadge } from '@/components/commerce';
+import { CertificationBadge, FxAttribution, Price, Stars, TrustBadge } from '@/components/commerce';
 import { Gallery } from '@/components/Gallery';
 import { ReportButton } from '@/components/ReportButton';
 import { BusinessDeals } from '@/components/deals/BusinessDeals';
@@ -55,12 +56,12 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0">
           <div className="flex items-start gap-4">
-            <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[16px] border border-border bg-surface text-2xl">{b.logo_url ? <img src={mediaUrlFromPath('business-media', b.logo_url)!} alt="" className="h-full w-full object-cover" /> : '🏪'}</div>
+            <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[16px] border border-border bg-surface text-2xl">{b.logo_url ? <img src={mediaUrlFromPath('business-media', b.logo_url)!} alt="" className="h-full w-full object-cover" /> : <Store aria-hidden className="h-7 w-7 text-text-muted" />}</div>
             <div className="min-w-0">
               <h1 className="text-3xl font-bold leading-tight">{b.name}</h1>
               {b.name_am && <p className="ethiopic text-text-muted">{b.name_am}</p>}
               <p className="text-sm text-text-muted">{[b.category?.name_en, place(b)].filter(Boolean).join(' · ')}</p>
-              <div className="mt-2 flex flex-wrap items-center gap-2"><Rating avg={b.rating_avg} count={b.rating_count} /><SignalBadges s={signals} /><TrustBadge tier={b.trust_tier} /><VerificationBadges badges={badges} />{b.selling_enabled && <Badge tone="primary">🛒 Takes online orders</Badge>}{signals?.saves_count ? <span className="text-xs text-text-muted">♥ Saved by {signals.saves_count} members</span> : null}</div>
+              <div className="mt-2 flex flex-wrap items-center gap-2"><Rating avg={b.rating_avg} count={b.rating_count} /><SignalBadges s={signals} /><TrustBadge tier={b.trust_tier} /><VerificationBadges badges={badges} />{b.selling_enabled && <Badge tone="primary"><ShoppingCart aria-hidden className="h-3.5 w-3.5" />Takes online orders</Badge>}{signals?.saves_count ? <span className="inline-flex items-center gap-1 text-xs text-text-muted"><Heart aria-hidden className="h-3.5 w-3.5" />Saved by {signals.saves_count} members</span> : null}</div>
               {(b.authenticity_avg != null || b.service_avg != null) && <p className="mt-1 text-sm text-text-muted">{[b.authenticity_avg != null ? `Authenticity ${Number(b.authenticity_avg).toFixed(1)}/5` : null, b.service_avg != null ? `Service ${Number(b.service_avg).toFixed(1)}/5` : null].filter(Boolean).join(' · ')}</p>}
             </div>
           </div>
@@ -68,7 +69,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           {signals?.review_quote && (
             <figure className="mt-6 rounded-[20px] bg-forest-soft p-5">
               <blockquote className="text-lg leading-snug">“{signals.review_quote}”</blockquote>
-              <figcaption className="mt-2 text-sm text-text-muted">— {signals.review_author ?? 'Adey member'} · {'★'.repeat(signals.review_rating ?? 5)}{signals.review_verified ? ' · Contacted this business' : ''} · <a href="#reviews" className="font-semibold text-forest hover:underline">All reviews</a></figcaption>
+              <figcaption className="mt-2 text-sm text-text-muted">— {signals.review_author ?? 'Adey member'} · <Stars value={signals.review_rating ?? 5} size="text-xs" />{signals.review_verified ? ' · Contacted this business' : ''} · <a href="#reviews" className="font-semibold text-forest hover:underline">All reviews</a></figcaption>
             </figure>
           )}
           {b.tagline && <p className="mt-6 text-lg">{b.tagline}</p>}
@@ -94,7 +95,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
             <Section title={`Products (${products.filter((p) => p.is_active).length})`}>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{products.filter((p) => p.is_active).map((p) => (
                 <Link key={p.id} href={`/product/${p.id}`} className="card block overflow-hidden hover:shadow-md">
-                  <div className="relative aspect-square bg-surface-muted">{p.images[0] ? <img src={mediaUrlFromPath('product-media', p.images[0])!} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="grid h-full place-items-center text-3xl">🛍️</div>}<span className="absolute left-2 top-2 flex flex-wrap gap-1">{p.is_authentic && <CertificationBadge />}{p.availability === 'out_of_stock' && <Badge tone="danger">Sold out</Badge>}</span></div>
+                  <div className="relative aspect-square bg-surface-muted">{p.images[0] ? <img src={mediaUrlFromPath('product-media', p.images[0])!} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="grid h-full place-items-center text-text-muted"><ShoppingBag aria-hidden className="h-8 w-8" strokeWidth={1.25} /></div>}<span className="absolute left-2 top-2 flex flex-wrap gap-1">{p.is_authentic && <CertificationBadge />}{p.availability === 'out_of_stock' && <Badge tone="danger">Sold out</Badge>}</span></div>
                   <div className="space-y-1 p-3"><p className="line-clamp-2 text-sm font-semibold">{p.name}</p><Price product={p} /><Rating avg={p.rating_avg} count={p.rating_count} /></div>
                 </Link>
               ))}</div>
@@ -116,7 +117,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
             <p className="font-semibold">Hours</p>
             {Object.keys(hours).length === 0 ? <p className="mt-1 text-text-muted">Hours not listed</p> : <ul className="mt-1 space-y-1">{DAYS.map(([k, dayLabel]) => <li key={k} className="flex justify-between"><span>{dayLabel}</span><span className={hours[k]?.length ? '' : 'text-text-muted'}>{hours[k]?.length ? hours[k].map((r) => `${fmt(r.open)} – ${fmt(r.close)}`).join(', ') : 'Closed'}</span></li>)}</ul>}
           </div>
-          {b.offers_ad_screens && <Link href={`/adconnect?q=${encodeURIComponent(b.name)}`} className="card block p-4 text-sm hover:shadow-md"><p className="font-semibold">📺 Advertising screens available</p><p className="text-text-muted">This business lists screens on AdConnect.</p></Link>}
+          {b.offers_ad_screens && <Link href={`/adconnect?q=${encodeURIComponent(b.name)}`} className="card block p-4 text-sm hover:shadow-md"><p className="flex items-center gap-2 font-semibold"><MonitorPlay aria-hidden className="h-4 w-4" />Advertising screens available</p><p className="text-text-muted">This business lists screens on AdConnect.</p></Link>}
         </aside>
       </div>
     </div>
@@ -128,7 +129,7 @@ function OfferingRow({ s, quoteHint }: { s: Service; quoteHint: string }) {
   return (
     <li className="flex gap-4 p-4">
       <div className="min-w-0 flex-1">
-        <p className="font-semibold">{s.name}{s.is_signature && <Badge tone="accent" className="ml-2 align-middle">★ Signature</Badge>}</p>
+        <p className="font-semibold">{s.name}{s.is_signature && <Badge tone="accent" className="ml-2 align-middle"><Star aria-hidden className="h-3 w-3 fill-current" />Signature</Badge>}</p>
         {s.description && <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{s.description}</p>}
         <p className="mt-1 text-sm font-semibold text-forest">{s.price_cents == null ? <span className="font-normal text-text-muted">{quoteHint}</span> : `${s.price_note ? s.price_note + ' ' : ''}${formatMoney(s.price_cents, s.currency)}`}{s.duration_minutes ? <span className="font-normal text-text-muted"> · {s.duration_minutes} min</span> : null}</p>
       </div>

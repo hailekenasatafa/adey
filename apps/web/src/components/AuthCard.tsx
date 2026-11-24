@@ -1,5 +1,6 @@
 'use client';
 import { useState, type ReactNode } from 'react';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { SUPABASE_KEY, SUPABASE_URL, supabase } from '@/lib/supabase/client';
@@ -55,7 +56,7 @@ function GoogleMark() {
 }
 
 /** "Continue with Google" plus the "or" divider. Renders nothing until Google is enabled in Supabase. */
-export function GoogleSignIn({ next }: { next?: string | null }) {
+export function GoogleSignIn({ next, terms = false }: { next?: string | null; terms?: boolean }) {
   const enabled = useGoogleEnabled();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +77,7 @@ export function GoogleSignIn({ next }: { next?: string | null }) {
         Continue with Google
       </button>
       {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
+      {terms && <p className="mt-2 text-center text-xs text-text-muted">By continuing with Google you agree to Adey’s <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>}
       <div className="my-6 flex items-center gap-3 text-xs text-text-muted" role="separator" aria-label="or">
         <span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" />
       </div>

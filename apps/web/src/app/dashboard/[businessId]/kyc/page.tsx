@@ -1,4 +1,5 @@
 'use client';
+import { Circle, CircleCheck, Paperclip } from 'lucide-react';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -125,14 +126,14 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
           {DOCS.map((d) => { const req = reqs.data?.find((r) => r.level === d.level && OPEN.includes(r.status)) ?? reqs.data?.find((r) => r.level === d.level); return (
             <div key={d.level}>
               <p className="text-sm font-semibold">{d.title}</p>
-              {reqs.isLoading ? <div className="skeleton mt-1 h-6" /> : <ul className="mt-1 text-sm">{(req?.documents ?? []).map((x) => <li key={x.id}>📎 {x.original_filename ?? x.doc_type} <Badge tone="neutral">{x.doc_type.replace(/_/g, ' ')}</Badge></li>)}{!req?.documents?.length && <li className="text-text-muted">Nothing uploaded yet.</li>}</ul>}
+              {reqs.isLoading ? <div className="skeleton mt-1 h-6" /> : <ul className="mt-1 text-sm">{(req?.documents ?? []).map((x) => <li key={x.id} className="flex items-center gap-1.5"><Paperclip aria-hidden className="h-4 w-4 text-text-muted" />{x.original_filename ?? x.doc_type} <Badge tone="neutral">{x.doc_type.replace(/_/g, ' ')}</Badge></li>)}{!req?.documents?.length && <li className="text-text-muted">Nothing uploaded yet.</li>}</ul>}
               {editable && <div className="mt-2 flex flex-wrap gap-2">{d.types.map(([t, label]) => <label key={t} className="btn btn-secondary btn-sm cursor-pointer">{busy === `doc-${t}` ? 'Uploading…' : `+ ${label}`}<input type="file" accept="image/*,application/pdf" className="hidden" disabled={!!busy} onChange={(e) => { const file = e.target.files?.[0]; e.target.value = ''; if (file) upload(d.level, t, file); }} /></label>)}</div>}
             </div>); })}
         </div>
 
         {editable && <div className="card space-y-3 p-5">
           <h2 className="font-semibold">4 · Review and submit</h2>
-          {check.isLoading ? <div className="skeleton h-16" /> : check.error ? <ErrorNote error={check.error} /> : <ul className="space-y-1 text-sm">{c?.items.map((i) => <li key={i.key}>{i.done ? '✅' : '⬜'} {i.label}{!i.required && <span className="text-text-muted"> (optional)</span>}</li>)}</ul>}
+          {check.isLoading ? <div className="skeleton h-16" /> : check.error ? <ErrorNote error={check.error} /> : <ul className="space-y-1 text-sm">{c?.items.map((i) => <li key={i.key} className="flex items-center gap-1.5">{i.done ? <CircleCheck aria-hidden className="h-4 w-4 text-success" /> : <Circle aria-hidden className="h-4 w-4 text-text-muted" />}{i.label}{!i.required && <span className="text-text-muted"> (optional)</span>}</li>)}</ul>}
           <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={attest} onChange={(e) => setAttest(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--forest)]" />I confirm the information and documents are true and belong to me or my business, and I agree Adey may verify them.</label>
           <button onClick={submit} disabled={!c?.complete || !attest || !!busy} className="btn btn-primary btn-sm">{busy === 'submit' ? 'Submitting…' : status === 'not_started' || status === 'draft' ? 'Submit for review' : 'Submit again'}</button>
           {c && !c.complete && <p className="text-xs text-text-muted">Finish the unchecked items to submit.</p>}

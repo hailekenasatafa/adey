@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import type { DealFeedItem } from '@adey/shared';
@@ -68,7 +69,7 @@ export default async function DealsPage({ searchParams }: { searchParams: Promis
             action={<Link href={sp.q || activeFilters ? '/deals' : '/dashboard'} className="btn btn-primary btn-sm">{sp.q || activeFilters ? 'Clear filters' : 'Post a deal'}</Link>} />
         )}
       </div>
-      <div className="mt-8 flex justify-center gap-2">{page > 1 && <Link href={qs({ page: String(page - 1) })} className="btn btn-outline btn-sm">← Previous</Link>}{deals.length === PAGE && <Link href={qs({ page: String(page + 1) })} className="btn btn-outline btn-sm">Next →</Link>}</div>
+      <div className="mt-8 flex justify-center gap-2">{page > 1 && <Link href={qs({ page: String(page - 1) })} className="btn btn-outline btn-sm"><ChevronLeft aria-hidden className="h-4 w-4" />Previous</Link>}{deals.length === PAGE && <Link href={qs({ page: String(page + 1) })} className="btn btn-outline btn-sm">Next<ChevronRight aria-hidden className="h-4 w-4" /></Link>}</div>
     </div>
   );
 }

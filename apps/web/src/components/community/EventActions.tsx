@@ -1,4 +1,5 @@
 'use client';
+import { Check } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -32,7 +33,7 @@ export function EventActions({ event, createdBy, going: g0, interested: i0, open
     } catch { /* share dismissed */ }
   };
   const btn = (s: RsvpStatus, label: string) => (
-    <button type="button" aria-pressed={current === s} disabled={rsvp.isPending} onClick={() => pick(s)} className={`btn btn-sm ${current === s ? 'btn-primary' : 'btn-outline'}`}>{current === s ? '✓ ' : ''}{label}</button>
+    <button type="button" aria-pressed={current === s} disabled={rsvp.isPending} onClick={() => pick(s)} className={`btn btn-sm ${current === s ? 'btn-primary' : 'btn-outline'}`}>{current === s && <Check aria-hidden className="h-4 w-4" />}{label}</button>
   );
   return (
     <div className="space-y-3">

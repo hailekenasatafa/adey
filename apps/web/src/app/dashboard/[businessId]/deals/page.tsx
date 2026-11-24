@@ -1,4 +1,5 @@
 'use client';
+import { ImagePlus, TicketPercent } from 'lucide-react';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -66,7 +67,7 @@ export default function DealsDashboard() {
               <div><label htmlFor="deal-terms" className="label">Conditions (optional)</label><input id="deal-terms" value={draft.terms} onChange={(e) => setDraft({ ...draft, terms: e.target.value })} maxLength={500} className="input" placeholder="e.g. Dine-in only · not with other offers" /></div>
             </div>
             <label className="card relative grid aspect-square cursor-pointer place-items-center overflow-hidden text-center text-sm text-text-muted">
-              {draft.image_path ? <img src={mediaUrlFromPath('business-media', draft.image_path)!} alt="" className="h-full w-full object-cover" /> : <span>{uploading ? 'Uploading…' : '🖼️ Add a photo (optional)'}</span>}
+              {draft.image_path ? <img src={mediaUrlFromPath('business-media', draft.image_path)!} alt="" className="h-full w-full object-cover" /> : <span className="flex items-center gap-2">{uploading ? 'Uploading…' : <><ImagePlus aria-hidden className="h-5 w-5" />Add a photo (optional)</>}</span>}
               <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => e.target.files?.[0] && photo(e.target.files[0])} />
             </label>
           </div>
@@ -87,7 +88,7 @@ export default function DealsDashboard() {
           <Empty title="No deals yet" body="A simple offer — a free coffee with any meal, 10% off on weekdays — gives people a reason to visit and to come back." action={canManage ? <button onClick={() => edit()} className="btn btn-primary btn-sm">Post your first deal</button> : undefined} />
         ) : rows.map((d) => (
           <div key={d.id} className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
-            {d.image_path ? <img src={mediaUrlFromPath('business-media', d.image_path)!} alt="" className="h-16 w-16 shrink-0 rounded-[12px] object-cover" /> : <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[12px] bg-gold-soft text-2xl">🏷️</div>}
+            {d.image_path ? <img src={mediaUrlFromPath('business-media', d.image_path)!} alt="" className="h-16 w-16 shrink-0 rounded-[12px] object-cover" /> : <div className="grid h-16 w-16 shrink-0 place-items-center rounded-[12px] bg-gold-soft text-gold-deep"><TicketPercent aria-hidden className="h-7 w-7" /></div>}
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2"><p className="font-semibold">{d.title}</p><Badge tone={tone[d.status]}>{dealStatusLabels[d.status]}</Badge></div>
               <p className="text-xs text-text-muted">{d.claims_count} claimed · {d.redeemed_count} used · posted {fmtDate(d.created_at)}{d.last_claim_at ? ` · last claim ${timeAgo(d.last_claim_at)}` : ''}{d.ended_at ? ` · ended ${fmtDate(d.ended_at)}` : ''}</p>

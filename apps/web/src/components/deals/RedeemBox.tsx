@@ -1,4 +1,5 @@
 'use client';
+import { CircleCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { dealRedeemMessages, friendlyError, type DealRedeemResult } from '@adey/shared';
@@ -21,7 +22,7 @@ export function RedeemBox({ businessId, onDone }: { businessId: string; onDone?:
       {error && <p className="mt-3 text-sm text-danger" role="alert">{error}</p>}
       {result && (
         <div className={`mt-3 rounded-[12px] p-3 text-sm ${ok ? 'bg-forest-soft text-forest' : 'bg-surface-muted'}`} role="status">
-          <p className="font-semibold">{ok ? '✓ ' : ''}{dealRedeemMessages[result.result]}</p>
+          <p className="flex items-center gap-2 font-semibold">{ok && <CircleCheck aria-hidden className="h-5 w-5 text-success" />}{dealRedeemMessages[result.result]}</p>
           {result.deal_title && <p className="mt-0.5">{result.deal_title} · {result.customer_name} · claimed {fmtDate(result.claimed_at)}{result.result === 'already_redeemed' && result.redeemed_at ? ` · used ${fmtDate(result.redeemed_at)}` : ''}</p>}
         </div>
       )}

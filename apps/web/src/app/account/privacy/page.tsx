@@ -1,4 +1,5 @@
 'use client';
+import { User } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -51,7 +52,7 @@ export default function Privacy() {
           : !blocked.data?.length ? <p className="mt-2 text-sm text-text-muted">You have not blocked anyone.</p>
           : <ul className="mt-2 divide-y divide-border">{blocked.data.map((b) => (
             <li key={b.blocked_id} className="flex items-center justify-between gap-3 py-2 text-sm">
-              <span className="flex items-center gap-2">{b.blocked?.avatar_url ? <img src={mediaUrlFromPath('avatars', b.blocked.avatar_url) ?? ''} alt="" className="h-8 w-8 rounded-full object-cover" /> : <span className="grid h-8 w-8 place-items-center rounded-full bg-surface-muted">👤</span>}{b.blocked?.display_name ?? 'Adey member'}</span>
+              <span className="flex items-center gap-2">{b.blocked?.avatar_url ? <img src={mediaUrlFromPath('avatars', b.blocked.avatar_url) ?? ''} alt="" className="h-8 w-8 rounded-full object-cover" /> : <span className="grid h-8 w-8 place-items-center rounded-full bg-surface-muted text-text-muted"><User aria-hidden className="h-4 w-4" /></span>}{b.blocked?.display_name ?? 'Adey member'}</span>
               <button className="btn btn-outline btn-sm" disabled={unblock.isPending} onClick={() => unblock.mutate(b.blocked_id)}>Unblock</button>
             </li>))}</ul>}
         {unblock.error && <div className="mt-2"><ErrorLine error={unblock.error} /></div>}

@@ -1,4 +1,5 @@
 'use client';
+import { Circle, CircleCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { friendlyError, kycStatusLabels, countryName, type KycStatus } from '@adey/shared';
@@ -93,7 +94,7 @@ function Detail({ businessId, onDone }: { businessId: string; onDone: () => void
       </div>
       <div>
         <p className="text-xs font-semibold text-text-muted">Seller checklist</p>
-        {list.isLoading ? <div className="skeleton mt-1 h-10" /> : <ul className="mt-1 grid gap-1 text-sm sm:grid-cols-2">{list.data?.items.map((i) => <li key={i.key}>{i.done ? '✓' : '○'} {i.label}{!i.required && <span className="text-text-muted"> (optional)</span>}</li>)}</ul>}
+        {list.isLoading ? <div className="skeleton mt-1 h-10" /> : <ul className="mt-1 grid gap-1 text-sm sm:grid-cols-2">{list.data?.items.map((i) => <li key={i.key} className="flex items-center gap-1.5">{i.done ? <CircleCheck aria-hidden className="h-4 w-4 text-success" /> : <Circle aria-hidden className="h-4 w-4 text-text-muted" />}{i.label}{!i.required && <span className="text-text-muted"> (optional)</span>}</li>)}</ul>}
         <ErrorLine error={list.error} />
       </div>
       <div>

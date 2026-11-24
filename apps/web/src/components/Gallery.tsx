@@ -1,4 +1,5 @@
 'use client';
+import { ChevronLeft, ChevronRight, LayoutGrid, Store, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 type Photo = { url: string; caption?: string | null };
@@ -19,7 +20,7 @@ export function Gallery({ photos, name }: { photos: Photo[]; name: string }) {
     return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
   }, [open, close, step]);
 
-  if (!photos.length) return <div className="mt-6 grid h-56 place-items-center rounded-[24px] bg-forest-soft text-6xl sm:h-72" aria-label={`${name} has not added photos yet`}>🏪</div>;
+  if (!photos.length) return <div className="mt-6 grid h-56 place-items-center rounded-[24px] bg-forest-soft text-forest sm:h-72" aria-label={`${name} has not added photos yet`}><Store aria-hidden className="h-12 w-12" strokeWidth={1.25} /></div>;
   const shown = photos.slice(0, 5);
   const layout = shown.length === 1 ? 'sm:grid-cols-1' : shown.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-4 sm:grid-rows-2';
   return (
@@ -37,7 +38,7 @@ export function Gallery({ photos, name }: { photos: Photo[]; name: string }) {
         })}
         {photos.length > 1 && (
           <button type="button" onClick={() => setOpen(0)} className="absolute bottom-3 right-3 rounded-[10px] border border-charcoal/20 bg-white px-3 py-1.5 text-sm font-semibold text-charcoal shadow-sm hover:bg-ivory">
-            ▦ Show all {photos.length} photos
+            <LayoutGrid aria-hidden className="h-4 w-4" />Show all {photos.length} photos
           </button>
         )}
       </div>
@@ -45,13 +46,13 @@ export function Gallery({ photos, name }: { photos: Photo[]; name: string }) {
         <div role="dialog" aria-modal="true" aria-label={`${name} photos`} className="fixed inset-0 z-[60] flex flex-col bg-black/95 text-white">
           <div className="flex items-center justify-between p-4 text-sm">
             <span aria-live="polite">{open + 1} / {photos.length}</span>
-            <button type="button" onClick={close} className="rounded-full bg-white/10 px-3 py-1.5 font-semibold hover:bg-white/20" autoFocus>✕ Close</button>
+            <button type="button" onClick={close} className="rounded-full bg-white/10 px-3 py-1.5 font-semibold hover:bg-white/20 inline-flex items-center gap-1.5" autoFocus><X aria-hidden className="h-4 w-4" />Close</button>
           </div>
           <div className="relative flex min-h-0 flex-1 items-center justify-center px-14">
             <img src={photos[open].url} alt={photos[open].caption ?? `${name}, photo ${open + 1}`} className="max-h-full max-w-full object-contain" />
             {photos.length > 1 && <>
-              <button type="button" onClick={() => step(-1)} aria-label="Previous photo" className="absolute left-2 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-2xl hover:bg-white/20">‹</button>
-              <button type="button" onClick={() => step(1)} aria-label="Next photo" className="absolute right-2 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-2xl hover:bg-white/20">›</button>
+              <button type="button" onClick={() => step(-1)} aria-label="Previous photo" className="absolute left-2 grid h-11 w-11 place-items-center rounded-full bg-white/10 hover:bg-white/20"><ChevronLeft aria-hidden className="h-6 w-6" /></button>
+              <button type="button" onClick={() => step(1)} aria-label="Next photo" className="absolute right-2 grid h-11 w-11 place-items-center rounded-full bg-white/10 hover:bg-white/20"><ChevronRight aria-hidden className="h-6 w-6" /></button>
             </>}
           </div>
           <p className="min-h-12 p-4 text-center text-sm text-white/80">{photos[open].caption ?? ''}</p>

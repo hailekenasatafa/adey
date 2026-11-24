@@ -1,4 +1,5 @@
 'use client';
+import { Circle, CircleCheck } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -40,7 +41,7 @@ export function SellingPanel({ businessId }: { businessId: string }) {
     <div className="mt-4 space-y-4">
       <div className="card p-5">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">Selling on Adey</h2><div className="flex items-center gap-2"><TrustBadge tier={d.business.trust_tier} /><span className="text-xs text-text-muted">{d.orders.completed_30d} completed in 30 days</span></div></div>
-        <ul className="mt-3 space-y-1.5 text-sm">{steps.map((s) => <li key={s.label} className="flex flex-wrap items-center gap-2"><span aria-hidden>{s.done == null ? '…' : s.done ? '✅' : '⬜'}</span><span className="sr-only">{s.done ? 'Done:' : 'To do:'}</span><Link href={s.href} className={s.done ? 'text-text-muted' : 'font-semibold text-forest underline'}>{s.label}</Link>{s.note && <span className="text-xs text-text-muted">{s.note}</span>}</li>)}</ul>
+        <ul className="mt-3 space-y-1.5 text-sm">{steps.map((s) => <li key={s.label} className="flex flex-wrap items-center gap-2"><span aria-hidden>{s.done == null ? '…' : s.done ? <CircleCheck className="h-4 w-4 text-success" /> : <Circle className="h-4 w-4 text-text-muted" />}</span><span className="sr-only">{s.done ? 'Done:' : 'To do:'}</span><Link href={s.href} className={s.done ? 'text-text-muted' : 'font-semibold text-forest underline'}>{s.label}</Link>{s.note && <span className="text-xs text-text-muted">{s.note}</span>}</li>)}</ul>
       </div>
       <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">{todos.map((t) => <Link key={t.f} href={`${base}/orders?filter=${t.f}`} className="card p-3 hover:shadow-md"><p className="text-2xl font-bold">{t.n}</p><p className="text-xs text-text-muted">{t.label}</p></Link>)}</div>
       {d.low_stock.length > 0 && <div className="card p-4"><h3 className="text-sm font-semibold">Running low</h3><ul className="mt-2 space-y-1 text-sm">{d.low_stock.map((p) => <li key={p.id}><Link href={`${base}/products/${p.id}`} className="text-forest underline">{p.name}</Link> <span className="text-text-muted">— {p.available} left</span></li>)}</ul></div>}
@@ -48,7 +49,7 @@ export function SellingPanel({ businessId }: { businessId: string }) {
         <div className="card p-4 text-sm">
           <h3 className="font-semibold">Ratings</h3>
           {!r.count ? <p className="mt-1 text-text-muted">No reviews yet.</p> : <dl className="mt-2 space-y-1"><div className="flex items-center justify-between"><dt className="text-text-muted">Overall ({r.count})</dt><dd><Stars value={r.avg} /> {r.avg != null && Number(r.avg).toFixed(1)}</dd></div>{r.authenticity_avg != null && <div className="flex items-center justify-between"><dt className="text-text-muted">Authenticity</dt><dd><Stars value={r.authenticity_avg} /> {Number(r.authenticity_avg).toFixed(1)}</dd></div>}{r.service_avg != null && <div className="flex items-center justify-between"><dt className="text-text-muted">Service</dt><dd><Stars value={r.service_avg} /> {Number(r.service_avg).toFixed(1)}</dd></div>}</dl>}
-          <Link href={`${base}/reviews`} className="mt-2 inline-block text-xs font-semibold text-forest">All reviews →</Link>
+          <Link href={`${base}/reviews`} className="mt-2 inline-block text-xs font-semibold text-forest">All reviews</Link>
           {d.open_certification_requests > 0 && <p className="mt-2 text-xs text-text-muted">{d.open_certification_requests} authenticity request(s) in review.</p>}
         </div>
         <div className="card p-4 text-sm">
