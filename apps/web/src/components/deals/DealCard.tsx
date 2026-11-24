@@ -55,13 +55,15 @@ export function ClaimButton({ deal }: { deal: DealView }) {
   const router = useRouter();
   const path = usePathname();
   const qc = useQueryClient();
-  const [claim, setClaim] = useState<DealClaimRef | null>(deal.my_claim);
+  // The claim made here wins; otherwise use the one the server knows about (it arrives after sign-in or a refresh).
+  const [made, setMade] = useState<DealClaimRef | null>(null);
+  const claim = made ?? deal.my_claim;
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const own = businesses.some((b) => b.id === deal.business.id);
   const go = useMutation({
     mutationFn: () => api.deals.claim(deal.id),
-    onSuccess: (c) => { setClaim({ id: c.id, code: c.code, redeemed_at: c.redeemed_at }); setOpen(true); qc.invalidateQueries({ queryKey: ['my-deals'] }); qc.invalidateQueries({ queryKey: ['business-deals'] }); },
+    onSuccess: (c) => { setMade({ id: c.id, code: c.code, redeemed_at: c.redeemed_at }); setOpen(true); qc.invalidateQueries({ queryKey: ['my-deals'] }); qc.invalidateQueries({ queryKey: ['business-deals'] }); },
     onError: (e) => setError(friendlyError(e)),
   });
   if (own) return <p className="rounded-[12px] bg-surface-muted px-3 py-2 text-center text-sm text-text-muted">Your business's deal — customers claim it here.</p>;

@@ -53,11 +53,13 @@ export function DealCard({ deal, showBusiness = false }: { deal: DealView; showB
 export function ClaimButton({ deal }: { deal: DealView }) {
   const { user, businesses } = useAuth();
   const qc = useQueryClient();
-  const [claim, setClaim] = useState<DealClaimRef | null>(deal.my_claim);
+  // The claim made here wins; otherwise use the one the server knows about (it arrives after sign-in or a refresh).
+  const [made, setMade] = useState<DealClaimRef | null>(null);
+  const claim = made ?? deal.my_claim;
   const [open, setOpen] = useState(false);
   const go = useMutation({
     mutationFn: () => api.deals.claim(deal.id),
-    onSuccess: (c) => { setClaim({ id: c.id, code: c.code, redeemed_at: c.redeemed_at }); setOpen(true); qc.invalidateQueries({ queryKey: ['my-deals'] }); qc.invalidateQueries({ queryKey: ['business-deals'] }); },
+    onSuccess: (c) => { setMade({ id: c.id, code: c.code, redeemed_at: c.redeemed_at }); setOpen(true); qc.invalidateQueries({ queryKey: ['my-deals'] }); qc.invalidateQueries({ queryKey: ['business-deals'] }); },
   });
   if (businesses.some((b) => b.id === deal.business.id)) return <Text variant="caption" color="muted" center>Your business’s deal — customers claim it here.</Text>;
   return (

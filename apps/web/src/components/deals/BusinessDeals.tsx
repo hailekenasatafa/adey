@@ -18,7 +18,7 @@ export function BusinessDeals({ business, initial }: { business: { id: string; s
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {deals.map((d) => (
-          <DealCard key={d.id + (d.my_claim?.code ?? '')} deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim, business }} />
+          <DealCard key={d.id} deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim, business }} />
         ))}
       </div>
     </section>

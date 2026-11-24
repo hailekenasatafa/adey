@@ -134,7 +134,7 @@ export default function BusinessDetail() {
           <View style={{ marginTop: 20, gap: 10 }}>
             <SectionHeader title={`Deals (${deals.data.length})`} />
             <Text variant="caption" color="muted" style={{ marginTop: -6 }}>Claim on Adey, then show your code here. Free to claim.</Text>
-            {deals.data.map((d) => <DealCard key={d.id + (d.my_claim?.code ?? '')} deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim, business: { id: b.id, slug: b.slug, name: b.name } }} />)}
+            {deals.data.map((d) => <DealCard key={d.id} deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim, business: { id: b.id, slug: b.slug, name: b.name } }} />)}
           </View>
         ) : null}
 
