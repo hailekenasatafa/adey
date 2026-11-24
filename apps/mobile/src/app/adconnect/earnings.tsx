@@ -7,12 +7,17 @@ import { api } from '@/lib/supabase';
 import { addDays, fmtDateRange, toISODate } from '@/lib/format';
 import { Badge, Button, Card, Chip, EmptyState, Header, KeyValue, Loading, Screen, SectionHeader, Text } from '@/components/ui';
 import { BusinessPicker, useSelectedBusiness } from '@/components/BusinessPicker';
+import { CampaignsGate } from '@/components/CampaignsGate';
 
 type Earnings = { currency: string; monetization_enabled: boolean; pending_requests_value_cents: number; expected_confirmed_gross_cents: number; expected_confirmed_net_cents: number; pending_payment_cents: number; paid_cents: number; completed_gross_cents: number; completed_commission_cents: number; completed_net_cents: number; completed_count: number; external_settlement_note: string | null };
 type OwnerAnalytics = { days: number; active_screens: number; listing_views: number; advertising_inquiries: number; accepted_campaigns: number; declined: number; utilization_pct: number | null; booking_history: { id: string; start_date: string; end_date: string; status: string; agreed_price_cents: number }[] };
 type Calendar = { pending_requests: { id: string; start_date: string; end_date: string; status: string; price_cents: number; advertiser: string }[]; bookings: { id: string; start_date: string; end_date: string; status: string; price_cents: number; advertiser: string; delivery_status: string }[]; blocked: { id: string; start_date: string; end_date: string; reason: string | null }[] };
 
-export default function EarningsAndCalendar() {
+export default function EarningsAndCalendarScreen() {
+  return <CampaignsGate><EarningsAndCalendar /></CampaignsGate>;
+}
+
+function EarningsAndCalendar() {
   const { businessId: initial } = useLocalSearchParams<{ businessId?: string }>();
   const [bizId, setBizId] = useSelectedBusiness(initial);
   const [days, setDays] = useState(30);

@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
-import { brand, eventCategoryLabels, type BusinessCard, type EventCard, type ProductCard, type ScreenCard } from '@adey/shared';
+import { brand, eventCategoryLabels, type BusinessCard, type DealFeedItem, type EventCard, type ProductCard, type ScreenCard } from '@adey/shared';
 import { useCart, useCommerce } from '@/lib/commerce';
 import { fmtDate } from '@/lib/format';
 import { useTheme } from '@/lib/theme';
@@ -15,6 +15,8 @@ import { api } from '@/lib/supabase';
 import { AdeyFlower, Avatar, Button, Card, IconButton, Screen, SectionHeader, Skeleton, Text } from '@/components/ui';
 import { BusinessCardItem, CategoryTile, ProductCardItem, ScreenCardItem, cover } from '@/components/cards';
 import { FxAttribution } from '@/components/commerce';
+import { DealCard } from '@/components/deals';
+import { useSignals } from '@/lib/settings';
 import { Image } from 'expo-image';
 
 type Feed = {
@@ -46,6 +48,8 @@ export default function Home() {
   const d = feed.data;
   const { checkoutEnabled } = useCommerce();
   const cart = useCart();
+  const deals = useQuery({ queryKey: ['deals-feed', 'home', location.lat.toFixed(2), location.lng.toFixed(2), user?.id ?? 'anon'], queryFn: () => api.deals.feed({ lat: location.lat, lng: location.lng, limit: 6 }), staleTime: 2 * 60_000 });
+  const signals = useSignals([...(d?.nearby ?? []), ...(d?.verified ?? []), ...(d?.trusted_vendors ?? []), ...(d?.recommended ?? [])].map((b) => b.id));
 
   return (
     <Screen padded={false} refreshing={feed.isRefetching} onRefresh={() => feed.refetch()} style={{ paddingTop: 0 }}>
@@ -83,7 +87,7 @@ export default function Home() {
         </Pressable>
       </View>
 
-      {/* Two pillars — equal weight */}
+      {/* The directory first, then the owner invitation */}
       <View style={[styles.padded, { gap: 14, marginTop: 18 }]}>
         <Card padded={false} style={{ borderWidth: 0 }}>
           <LinearGradient colors={[brand.forest, '#0F3227']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pillar}>
@@ -94,11 +98,14 @@ export default function Home() {
               Adey Market
             </Text>
             <Text variant="heading" style={{ color: brand.ivory, marginTop: 4 }}>
-              Find businesses, products, and services.
+              Find Habesha-owned businesses near you.
+            </Text>
+            <Text variant="caption" style={{ color: brand.ivory, opacity: 0.85, marginTop: 4 }}>
+              Photos, menus and prices from the owners, real reviews, and deals you can claim.
             </Text>
             <View style={styles.pillarBtns}>
-              <Button title="Explore US Market" variant="accent" size="sm" onPress={() => router.push({ pathname: '/(tabs)/explore', params: { market: 'us' } })} />
-              <Button title="Explore Ethiopian Market" variant="outline" size="sm" style={{ borderColor: brand.ivory }} onPress={() => router.push({ pathname: '/(tabs)/explore', params: { market: 'et' } })} />
+              <Button title="Browse businesses" variant="accent" size="sm" onPress={() => router.push({ pathname: '/(tabs)/explore', params: { market: 'us' } })} />
+              <Button title="Deals" icon="pricetags-outline" variant="outline" size="sm" style={{ borderColor: brand.ivory }} onPress={() => router.push('/deals')} />
             </View>
           </LinearGradient>
         </Card>
@@ -108,14 +115,16 @@ export default function Home() {
               <AdeyFlower size={90} petal={brand.forest} center={brand.gold} />
             </View>
             <Text variant="overline" style={{ color: brand.forest }}>
-              Adey AdConnect
+              For business owners
             </Text>
             <Text variant="heading" style={{ color: brand.charcoal, marginTop: 4 }}>
-              Discover advertising spaces and grow your business.
+              List your business free in a few minutes.
+            </Text>
+            <Text variant="caption" style={{ color: brand.charcoal, marginTop: 4 }}>
+              Add photos, your menu or services and hours, then publish. Post deals to bring people back. No fees.
             </Text>
             <View style={styles.pillarBtns}>
-              <Button title="Find Screens" variant="primary" size="sm" onPress={() => router.push('/adconnect/screens')} />
-              <Button title="Create Campaign" variant="outline" size="sm" style={{ borderColor: brand.forest }} onPress={() => router.push('/adconnect/campaigns/new')} />
+              <Button title="List your business" variant="primary" size="sm" onPress={() => router.push(user ? '/business/new' : '/(auth)/sign-in')} />
             </View>
           </LinearGradient>
         </Card>
@@ -137,18 +146,17 @@ export default function Home() {
       {!!d?.shop_products?.length && <Section title="Shop from Habesha sellers" items={d.shop_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
       {!!d?.authentic_products?.length && <Section title="Authentic Habesha" subtitle="Certified by Adey" items={d.authentic_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
       {!!(d?.shop_products?.length || d?.authentic_products?.length) && <View style={[styles.padded, { marginTop: 6 }]}><FxAttribution /></View>}
-      {!!d?.trusted_vendors?.length && <Section title="Trusted vendors" items={d.trusted_vendors} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'businesses' } })} empty="" render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />}
+      {!!deals.data?.length && <Section title="Deals near you" items={deals.data} loading={false} onSeeAll={() => router.push('/deals')} empty="" render={(x) => { const it = x as DealFeedItem; return <View style={{ width: 280 }}><DealCard showBusiness deal={{ id: it.id, title: it.title, description: it.description, terms: it.terms, image_path: it.image_path, claims_count: it.claims_count, my_claim: it.my_claim, business: { id: it.business_id, slug: it.business_slug, name: it.business_name, place: [it.city, it.state].filter(Boolean).join(', ') || null, cover_url: it.cover_url } }} /></View>; }} />}
+      {!!d?.trusted_vendors?.length && <Section title="Trusted vendors" items={d.trusted_vendors} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'businesses' } })} empty="" render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />}
       {!!d?.upcoming_events?.length && <Section title="Upcoming events" items={d.upcoming_events} loading={false} onSeeAll={() => router.push('/(tabs)/events')} empty="" render={(e) => <EventTile e={e as EventCard} />} />}
       <Section title="Nearby businesses" items={d?.nearby} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { sort: 'distance' } })} empty={`No published businesses near ${location.label} yet.`}
-        render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />
+        render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />
       <Section title="Verified businesses" items={d?.verified} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { verified: '1' } })} empty="Verified badges appear here once Adey approves verification requests."
-        render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />
-      <Section title="Featured sellers" subtitle="Ethiopian Market" items={d?.featured_sellers} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { market: 'et' } })} empty="Ethiopian sellers will appear here once they publish."
-        render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />
+        render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />
       <Section title="Available advertising locations" items={d?.available_screens} loading={feed.isLoading} onSeeAll={() => router.push('/adconnect/screens')} empty="Screen listings appear here once businesses list them in AdConnect."
         render={(s) => <ScreenCardItem s={s as ScreenCard} horizontal />} />
       <Section title={d?.recommendation_basis === 'saved_and_viewed' ? 'Recommended for you' : 'Top rated'} subtitle={d?.recommendation_basis === 'saved_and_viewed' ? 'Based on what you saved and viewed' : 'Sorted by rating until we learn your preferences'}
-        items={d?.recommended} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { sort: 'rating' } })} empty="Nothing to recommend yet." render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal />} />
+        items={d?.recommended} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { sort: 'rating' } })} empty="Nothing to recommend yet." render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />
 
       {feed.isError && (
         <View style={[styles.padded, { marginTop: 24 }]}>

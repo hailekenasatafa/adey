@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { formatMoney, mediaUrl, type BusinessCard, type Category, type ProductCard, type ScreenCard } from '@adey/shared';
+import { formatMoney, mediaUrl, type BusinessCard, type BusinessSignals, type Category, type ProductCard, type ScreenCard } from '@adey/shared';
 import { useTheme } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 import { Badge, Card, RatingStars, Text, VerificationBadges } from './ui';
@@ -26,7 +26,8 @@ export function placeLabel(b: { city?: string | null; state?: string | null; cou
 }
 
 // ------------------------------------------------------------------ Business
-export function BusinessCardItem({ b, horizontal }: { b: BusinessCard; horizontal?: boolean }) {
+/** `signals` (from business_signals) adds New / Trending badges, the business's deal and a review quote. */
+export function BusinessCardItem({ b, horizontal, signals }: { b: BusinessCard; horizontal?: boolean; signals?: BusinessSignals | null }) {
   const { colors } = useTheme();
   const img = cover('business-media', b.cover_url) ?? cover('business-media', b.logo_url);
   return (
@@ -36,11 +37,18 @@ export function BusinessCardItem({ b, horizontal }: { b: BusinessCard; horizonta
         <View style={styles.saveBtn}>
           <SaveButton targetType="business" targetId={b.id!} size={18} />
         </View>
-        {b.is_featured && (
-          <View style={styles.featured}>
-            <Badge label="Featured" tone="accent" icon="sparkles" />
+        {(b.is_featured || signals?.is_new || signals?.is_trending) && (
+          <View style={[styles.featured, { flexDirection: 'row', gap: 4 }]}>
+            {b.is_featured && <Badge label="Featured" tone="accent" icon="sparkles" />}
+            {signals?.is_new && <Badge label="New" tone="info" />}
+            {signals?.is_trending && <Badge label="Trending" tone="accent" icon="flame-outline" />}
           </View>
         )}
+        {signals?.deal_count ? (
+          <View style={[styles.dealRibbon, { backgroundColor: colors.primary }]}>
+            <Text variant="caption" numberOfLines={1} style={{ color: colors.onPrimary, fontWeight: '600' }}>🏷️ {signals.deal_title}{signals.deal_count > 1 ? ` · +${signals.deal_count - 1}` : ''}</Text>
+          </View>
+        ) : null}
       </View>
       <View style={{ padding: 12, gap: 4 }}>
         <View style={styles.rowBetween}>
@@ -59,6 +67,7 @@ export function BusinessCardItem({ b, horizontal }: { b: BusinessCard; horizonta
           </Text>
         )}
         <RatingStars rating={b.rating_avg} count={b.rating_count} />
+        {signals?.review_quote && !horizontal ? <Text variant="caption" color="muted" numberOfLines={2}>“{signals.review_quote}” — {signals.review_author ?? 'Adey member'}</Text> : null}
         {(b.selling_enabled || (b.trust_tier && b.trust_tier !== 'new')) && (
           <View style={styles.badgeRow}>
             <TrustBadge tier={b.trust_tier} />
@@ -181,6 +190,7 @@ const styles = StyleSheet.create({
   cover: { alignItems: 'center', justifyContent: 'center' },
   saveBtn: { position: 'absolute', top: 8, right: 8 },
   check: { position: 'absolute', top: 8, right: 8, width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  dealRibbon: { position: 'absolute', left: 8, right: 8, bottom: 8, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
   featured: { position: 'absolute', top: 8, left: 8 },
   badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 2 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },

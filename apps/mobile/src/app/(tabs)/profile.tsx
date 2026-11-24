@@ -10,11 +10,15 @@ import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/supabase';
 import { Avatar, Badge, Button, Card, Divider, Screen, Text, VerificationBadges } from '@/components/ui';
 import { MenuRow } from '@/components/MenuRow';
+import { useAdconnect } from '@/lib/settings';
+import { useCommerce } from '@/lib/commerce';
 
 export default function Profile() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { user, profile, businesses, roles, signOut } = useAuth();
+  const { checkoutEnabled } = useCommerce();
+  const { campaignsEnabled } = useAdconnect();
   const unread = useQuery({ queryKey: ['unread', user?.id], queryFn: () => api.notifications.unread(), enabled: !!user });
   const rewards = useQuery({ queryKey: ['rewards', user?.id], queryFn: () => api.rewards.summary(), enabled: !!user, staleTime: 60_000 });
   const points = rewards.data?.enabled ? rewards.data.balance : null;
@@ -97,11 +101,15 @@ export default function Profile() {
         </View>
       )}
 
-      <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>Shopping</Text>
+      <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>Deals & events</Text>
       <Card padded={false}>
+        <MenuRow icon="pricetags-outline" label="My deals" onPress={() => router.push('/deals/mine')} />
+        <Divider />
+        <MenuRow icon="pricetag-outline" label="Browse deals" onPress={() => router.push('/deals')} />
+        {checkoutEnabled && <><Divider />
         <MenuRow icon="receipt-outline" label="My orders" onPress={() => router.push('/orders')} />
         <Divider />
-        <MenuRow icon="location-outline" label="Delivery addresses" onPress={() => router.push('/settings/addresses')} />
+        <MenuRow icon="location-outline" label="Delivery addresses" onPress={() => router.push('/settings/addresses')} /></>}
         {rewards.data?.enabled && (<><Divider /><MenuRow icon="gift-outline" label="Adey Rewards" value={points != null ? `${points.toLocaleString()} pts` : undefined} onPress={() => router.push('/rewards')} /></>)}
         <Divider />
         <MenuRow icon="calendar-outline" label="Events I am going to" onPress={() => router.push('/(tabs)/events?mine=1')} />
@@ -113,9 +121,8 @@ export default function Profile() {
       <Card padded={false}>
         <MenuRow icon="tv-outline" label="Find advertising screens" onPress={() => router.push('/adconnect/screens')} />
         <Divider />
-        <MenuRow icon="megaphone-outline" label="My campaigns" onPress={() => router.push('/adconnect/campaigns')} />
-        <Divider />
-        <MenuRow icon="albums-outline" label="My screens & incoming requests" onPress={() => router.push('/adconnect/my-screens')} />
+        {campaignsEnabled && <><MenuRow icon="megaphone-outline" label="My campaigns" onPress={() => router.push('/adconnect/campaigns')} /><Divider /></>}
+        <MenuRow icon="albums-outline" label={campaignsEnabled ? 'My screens & incoming requests' : 'My screens'} onPress={() => router.push('/adconnect/my-screens')} />
       </Card>
 
       <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>Help & settings</Text>

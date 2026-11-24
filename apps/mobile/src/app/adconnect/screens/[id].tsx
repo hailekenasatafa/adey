@@ -14,6 +14,7 @@ import { track } from '@/lib/analytics';
 import { callPhone, DAY_LABELS, DAY_ORDER, fmtTime, shareScreen } from '@/lib/actions';
 import { useCampaignCart } from '@/lib/campaignCart';
 import { fmtDateRange } from '@/lib/format';
+import { useAdconnect } from '@/lib/settings';
 import { Badge, Button, Card, ErrorState, IconButton, KeyValue, Loading, RatingStars, Screen, SectionHeader, Text, VerificationBadges } from '@/components/ui';
 import { SaveButton } from '@/components/SaveButton';
 import { cover, placeLabel } from '@/components/cards';
@@ -26,6 +27,7 @@ export default function ScreenDetail() {
   const insets = useSafeAreaInsets();
   const { user, businesses } = useAuth();
   const cart = useCampaignCart();
+  const { campaignsEnabled } = useAdconnect();
   const [pkg, setPkg] = useState<string | null>(null);
   const q = useQuery({ queryKey: ['screen', id], queryFn: () => api.adconnect.screen(id!), enabled: !!id });
   const s = q.data;
@@ -156,16 +158,16 @@ export default function ScreenDetail() {
           </Card>
         )) : <Text color="muted">No advertiser reviews yet. Reviews can only be left after a completed booking.</Text>}
 
-        {/* Actions */}
+        {/* Actions: contact the owner; campaign tools only when Adey switches them on */}
         {!isMine && (
           <View style={{ gap: 10, marginTop: 24 }}>
-            <Button title={inCart ? 'Added to campaign ✓' : 'Add to Campaign'} icon={inCart ? 'checkmark' : 'add'} variant={inCart ? 'secondary' : 'primary'} fullWidth onPress={() => gate(() => cart.toggle(cartItem))} />
-            <Button title="Request Advertising (single screen)" icon="paper-plane-outline" variant="accent" fullWidth onPress={() => gate(() => { if (!inCart) cart.setMany([cartItem]); router.push({ pathname: '/adconnect/campaigns/new', params: { screenId: s.id } }); })} />
-            <View style={{ flexDirection: 'row', gap: 10 }}>
-              <Button title="Call Owner" icon="call-outline" variant="outline" style={{ flex: 1 }} disabled={!b.phone} onPress={() => b.phone && callPhone(b.phone, b.id)} />
-              <Button title="Send Inquiry" icon="chatbubble-ellipses-outline" variant="outline" style={{ flex: 1 }} onPress={() => { track('screen_inquiry', { businessId: b.id, targetType: 'screen', targetId: s.id }); gate(() => router.push({ pathname: '/inquiry/[businessId]', params: { businessId: b.id, type: 'advertising' } })); }} />
-            </View>
-            {cart.items.length > 0 && <Button title={`Review campaign selection (${cart.items.length})`} variant="ghost" onPress={() => router.push('/adconnect/campaigns/new')} />}
+            <Button title="Contact screen owner" icon="chatbubble-ellipses-outline" fullWidth onPress={() => { track('screen_inquiry', { businessId: b.id, targetType: 'screen', targetId: s.id }); if (!user) return router.push('/(auth)/sign-in'); router.push({ pathname: '/inquiry/[businessId]', params: { businessId: b.id, type: 'advertising', screen: s.id } }); }} />
+            <Text variant="caption" color="muted">Ask about dates, price and the ad you want to run. You and the owner agree everything and pay each other directly; Adey takes no commission.</Text>
+            <Button title="Call owner" icon="call-outline" variant="outline" fullWidth disabled={!b.phone} onPress={() => b.phone && callPhone(b.phone, b.id)} />
+            {campaignsEnabled && <>
+              <Button title={inCart ? 'Added to campaign ✓' : 'Add to Campaign'} icon={inCart ? 'checkmark' : 'add'} variant="secondary" fullWidth onPress={() => gate(() => cart.toggle(cartItem))} />
+              {cart.items.length > 0 && <Button title={`Review campaign selection (${cart.items.length})`} variant="ghost" onPress={() => router.push('/adconnect/campaigns/new')} />}
+            </>}
           </View>
         )}
         {isMine && <Button title="Manage this screen" style={{ marginTop: 24 }} fullWidth onPress={() => router.push({ pathname: '/adconnect/my-screens/[screenId]', params: { screenId: s.id, businessId: s.business_id } })} />}

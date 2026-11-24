@@ -24,6 +24,7 @@ const ROWS: { key: keyof NotificationPrefs; label: string; hint: string }[] = [
   { key: 'events', label: 'Events', hint: 'Reminders and changes for events you plan to attend' },
   { key: 'support', label: 'Support replies', hint: 'When the Adey team answers you' },
   { key: 'messages', label: 'Messages', hint: 'New chat messages' },
+  { key: 'deals', label: 'New deals', hint: 'When a business you saved posts a deal' },
   { key: 'marketing', label: 'Tips & announcements', hint: 'Occasional news from Adey' },
 ];
 

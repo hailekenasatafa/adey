@@ -14,6 +14,7 @@ import { BusinessCardItem, ProductCardItem } from '@/components/cards';
 import { CrossBorderNotice } from '@/components/CrossBorderNotice';
 import { FxAttribution } from '@/components/commerce';
 import { CountryPicker } from '@/components/shop';
+import { useSignals } from '@/lib/settings';
 
 const PAGE = 20;
 type BizSort = 'relevance' | 'distance' | 'rating' | 'newest';
@@ -70,6 +71,7 @@ export default function Explore() {
   });
 
   const bizItems = useMemo(() => businesses.data?.pages.flat() ?? [], [businesses.data]);
+  const signals = useSignals((bizItems as BusinessCard[]).map((b) => b.id));
   const prodItems = useMemo(() => productQ.data?.pages.flat() ?? [], [productQ.data]);
   const active = products ? productQ : businesses;
   const activeFilters = [f.min, f.max, f.minRating, f.authentic, f.inStock, f.handmade, f.purchasable, f.shipsTo, f.sort !== 'relevance'].filter(Boolean).length;
@@ -138,7 +140,7 @@ export default function Explore() {
         columnWrapperStyle={products ? { gap: 12 } : undefined}
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 12 }}
         ListHeaderComponent={header}
-        renderItem={({ item }) => (products ? <View style={{ flex: 1, maxWidth: '50%' }}><ProductCardItem p={item as ProductCard} /></View> : <BusinessCardItem b={item as BusinessCard} />)}
+        renderItem={({ item }) => (products ? <View style={{ flex: 1, maxWidth: '50%' }}><ProductCardItem p={item as ProductCard} /></View> : <BusinessCardItem b={item as BusinessCard} signals={signals.data?.[(item as BusinessCard).id!]} />)}
         onEndReachedThreshold={0.6}
         onEndReached={() => active.hasNextPage && !active.isFetchingNextPage && active.fetchNextPage()}
         refreshing={active.isRefetching}

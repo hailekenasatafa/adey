@@ -7,11 +7,16 @@ import { api } from '@/lib/supabase';
 import { fmtDate } from '@/lib/format';
 import { Badge, Card, EmptyState, Header, Loading, Screen, SectionHeader, Text } from '@/components/ui';
 import { BusinessPicker, useSelectedBusiness } from '@/components/BusinessPicker';
+import { CampaignsGate } from '@/components/CampaignsGate';
 
 type History = { monetization_enabled: boolean; payments: { id: string; amount_cents: number; currency: string; status: string; provider: string; created_at: string; receipt_url: string | null }[]; payouts: { id: string; amount_cents: number; currency: string; status: string; scheduled_for: string | null; paid_at: string | null; created_at: string }[] };
 
 /** Payment-ready surface: reads real records only; nothing here moves money. */
-export default function Payments() {
+export default function PaymentsScreen() {
+  return <CampaignsGate><Payments /></CampaignsGate>;
+}
+
+function Payments() {
   const { businessId: initial } = useLocalSearchParams<{ businessId?: string }>();
   const [bizId, setBizId] = useSelectedBusiness(initial);
   const q = useQuery({ queryKey: ['payments', bizId], queryFn: () => api.adconnect.paymentHistory(bizId!) as Promise<History>, enabled: !!bizId });

@@ -8,6 +8,7 @@ import { api } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { Avatar, Badge, Button, Card, Input, Text } from '@/components/ui';
+import { ReportButton } from '@/components/ReportButton';
 
 export function ReviewList({ businessId, canReview }: { businessId: string; canReview: boolean }) {
   const { colors } = useTheme();
@@ -76,6 +77,7 @@ export function ReviewList({ businessId, canReview }: { businessId: string; canR
                 <Text variant="caption" style={{ marginTop: 2 }}>{r.response}</Text>
               </View>
             )}
+            {r.author_id !== user?.id && <View style={{ marginTop: 8, alignItems: 'flex-end' }}><ReportButton targetType="review" targetId={r.id} /></View>}
           </Card>
         ))
       ) : (

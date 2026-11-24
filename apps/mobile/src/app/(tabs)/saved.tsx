@@ -9,6 +9,7 @@ import { api, supabase } from '@/lib/supabase';
 import { Chip, EmptyState, Screen, Skeleton, Text } from '@/components/ui';
 import { BusinessCardItem, ProductCardItem, ScreenCardItem } from '@/components/cards';
 import { useSaved } from '@/components/SaveButton';
+import { useSignals } from '@/lib/settings';
 
 type Kind = 'business' | 'product' | 'screen';
 
@@ -50,6 +51,8 @@ export default function Saved() {
     ],
   });
 
+  const signals = useSignals(kind === 'business' ? ((cards.data ?? []) as BusinessCard[]).map((b) => b.id) : []);
+
   if (!user) {
     return (
       <Screen>
@@ -78,7 +81,7 @@ export default function Saved() {
             </View>
           </View>
         }
-        renderItem={({ item }) => (kind === 'business' ? <BusinessCardItem b={item as BusinessCard} /> : kind === 'product' ? <View style={{ flex: 1 }}><ProductCardItem p={item as ProductCard} /></View> : <ScreenCardItem s={item as ScreenCard} />)}
+        renderItem={({ item }) => (kind === 'business' ? <BusinessCardItem b={item as BusinessCard} signals={signals.data?.[(item as BusinessCard).id!]} /> : kind === 'product' ? <View style={{ flex: 1 }}><ProductCardItem p={item as ProductCard} /></View> : <ScreenCardItem s={item as ScreenCard} />)}
         refreshing={saved.isRefetching}
         onRefresh={() => { saved.refetch(); cards.refetch(); }}
         ListEmptyComponent={

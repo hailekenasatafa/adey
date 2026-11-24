@@ -6,7 +6,7 @@ import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import MapView, { Marker } from 'react-native-maps';
-import { formatMoney, friendlyError, type Product, type Service, type VerificationLevel } from '@adey/shared';
+import { catalogLabelFor, catalogLabels, formatMoney, friendlyError, groupBySection, type Product, type Service, type VerificationLevel } from '@adey/shared';
 import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { api } from '@/lib/supabase';
@@ -17,6 +17,9 @@ import { SaveButton } from '@/components/SaveButton';
 import { cover, placeLabel } from '@/components/cards';
 import { ReviewList } from '@/components/ReviewList';
 import { FxAttribution, PriceText, TrustBadge } from '@/components/commerce';
+import { DealCard } from '@/components/deals';
+import { ReportButton } from '@/components/ReportButton';
+import { useSignals } from '@/lib/settings';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +35,9 @@ export default function BusinessDetail() {
   const b = q.data;
   const products = useQuery({ queryKey: ['products', b?.id], queryFn: () => api.market.products(b!.id), enabled: !!b });
   const services = useQuery({ queryKey: ['services', b?.id], queryFn: () => api.market.services(b!.id), enabled: !!b });
+  const deals = useQuery({ queryKey: ['business-deals', b?.id, user?.id ?? 'guest'], queryFn: () => api.deals.forBusiness(b!.id), enabled: !!b });
+  const signalsQ = useSignals([b?.id]);
+  const sig = b ? signalsQ.data?.[b.id] : undefined;
 
   useEffect(() => {
     if (b) track('business_view', { businessId: b.id, targetType: 'business', targetId: b.id, meta: { category_id: b.category_id } });
@@ -48,6 +54,7 @@ export default function BusinessDetail() {
   if (q.isError || !b) return <Screen><ErrorState error={q.error ?? new Error('This business is not available.')} onRetry={() => q.refetch()} /></Screen>;
 
   const status = openStatus(b.hours);
+  const catalogLabel = catalogLabelFor(b.catalog_label, b.category?.slug);
   const address = [b.address_line1, b.address_line2, [b.city, b.state].filter(Boolean).join(', '), b.postal_code].filter(Boolean).join(', ');
   const requireAuth = (fn: () => void) => (user ? fn() : router.push('/(auth)/sign-in'));
 
@@ -89,6 +96,9 @@ export default function BusinessDetail() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 10, flexWrap: 'wrap' }}>
           <RatingStars rating={b.rating_avg} count={b.rating_count} size={16} />
           {status.open !== null && <Badge label={status.label} tone={status.open ? 'success' : 'neutral'} icon="time-outline" />}
+          {sig?.is_new && <Badge label="New on Adey" tone="info" />}
+          {sig?.is_trending && <Badge label="Trending" tone="accent" icon="flame-outline" />}
+          {sig?.saves_count ? <Text variant="caption" color="muted">♥ Saved by {sig.saves_count}</Text> : null}
         </View>
         <View style={{ marginTop: 10, gap: 6 }}>
           <VerificationBadges badges={badges} />
@@ -103,6 +113,12 @@ export default function BusinessDetail() {
           )}
         </View>
         {b.tagline && <Text style={{ marginTop: 10 }}>{b.tagline}</Text>}
+        {sig?.review_quote ? (
+          <View style={{ marginTop: 12, padding: 14, borderRadius: radius.lg, backgroundColor: colors.primarySoft }}>
+            <Text>“{sig.review_quote}”</Text>
+            <Text variant="caption" color="muted" style={{ marginTop: 4 }}>— {sig.review_author ?? 'Adey member'}{sig.review_verified ? ' · Contacted this business' : ''}</Text>
+          </View>
+        ) : null}
 
         {/* Actions */}
         <View style={styles.actions}>
@@ -113,12 +129,21 @@ export default function BusinessDetail() {
           <Action icon="globe" label="Website" disabled={!b.website} onPress={() => b.website && openWebsite(b.website, b.id)} />
         </View>
 
+        {/* Deals: the reason to come back */}
+        {deals.data?.length ? (
+          <View style={{ marginTop: 20, gap: 10 }}>
+            <SectionHeader title={`Deals (${deals.data.length})`} />
+            <Text variant="caption" color="muted" style={{ marginTop: -6 }}>Claim on Adey, then show your code here. Free to claim.</Text>
+            {deals.data.map((d) => <DealCard key={d.id + (d.my_claim?.code ?? '')} deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim, business: { id: b.id, slug: b.slug, name: b.name } }} />)}
+          </View>
+        ) : null}
+
         {/* Tabs */}
         <View style={[styles.tabs, { borderBottomColor: colors.border }]}>
           {(['about', 'products', 'services', 'reviews'] as const).map((t) => (
             <Pressable key={t} onPress={() => setTab(t)} accessibilityRole="tab" accessibilityState={{ selected: tab === t }} style={[styles.tab, tab === t && { borderBottomColor: colors.primary, borderBottomWidth: 2 }]}>
               <Text variant="label" color={tab === t ? 'primary' : 'muted'}>
-                {t[0].toUpperCase() + t.slice(1)}
+                {t === 'services' ? catalogLabels[catalogLabel] : t[0].toUpperCase() + t.slice(1)}
                 {t === 'products' && products.data?.length ? ` (${products.data.length})` : t === 'services' && services.data?.length ? ` (${services.data.length})` : t === 'reviews' && b.rating_count ? ` (${b.rating_count})` : ''}
               </Text>
             </Pressable>
@@ -174,13 +199,22 @@ export default function BusinessDetail() {
         )}
         {tab === 'services' && (
           <View style={{ marginTop: 16, gap: 10 }}>
-            {services.isLoading ? <Loading /> : services.data?.length ? services.data.map((s) => <ServiceRow key={s.id} s={s} onQuote={() => requireAuth(() => router.push({ pathname: '/inquiry/[businessId]', params: { businessId: b.id, type: 'quote', serviceId: s.id } }))} />) : <Text color="muted">No services listed yet.</Text>}
+            {services.isLoading ? <Loading /> : services.data?.filter((s) => s.is_active).length ? groupBySection(services.data.filter((s) => s.is_active)).map((g) => (
+              <View key={g.section ?? '_'} style={{ gap: 10 }}>
+                {g.section ? <Text variant="overline" color="muted" style={{ marginTop: 6 }}>{g.section}</Text> : null}
+                {g.items.map((s) => <ServiceRow key={s.id} s={s} menu={catalogLabel === 'menu'} onQuote={() => requireAuth(() => router.push({ pathname: '/inquiry/[businessId]', params: { businessId: b.id, type: 'quote', serviceId: s.id } }))} />)}
+              </View>
+            )) : <Text color="muted">Nothing listed yet.</Text>}
           </View>
         )}
         {tab === 'reviews' && <ReviewList businessId={b.id} canReview={!!user} />}
       </View>
 
-      <View style={[styles.padded, { marginTop: 24 }]}>
+      <View style={[styles.padded, { marginTop: 24, alignItems: 'center' }]}>
+        <Text variant="caption" color="muted" center>Information on this page comes from the business.</Text>
+        <View style={{ marginTop: 4 }}><ReportButton targetType="business" targetId={b.id} label="Report this listing" /></View>
+      </View>
+      <View style={[styles.padded, { marginTop: 16 }]}>
         <Button title="Request Quote" icon="document-text-outline" fullWidth onPress={() => requireAuth(() => router.push({ pathname: '/inquiry/[businessId]', params: { businessId: b.id, type: 'quote' } }))} />
       </View>
     </Screen>
@@ -230,18 +264,22 @@ function ProductTile({ p }: { p: Product }) {
   );
 }
 
-function ServiceRow({ s, onQuote }: { s: Service; onQuote: () => void }) {
+function ServiceRow({ s, onQuote, menu }: { s: Service; onQuote: () => void; menu?: boolean }) {
+  const { radius } = useTheme();
+  const img = cover('business-media', s.image_path);
   return (
     <Card>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">{s.name}</Text>
+          <Text variant="bodyStrong">{s.name}{s.is_signature ? '  ★' : ''}</Text>
+          {s.is_signature && <Text variant="caption" color="accent">Signature</Text>}
           {s.description && <Text variant="caption" color="muted" numberOfLines={2}>{s.description}</Text>}
           <Text variant="label" color="primary" style={{ marginTop: 4 }}>
-            {s.price_note ? `${s.price_note} ` : ''}{formatMoney(s.price_cents, s.currency)}{s.duration_minutes ? ` · ${s.duration_minutes} min` : ''}
+            {s.price_cents == null ? (menu ? 'Ask for price' : 'Ask for a quote') : `${s.price_note ? `${s.price_note} ` : ''}${formatMoney(s.price_cents, s.currency)}`}{s.duration_minutes ? ` · ${s.duration_minutes} min` : ''}
           </Text>
         </View>
-        <Button title="Quote" size="sm" variant="secondary" onPress={onQuote} />
+        {img ? <Image source={{ uri: img }} style={{ width: 64, height: 64, borderRadius: radius.md }} contentFit="cover" /> : null}
+        {!menu && <Button title="Quote" size="sm" variant="secondary" onPress={onQuote} />}
       </View>
     </Card>
   );

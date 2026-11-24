@@ -18,6 +18,7 @@ const ICONS: Record<Notification['type'], keyof typeof Ionicons.glyphMap> = {
   refund_update: 'return-down-back-outline', order_dispute: 'warning-outline', kyc_update: 'id-card-outline', certification_update: 'ribbon-outline', review_new: 'star-outline',
   low_stock: 'trending-down-outline', event_reminder: 'alarm-outline', event_update: 'calendar-outline', rewards_update: 'gift-outline', support_reply: 'help-buoy-outline',
   announcement: 'megaphone-outline',
+  deal_new: 'pricetag-outline',
 };
 
 export default function Notifications() {

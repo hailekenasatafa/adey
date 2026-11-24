@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useForm } from 'react-hook-form';
@@ -11,18 +11,21 @@ import { track } from '@/lib/analytics';
 import { Button, Card, Chip, FormInput, Header, Screen, Text } from '@/components/ui';
 
 export default function InquiryScreen() {
-  const { businessId, type, productId, serviceId } = useLocalSearchParams<{ businessId: string; type?: 'contact' | 'quote'; productId?: string; serviceId?: string }>();
+  const { businessId, type, productId, serviceId, screen: screenId } = useLocalSearchParams<{ businessId: string; type?: 'contact' | 'quote' | 'advertising'; productId?: string; serviceId?: string; screen?: string }>();
   const { user, profile } = useAuth();
   const qc = useQueryClient();
   const biz = useQuery({ queryKey: ['business', businessId], queryFn: () => api.market.business(businessId!) });
   const product = useQuery({ queryKey: ['product', productId], queryFn: () => api.market.product(productId!), enabled: !!productId });
+  const screen = useQuery({ queryKey: ['screen', screenId], queryFn: () => api.adconnect.screen(screenId!), enabled: !!screenId });
   const [error, setError] = useState<string | null>(null);
 
-  const { control, handleSubmit, setValue, watch, formState } = useForm<InquiryInput>({
+  const { control, handleSubmit, setValue, watch, getValues, formState } = useForm<InquiryInput>({
     resolver: zodResolver(inquirySchema),
     defaultValues: { type: type ?? 'contact', subject: productId ? `About: ${product.data?.name ?? 'a product'}` : '', message: '', contact_phone: profile?.phone ?? '', product_id: productId ?? null, service_id: serviceId ?? null },
   });
   const kind = watch('type');
+  // Name the screen in the subject so the owner knows which one you mean.
+  useEffect(() => { if (screen.data && !getValues('subject')) setValue('subject', `Advertising on your screen: ${screen.data.title}`.slice(0, 200)); }, [screen.data, getValues, setValue]);
 
   const send = useMutation({
     mutationFn: (v: InquiryInput) =>
@@ -45,11 +48,15 @@ export default function InquiryScreen() {
   }
 
   return (
-    <Screen header={<Header title={kind === 'quote' ? 'Request a quote' : 'Contact business'} subtitle={biz.data?.name} />} keyboard>
-      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
-        <Chip label="Message" icon="chatbubble-ellipses-outline" selected={kind === 'contact'} onPress={() => setValue('type', 'contact')} />
-        <Chip label="Request quote" icon="document-text-outline" selected={kind === 'quote'} onPress={() => setValue('type', 'quote')} />
-      </View>
+    <Screen header={<Header title={kind === 'quote' ? 'Request a quote' : kind === 'advertising' ? 'Contact screen owner' : 'Contact business'} subtitle={biz.data?.name} />} keyboard>
+      {kind === 'advertising' ? (
+        <Text variant="caption" color="muted" style={{ marginBottom: 16 }}>Say when you want to run your ad, for how long, your budget, and whether it’s a video or an image. You and the owner agree the details and payment directly; Adey isn’t part of the agreement and takes no commission.</Text>
+      ) : (
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+          <Chip label="Message" icon="chatbubble-ellipses-outline" selected={kind === 'contact'} onPress={() => setValue('type', 'contact')} />
+          <Chip label="Request quote" icon="document-text-outline" selected={kind === 'quote'} onPress={() => setValue('type', 'quote')} />
+        </View>
+      )}
       {product.data && (
         <Card style={{ marginBottom: 14 }}>
           <Text variant="caption" color="muted">About product</Text>

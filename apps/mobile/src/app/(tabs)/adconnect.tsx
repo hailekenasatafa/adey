@@ -10,18 +10,20 @@ import { useTheme } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { useLocation } from '@/lib/location';
 import { api } from '@/lib/supabase';
-import { AdeyFlower, Badge, Button, Card, Screen, SectionHeader, Skeleton, Text } from '@/components/ui';
+import { AdeyFlower, Button, Card, Screen, SectionHeader, Skeleton, Text } from '@/components/ui';
 import { ScreenCardItem } from '@/components/cards';
+import { useAdconnect } from '@/lib/settings';
 
 export default function AdConnectHub() {
   const { radius } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, businesses, roles } = useAuth();
   const { location } = useLocation();
+  const { campaignsEnabled } = useAdconnect();
   const screens = useQuery({ queryKey: ['search-screens', 'hub', location.lat.toFixed(1)], queryFn: () => api.adconnect.searchScreens({ p_lat: location.lat, p_lng: location.lng, p_radius_km: 120, p_sort: 'distance', p_limit: 6 }), staleTime: 120_000 });
   const pendingOwner = useQuery({
     queryKey: ['pending-owner-requests', user?.id],
-    enabled: !!user && roles.screenOwner,
+    enabled: !!user && roles.screenOwner && campaignsEnabled,
     queryFn: async () => {
       const lists = await Promise.all(businesses.filter((b) => b.offers_ad_screens).map((b) => api.adconnect.incomingRequests(b.id)));
       return lists.flat().filter((r) => (r.status === 'pending' || r.status === 'countered') && r.last_offer_by === 'advertiser').length;
@@ -41,35 +43,37 @@ export default function AdConnectHub() {
           <AdeyFlower size={26} petal={brand.forest} center={brand.gold} />
           <Text variant="title">AdConnect</Text>
         </View>
-        <Text color="muted" style={{ marginTop: 4 }}>Advertise on screens inside Habesha businesses — or earn by listing yours.</Text>
+        <Text color="muted" style={{ marginTop: 4 }}>Find TV screens inside Habesha businesses that take local ads — or list yours for free.</Text>
       </View>
 
       <View style={{ paddingHorizontal: 16, marginTop: 16 }}>
         <LinearGradient colors={[brand.forest, '#0F3227']} style={[styles.hero, { borderRadius: radius.lg }]}>
           <Text variant="overline" style={{ color: brand.gold }}>How it works</Text>
           <View style={{ gap: 6, marginTop: 8 }}>
-            <Step n="1" text="Advertisers pick screens and send one request per business." />
-            <Step n="2" text="Screen owners accept, counter, or decline from their phone." />
-            <Step n="3" text="Agreed bookings show up for both sides — in the app and on the website." />
+            <Step n="1" text="Find a screen by city, size, visitors and price." />
+            <Step n="2" text="Contact the screen owner about dates, price and your ad." />
+            <Step n="3" text="Agree and pay each other directly. Adey takes no commission." />
           </View>
-          <Badge label="Free Launch Mode — no platform commission" tone="accent" />
+          <Text variant="caption" style={{ color: brand.ivory, opacity: 0.8 }}>Visitor numbers are the owners’ own estimates.</Text>
         </LinearGradient>
       </View>
 
       <View style={styles.grid}>
-        <Tile icon="search-outline" label="Find Advertising Screens" onPress={() => router.push('/adconnect/screens')} />
-        <Tile icon="rocket-outline" label="Create Campaign" onPress={() => gated(() => router.push('/adconnect/campaigns/new'))} />
-        <Tile icon="megaphone-outline" label="My Campaigns" onPress={() => gated(() => router.push('/adconnect/campaigns'))} />
-        <Tile icon="tv-outline" label="List My Screens" onPress={() => gated(() => router.push('/adconnect/my-screens'))} />
-        <Tile icon="mail-unread-outline" label="Incoming Requests" badge={pendingOwner.data} onPress={() => gated(() => router.push('/adconnect/requests'))} />
-        <Tile icon="stats-chart-outline" label="Advertising Dashboard" onPress={() => gated(() => router.push('/adconnect/earnings'))} />
+        <Tile icon="search-outline" label="Find advertising screens" onPress={() => router.push('/adconnect/screens')} />
+        <Tile icon="tv-outline" label="List my screens — free" onPress={() => gated(() => router.push('/adconnect/my-screens'))} />
+        {campaignsEnabled && <>
+          <Tile icon="rocket-outline" label="Create Campaign" onPress={() => gated(() => router.push('/adconnect/campaigns/new'))} />
+          <Tile icon="megaphone-outline" label="My Campaigns" onPress={() => gated(() => router.push('/adconnect/campaigns'))} />
+          <Tile icon="mail-unread-outline" label="Incoming Requests" badge={pendingOwner.data} onPress={() => gated(() => router.push('/adconnect/requests'))} />
+          <Tile icon="stats-chart-outline" label="Advertising Dashboard" onPress={() => gated(() => router.push('/adconnect/earnings'))} />
+        </>}
       </View>
 
       {user && businesses.length === 0 && (
         <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
           <Card>
             <Text variant="subheading">Set up your AdConnect profile</Text>
-            <Text color="muted" style={{ marginTop: 4 }}>Campaigns and screen listings belong to a business. Create one (it takes two minutes) to advertise or to list screens.</Text>
+            <Text color="muted" style={{ marginTop: 4 }}>Screen listings belong to a business profile. Create one for free (it takes two minutes) to list your screens.</Text>
             <Button title="Create business profile" style={{ marginTop: 12 }} onPress={() => router.push('/adconnect/get-started')} />
           </Card>
         </View>

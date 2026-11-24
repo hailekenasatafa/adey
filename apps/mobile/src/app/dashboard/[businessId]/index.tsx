@@ -12,6 +12,8 @@ import { Badge, Button, Card, Divider, EmptyState, ErrorState, Header, Loading, 
 import { MenuRow } from '@/components/MenuRow';
 import { SellingPanel } from '@/components/seller/SellingPanel';
 import { SellingNotice } from '@/components/seller/common';
+import { useCommerce } from '@/lib/commerce';
+import { useAdconnect } from '@/lib/settings';
 
 type Overview = {
   business: { id: string; name: string; status: string; market: string; logo_url: string | null };
@@ -28,6 +30,11 @@ export default function BusinessDashboard() {
   const { membership, business, canManage } = useManagedBusiness(businessId);
   const overview = useQuery({ queryKey: ['overview', businessId], queryFn: () => api.owner.overview(businessId!) as Promise<Overview>, enabled: !!businessId && !!membership, refetchInterval: 60_000 });
   const [err, setErr] = useState<string | null>(null);
+  const { checkoutEnabled } = useCommerce();
+  const { campaignsEnabled } = useAdconnect();
+  const deals = useQuery({ queryKey: ['owner-deals', businessId], queryFn: () => api.deals.owner(businessId!), enabled: !!businessId && !!membership });
+  const claimed = (deals.data ?? []).reduce((n, d) => n + d.claims_count, 0);
+  const activeDeals = (deals.data ?? []).filter((d) => d.status === 'active').length;
 
   const publish = useMutation({
     mutationFn: (status: 'published' | 'draft') => api.owner.update(businessId!, { status }),
@@ -74,18 +81,21 @@ export default function BusinessDashboard() {
         <Stat label="Profile views · 30d" value={o?.profile_views_30d} icon="eye-outline" />
         <Stat label="Contact clicks · 30d" value={o?.contact_clicks_30d} icon="call-outline" />
         <Stat label="Open inquiries" value={o?.open_inquiries} icon="chatbubble-ellipses-outline" onPress={() => router.push(`/dashboard/${b.id}/inquiries`)} highlight={!!o?.open_inquiries} />
-        <Stat label="Ad requests waiting" value={o?.pending_ad_requests} icon="tv-outline" onPress={() => router.push('/adconnect/requests')} highlight={!!o?.pending_ad_requests} />
-        <Stat label="Upcoming bookings" value={o?.upcoming_bookings} icon="calendar-outline" onPress={() => router.push('/adconnect/bookings')} />
+        <Stat label="Deals claimed" value={claimed} icon="pricetags-outline" onPress={() => router.push(`/dashboard/${b.id}/deals`)} />
+        {campaignsEnabled && <Stat label="Ad requests waiting" value={o?.pending_ad_requests} icon="tv-outline" onPress={() => router.push('/adconnect/requests')} highlight={!!o?.pending_ad_requests} />}
+        {campaignsEnabled && <Stat label="Upcoming bookings" value={o?.upcoming_bookings} icon="calendar-outline" onPress={() => router.push('/adconnect/bookings')} />}
         <Stat label="Rating" value={o?.rating.avg != null ? `${Number(o.rating.avg).toFixed(1)} (${o.rating.count})` : '—'} icon="star-outline" />
       </View>
 
-      {/* Selling */}
-      <Text variant="overline" color="muted" style={{ marginTop: 24 }}>Selling</Text>
-      <View style={{ marginTop: 8 }}><SellingNotice businessId={b.id} /></View>
-      <SellingPanel businessId={b.id} role={membership.role} />
+      {/* Selling: only while online orders are switched on */}
+      {checkoutEnabled && <>
+        <Text variant="overline" color="muted" style={{ marginTop: 24 }}>Selling</Text>
+        <View style={{ marginTop: 8 }}><SellingNotice businessId={b.id} /></View>
+        <SellingPanel businessId={b.id} role={membership.role} />
+      </>}
 
-      {/* Revenue — honest labels */}
-      <Card style={{ marginTop: 12 }}>
+      {/* Revenue — honest labels; only while AdConnect bookings are switched on */}
+      {campaignsEnabled && <Card style={{ marginTop: 12 }}>
         <Text variant="overline" color="muted">Advertising revenue</Text>
         <View style={{ flexDirection: 'row', marginTop: 8 }}>
           <View style={{ flex: 1 }}>
@@ -98,7 +108,7 @@ export default function BusinessDashboard() {
           </View>
         </View>
         <Text variant="caption" color="muted" style={{ marginTop: 6 }}>Only completed bookings count as revenue. Expected amounts are not earnings yet.</Text>
-      </Card>
+      </Card>}
 
       {/* Manage */}
       <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>Manage business</Text>
@@ -109,9 +119,11 @@ export default function BusinessDashboard() {
         <Divider />
         <MenuRow icon="time-outline" label="Opening hours" onPress={() => router.push(`/dashboard/${b.id}/hours`)} />
         <Divider />
-        <MenuRow icon="bag-handle-outline" label="Products" onPress={() => router.push(`/dashboard/${b.id}/products`)} />
+        <MenuRow icon="restaurant-outline" label="Menu & services" onPress={() => router.push(`/dashboard/${b.id}/services`)} />
         <Divider />
-        <MenuRow icon="construct-outline" label="Services" onPress={() => router.push(`/dashboard/${b.id}/services`)} />
+        <MenuRow icon="pricetags-outline" label="Deals & redeem codes" value={activeDeals ? `${activeDeals} active` : undefined} onPress={() => router.push(`/dashboard/${b.id}/deals`)} />
+        <Divider />
+        <MenuRow icon="bag-handle-outline" label="Products" onPress={() => router.push(`/dashboard/${b.id}/products`)} />
         <Divider />
         <MenuRow icon="chatbubbles-outline" label="Customer inquiries" value={o?.open_inquiries ? `${o.open_inquiries} open` : undefined} onPress={() => router.push(`/dashboard/${b.id}/inquiries`)} />
         <Divider />
@@ -125,12 +137,14 @@ export default function BusinessDashboard() {
       <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>AdConnect</Text>
       <Card padded={false}>
         <MenuRow icon="albums-outline" label="My advertising screens" onPress={() => router.push({ pathname: '/adconnect/my-screens', params: { businessId: b.id } })} />
+        {campaignsEnabled && <>
         <Divider />
         <MenuRow icon="mail-unread-outline" label="Incoming advertising requests" value={o?.pending_ad_requests ? `${o.pending_ad_requests} waiting` : undefined} onPress={() => router.push({ pathname: '/adconnect/requests', params: { businessId: b.id } })} />
         <Divider />
         <MenuRow icon="megaphone-outline" label="Campaigns (as advertiser)" value={o?.active_campaigns ? `${o.active_campaigns} active` : undefined} onPress={() => router.push({ pathname: '/adconnect/campaigns', params: { businessId: b.id } })} />
         <Divider />
         <MenuRow icon="wallet-outline" label="Earnings & calendar" onPress={() => router.push({ pathname: '/adconnect/earnings', params: { businessId: b.id } })} />
+        </>}
       </Card>
     </Screen>
   );
