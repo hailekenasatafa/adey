@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { Images, MessageCircle, Search, ShieldCheck, TicketPercent } from 'lucide-react';
+import { Briefcase, CakeSlice, Coffee, Images, MessageCircle, PartyPopper, Scissors, Search, ShieldCheck, ShoppingBasket, Spool, TicketPercent, Utensils, type LucideIcon } from 'lucide-react';
 import type { BusinessCard, BusinessSignals, Category, DealFeedItem, EventCard, ProductCard, ScreenCard } from '@adey/shared';
-import { categoryIcon } from '@/lib/icons';
+import { BreathingBackground } from '@/components/home/BreathingBackground';
+import { CategoryTicker, type TickerItem } from '@/components/home/CategoryTicker';
 import { serverApi } from '@/lib/supabase/server';
 import { AdeyFlower, BusinessCardView, EventCardView, ProductCardView, ScreenCardView, Section } from '@/components/ui';
 import { FxAttribution } from '@/components/commerce';
@@ -20,30 +21,21 @@ export default async function Home() {
   ]);
   const cards = [...(feed?.nearby ?? []), ...(feed?.verified ?? []), ...(feed?.trusted_vendors ?? [])];
   const signals: Record<string, BusinessSignals> = await api.market.signals(cards.map((b) => b.id!)).catch(() => ({}));
-  const counts = new Map((feed?.popular_categories ?? []).map((c) => [c.id, c.business_count]));
-  const cats = categories.filter((c) => c.markets.includes('us'));
   return (
-    <div className="container-x">
-      <section className="pt-4 sm:pt-8">
-        <h1 className="max-w-3xl text-[34px] font-semibold leading-[1.08] sm:text-5xl">Find Habesha-owned businesses near you</h1>
-        <p className="mt-4 max-w-xl text-text-muted sm:text-lg">Restaurants, groceries, salons, coffee and services, with photos, menus and prices from the owners, real reviews, and deals you can claim.</p>
+    <>
+      {/* Hero: slides under the fixed header so the breathing background fills the top of the page. */}
+      <section className="hero relative isolate -mt-[124px] overflow-hidden pt-[124px] md:-mt-[144px] md:pt-[144px]">
+        <BreathingBackground />
+        <div className="container-x pb-8 pt-8 sm:pb-12 sm:pt-16">
+          <h1 className="max-w-3xl text-[34px] font-semibold leading-[1.08] sm:text-5xl lg:text-[56px]">Find Habesha-owned businesses near you</h1>
+          <p className="mt-4 max-w-xl text-text-muted sm:text-lg">Restaurants, groceries, salons, coffee and services, with photos, menus and prices from the owners, real reviews, and deals you can claim.</p>
+        </div>
+        <div className="pb-10 sm:pb-14">
+          <CategoryTicker items={tickerItems(categories)} />
+        </div>
       </section>
 
-      {cats.length > 0 && (
-        <nav aria-label="Browse by category" className="no-scrollbar relative -mx-5 mt-8 flex gap-1 overflow-x-auto border-b border-border px-5 sm:-mx-8 sm:px-8">
-          {cats.map((c) => {
-            const Icon = categoryIcon(c.icon);
-            const n = counts.get(c.id);
-            return (
-              <Link key={c.id} href={`/market?category=${c.id}`} className="group relative flex shrink-0 flex-col items-center gap-2 border-b-2 border-transparent px-3 pb-3 pt-1 text-text-muted transition hover:border-border-strong hover:text-text">
-                <Icon aria-hidden className="h-6 w-6" />
-                <span className="whitespace-nowrap text-xs font-semibold">{c.name_en}{n ? <span className="sr-only">, {n} businesses</span> : null}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      )}
-
+      <div className="container-x">
       <Grid title="Businesses on Adey Connect" items={feed?.nearby ?? []} empty="Businesses appear here as soon as owners publish them. Yours could be the first." href="/market" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} signals={signals[(b as BusinessCard).id!]} />} />
 
       {deals.length > 0 && (
@@ -90,8 +82,31 @@ export default async function Home() {
           ))}
         </div>
       </Section>
-    </div>
+      </div>
+    </>
   );
+}
+
+/**
+ * The moving category strip in the hero. Each pill opens the Market filtered to the closest category
+ * in the database (by slug); a pill with no matching category runs a Market search instead.
+ */
+const TICKER: { label: string; icon: LucideIcon; slugs: string[]; q: string }[] = [
+  { label: 'Restaurants', icon: Utensils, slugs: ['restaurants'], q: 'restaurant' },
+  { label: 'Coffee & Cafes', icon: Coffee, slugs: ['coffee-shops'], q: 'coffee' },
+  { label: 'Salons & Barbers', icon: Scissors, slugs: ['salons', 'barbershops'], q: 'salon' },
+  { label: 'Habesha Markets', icon: ShoppingBasket, slugs: ['groceries'], q: 'market' },
+  { label: 'Catering & Bakeries', icon: CakeSlice, slugs: [], q: 'catering' },
+  { label: 'Events & Venues', icon: PartyPopper, slugs: ['event-venues'], q: 'venue' },
+  { label: 'Traditional Fashion', icon: Spool, slugs: ['traditional-clothing', 'cultural-shops', 'clothing'], q: 'habesha kemis' },
+  { label: 'Professional Services', icon: Briefcase, slugs: ['professional-services'], q: 'services' },
+];
+function tickerItems(categories: Category[]): TickerItem[] {
+  const us = categories.filter((c) => c.is_active !== false && c.markets.includes('us'));
+  return TICKER.map(({ label, icon, slugs, q }) => {
+    const c = slugs.map((s) => us.find((x) => x.slug === s)).find(Boolean);
+    return { label, icon, href: c ? `/market?category=${c.id}` : `/market?q=${encodeURIComponent(q)}` };
+  });
 }
 
 const OWNER = [

@@ -92,6 +92,8 @@ export function Nav() {
     return () => window.removeEventListener('scroll', on);
   }, []);
   const compact = search && scrolled;
+  // On the home page the header starts see-through, over the hero's breathing background.
+  const overHero = path === '/' && !scrolled;
   const searchRef = useRef<SiteSearchHandle>(null);
   const expand = () => { window.scrollTo({ top: 0, behavior: 'smooth' }); setTimeout(() => searchRef.current?.focus(), 350); };
 
@@ -101,7 +103,7 @@ export function Nav() {
 
   return (
     <>
-      <header className={`fixed inset-x-0 top-0 z-40 border-b bg-background/95 backdrop-blur transition-[border-color,box-shadow] ${compact || !search ? 'border-border shadow-sm' : 'border-transparent'}`}>
+      <header className={`fixed inset-x-0 top-0 z-40 border-b transition-[background-color,border-color,box-shadow] duration-300 ${overHero ? 'border-transparent bg-transparent' : `bg-background/95 backdrop-blur ${compact || !search ? 'border-border shadow-sm' : 'border-transparent'}`}`}>
         <div className="container-x flex h-16 items-center gap-3">
           <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Adey Connect home">
             <AdeyFlower size={30} />
