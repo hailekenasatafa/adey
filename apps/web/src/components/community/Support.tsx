@@ -50,7 +50,7 @@ function Home({ orderId }: { orderId: string | null }) {
         {!orderId && <div className="flex flex-wrap gap-2" aria-label="Starter questions">{STARTERS.map((s) => <button key={s} type="button" disabled={start.isPending} onClick={() => go(s)} className="chip">{s}</button>)}</div>}
         {err && <p role="alert" className="text-sm text-danger">{err}</p>}
         <div className="flex items-center gap-3"><button type="submit" className="btn btn-primary btn-sm" disabled={start.isPending || !text.trim()}>{start.isPending ? 'Sending…' : 'Start conversation'}</button>{start.isPending && <span role="status" className="text-sm text-text-muted">Adey Connect Assistant is typing…</span>}</div>
-        <p className="text-xs text-text-muted">Looking for quick answers? <Link href="/help" className="underline">Browse the help centre</Link>.</p>
+        <p className="text-xs text-text-muted">Looking for quick answers? <Link href="/help" className="underline">Browse the help center</Link>.</p>
       </form>
       <section className="mt-8" aria-labelledby="conv-h">
         <h2 id="conv-h" className="text-xl font-bold">Your conversations</h2>

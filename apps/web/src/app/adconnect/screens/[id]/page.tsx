@@ -7,6 +7,7 @@ import { fmtRange, mediaUrlFromPath } from '@/lib/media';
 import { Badge, Rating, VerificationBadges, place } from '@/components/ui';
 import { ScreenActions } from './actions';
 import { Stars } from '@/components/commerce';
+import { Gallery } from '@/components/Gallery';
 
 export const dynamic = 'force-dynamic';
 const DAYS = [['mon', 'Mon'], ['tue', 'Tue'], ['wed', 'Wed'], ['thu', 'Thu'], ['fri', 'Fri'], ['sat', 'Sat'], ['sun', 'Sun']] as const;
@@ -26,7 +27,7 @@ export default async function ScreenPage({ params }: { params: Promise<{ id: str
   const packages = (s.packages ?? []).filter((p) => p.is_active);
   return (
     <div className="container-x pb-16">
-      <div className="mt-6 grid gap-2 md:grid-cols-3 overflow-hidden rounded-[24px] bg-gold-soft min-h-60">{s.images.length ? s.images.slice(0, 3).map((i, idx) => <img key={i} src={mediaUrlFromPath('screen-media', i)!} alt="" className={`h-60 w-full object-cover ${idx === 0 && s.images.length > 1 ? 'md:col-span-2' : s.images.length === 1 ? 'md:col-span-3' : ''}`} />) : <div className="grid h-60 place-items-center text-gold-deep md:col-span-3"><MonitorPlay aria-hidden className="h-12 w-12" strokeWidth={1.25} /></div>}</div>
+      {s.images.length ? <Gallery photos={s.images.map((i) => ({ url: mediaUrlFromPath('screen-media', i)! }))} name={s.title} /> : <div className="mt-6 grid h-60 place-items-center rounded-[24px] bg-gold-soft text-gold-deep"><MonitorPlay aria-hidden className="h-12 w-12" strokeWidth={1.25} /></div>}
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
         <div>
           <p className="text-xs font-bold uppercase tracking-wider text-text-muted">{b.category?.name_en ?? 'Business'} · {place(b)}</p>

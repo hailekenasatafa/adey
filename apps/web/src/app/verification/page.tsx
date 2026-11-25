@@ -43,7 +43,7 @@ export default function VerificationInfo() {
         <p className="text-sm text-text-muted">A review has an overall score plus separate scores for cultural authenticity and for service. Sellers can reply publicly but cannot change or remove a review. Reviews that break the rules can be reported.</p>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-2"><Link href="/dashboard" className="btn btn-primary">Verify my business</Link><Link href="/help" className="btn btn-outline">Read the help centre</Link></div>
+      <div className="mt-8 flex flex-wrap gap-2"><Link href="/dashboard" className="btn btn-primary">Verify my business</Link><Link href="/help" className="btn btn-outline">Read the help center</Link></div>
     </div>
   );
 }

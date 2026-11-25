@@ -73,7 +73,7 @@ function Summary({ s }: { s: LoyaltySummary }) {
           <li><b>Where:</b> {s.participating_businesses > 0 ? `${pts(s.participating_businesses)} participating business${s.participating_businesses === 1 ? '' : 'es'} so far.` : 'No businesses are taking part yet.'} Participating sellers are marked at checkout.</li>
           <li><b>Expiry:</b> {s.expires_at ? `Points expire on ${fmtDate(s.expires_at)} if not used.` : 'You have no points that are due to expire.'}</li>
         </ul>
-        <p className="mt-3 text-xs text-text-muted">Questions? See the <Link href="/help" className="underline">help centre</Link>.</p>
+        <p className="mt-3 text-xs text-text-muted">Questions? See the <Link href="/help" className="underline">help center</Link>.</p>
       </section>
 
       <section className="mt-8" aria-labelledby="hist-h">

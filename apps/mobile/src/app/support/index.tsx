@@ -19,8 +19,8 @@ export default function Support() {
 
   if (!user) return (
     <Screen header={header}>
-      <EmptyState icon="help-buoy-outline" title="Sign in to chat with us" body="The help centre is open to everyone. Chat with the assistant needs an account." action="Sign in" onAction={() => router.push('/(auth)/sign-in')} />
-      <Card padded={false}><MenuRow icon="book-outline" label="Browse the help centre" onPress={() => router.push('/help')} /></Card>
+      <EmptyState icon="help-buoy-outline" title="Sign in to chat with us" body="The help center is open to everyone. Chat with the assistant needs an account." action="Sign in" onAction={() => router.push('/(auth)/sign-in')} />
+      <Card padded={false}><MenuRow icon="book-outline" label="Browse the help center" onPress={() => router.push('/help')} /></Card>
     </Screen>
   );
   const threads = q.data ?? [];
@@ -34,7 +34,7 @@ export default function Support() {
           <Button title="New conversation" icon="add" onPress={() => start()} />
         </View>
       </Card>
-      <Card padded={false} style={{ marginTop: 12 }}><MenuRow icon="book-outline" label="Browse the help centre" onPress={() => router.push('/help')} /></Card>
+      <Card padded={false} style={{ marginTop: 12 }}><MenuRow icon="book-outline" label="Browse the help center" onPress={() => router.push('/help')} /></Card>
 
       <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>Your conversations</Text>
       {q.isLoading ? <Loading /> : q.isError ? <ErrorState error={q.error} onRetry={() => q.refetch()} /> : threads.length === 0 ? (

@@ -55,7 +55,7 @@ function Page() {
           </div>
         ))}</div>
       )}
-      {del && <ConfirmDialog title="Delete this article?" danger confirmLabel="Delete" busy={remove.isPending} body="It disappears from the help centre." onCancel={() => setDel(null)} onConfirm={() => remove.mutate(del)} />}
+      {del && <ConfirmDialog title="Delete this article?" danger confirmLabel="Delete" busy={remove.isPending} body="It disappears from the help center." onCancel={() => setDel(null)} onConfirm={() => remove.mutate(del)} />}
     </div>
   );
 }

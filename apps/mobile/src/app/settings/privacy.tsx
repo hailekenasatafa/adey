@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { friendlyError, type PrivacySettings } from '@adey/shared';
+import { friendlyError, LEGAL_PAGES_PUBLISHED, type PrivacySettings } from '@adey/shared';
 import { api } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
 import { Avatar, Button, Card, Divider, EmptyState, Header, Loading, Screen, Text } from '@/components/ui';
@@ -81,8 +81,7 @@ export default function Privacy() {
         <Button title="Download my data" icon="download-outline" variant="secondary" style={{ marginTop: 10 }} loading={exporting} onPress={download} />
       </Card>
       <Card padded={false} style={{ marginTop: 12 }}>
-        <MenuRow icon="document-outline" label="Privacy policy & terms" onPress={() => router.push('/profile/legal')} />
-        <Divider />
+        {LEGAL_PAGES_PUBLISHED && (<><MenuRow icon="document-outline" label="Privacy policy & terms" onPress={() => router.push('/profile/legal')} /><Divider /></>)}
         <MenuRow icon="trash-outline" label="Delete my account" danger onPress={() => router.push('/profile/delete-account')} />
       </Card>
     </Screen>

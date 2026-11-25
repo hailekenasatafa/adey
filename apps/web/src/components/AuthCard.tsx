@@ -1,4 +1,5 @@
 'use client';
+import { LEGAL_PAGES_PUBLISHED } from '@adey/shared';
 import { useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -77,7 +78,7 @@ export function GoogleSignIn({ next, terms = false }: { next?: string | null; te
         Continue with Google
       </button>
       {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
-      {terms && <p className="mt-2 text-center text-xs text-text-muted">By continuing with Google you agree to Adey Connect’s <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>}
+      {terms && LEGAL_PAGES_PUBLISHED && <p className="mt-2 text-center text-xs text-text-muted">By continuing with Google you agree to Adey Connect’s <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>}
       <div className="my-6 flex items-center gap-3 text-xs text-text-muted" role="separator" aria-label="or">
         <span className="h-px flex-1 bg-border" />or<span className="h-px flex-1 bg-border" />
       </div>

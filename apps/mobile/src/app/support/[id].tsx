@@ -98,7 +98,7 @@ export default function SupportChat() {
               <View style={{ gap: 8, marginTop: 12 }}>
                 <Text variant="subheading" center>How can we help?</Text>
                 {STARTERS.map((s) => <Button key={s} title={s} variant="outline" onPress={() => setText(s)} />)}
-                <Button title="Browse the help centre" variant="ghost" icon="book-outline" onPress={() => router.push('/help')} />
+                <Button title="Browse the help center" variant="ghost" icon="book-outline" onPress={() => router.push('/help')} />
               </View>
             )
           }

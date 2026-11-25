@@ -4,7 +4,7 @@ import { Link, router } from 'expo-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { friendlyError, signUpSchema } from '@adey/shared';
+import { friendlyError, LEGAL_PAGES_PUBLISHED, signUpSchema } from '@adey/shared';
 import { api, WEB_URL } from '@/lib/supabase';
 import { AuthShell } from '@/components/AuthShell';
 import { Button, FormInput, Text } from '@/components/ui';
@@ -38,9 +38,11 @@ export default function SignUp() {
         </Text>
       )}
       <Button title="Create Account" size="lg" fullWidth loading={formState.isSubmitting} onPress={() => onSubmit()} />
-      <Text variant="caption" color="muted" center style={{ marginTop: 14 }}>
-        By continuing you agree to Adey Connect's Terms of Service and Privacy Policy.
-      </Text>
+      {LEGAL_PAGES_PUBLISHED && (
+        <Text variant="caption" color="muted" center style={{ marginTop: 14 }}>
+          By continuing you agree to Adey Connect's Terms of Service and Privacy Policy.
+        </Text>
+      )}
       <View style={{ alignItems: 'center', marginTop: 18 }}>
         <Text color="muted">
           Already have an account?{' '}

@@ -37,7 +37,7 @@ export default function Profile() {
         <Card padded={false}><MenuRow icon="calendar-outline" label="Community events" onPress={() => router.push('/(tabs)/events')} /></Card>
         <Text variant="overline" color="muted" style={{ marginTop: 24, marginBottom: 8 }}>Help & settings</Text>
         <Card padded={false}>
-          <MenuRow icon="help-buoy-outline" label="Help centre" onPress={() => router.push('/help')} />
+          <MenuRow icon="help-buoy-outline" label="Help center" onPress={() => router.push('/help')} />
           <Divider />
           <MenuRow icon="settings-outline" label="Settings" onPress={() => router.push('/settings')} />
         </Card>

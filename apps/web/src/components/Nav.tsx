@@ -4,7 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Bell, CircleUser, Menu, MessageCircle, Monitor, Moon, Search, ShoppingCart, Sun, type LucideIcon } from 'lucide-react';
+import { LEGAL_PAGES_PUBLISHED } from '@adey/shared';
 import { AdeyFlower } from './ui';
+import { InstallAppButton } from './AppInstall';
 import { useAuth } from './Providers';
 import { SiteSearch, SiteSearchFallback, type SiteSearchHandle } from './SiteSearch';
 import { api, supabase } from '@/lib/supabase/client';
@@ -166,7 +168,7 @@ export function Nav() {
                       <div className="my-1.5 border-t border-border" />
                       <Link role="menuitem" href={owner ? '/dashboard' : '/dashboard/new'} className={item}>{owner ? 'Business dashboard' : 'List your business'}</Link>
                       {isStaff && <Link role="menuitem" href="/admin" className={item}>Admin</Link>}
-                      <Link role="menuitem" href="/help" className={item}>Help centre</Link>
+                      <Link role="menuitem" href="/help" className={item}>Help center</Link>
                     </>
                   ) : (
                     <>
@@ -174,7 +176,7 @@ export function Nav() {
                       <Link role="menuitem" href="/auth/sign-up" className={item}>Create an account</Link>
                       <div className="my-1.5 border-t border-border" />
                       <Link role="menuitem" href="/dashboard/new" className={item}>List your business</Link>
-                      <Link role="menuitem" href="/help" className={item}>Help centre</Link>
+                      <Link role="menuitem" href="/help" className={item}>Help center</Link>
                     </>
                   )}
                   <div className="my-1.5 border-t border-border" />
@@ -210,12 +212,12 @@ export function Footer() {
           <p className="mt-4 max-w-sm text-sm text-text-muted">Find Habesha-owned businesses, see their menus and photos, and claim their deals. Listing a business is free.</p>
         </div>
         <nav aria-label="Marketplace"><h2 className="mb-4 text-sm font-semibold">Marketplace</h2><ul className={col}><li><Link href="/market">Find businesses</Link></li><li><Link href="/deals">Deals</Link></li><li><Link href="/events">Events</Link></li><li><Link href="/adconnect">AdConnect</Link></li><li><Link href="/dashboard/new">List your business for free</Link></li><li><Link href="/market?market=et">Ethiopian Market</Link></li></ul></nav>
-        <nav aria-label="Company"><h2 className="mb-4 text-sm font-semibold">Support</h2><ul className={col}><li><Link href="/help">Help centre</Link></li><li><Link href="/verification">How verification works</Link></li><li><Link href="/legal/terms">Terms</Link></li><li><Link href="/legal/privacy">Privacy</Link></li><li><a href={`mailto:${support}`}>{support}</a></li></ul></nav>
+        <nav aria-label="Company"><h2 className="mb-4 text-sm font-semibold">Support</h2><ul className={col}><li><Link href="/help">Help center</Link></li><li><Link href="/verification">How verification works</Link></li>{LEGAL_PAGES_PUBLISHED && <><li><Link href="/legal/terms">Terms</Link></li><li><Link href="/legal/privacy">Privacy</Link></li></>}<li><a href={`mailto:${support}`}>{support}</a></li></ul></nav>
       </div>
       <div className="border-t border-border">
         <div className="container-x flex flex-col-reverse items-center justify-between gap-4 py-5 text-sm text-text-muted sm:flex-row">
           <p>© {new Date().getFullYear()} Adey Connect. Apps for iPhone and Android are on the way.</p>
-          <ThemeToggle />
+          <div className="flex flex-wrap items-center justify-center gap-2"><InstallAppButton className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 font-semibold text-text transition hover:bg-surface-muted" /><ThemeToggle /></div>
         </div>
       </div>
     </footer>

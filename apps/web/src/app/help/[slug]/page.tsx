@@ -21,7 +21,7 @@ export default async function HelpArticle({ params }: Props) {
   const related = (await (await serverApi()).support.articles(a.category).catch(() => [])).filter((r) => r.slug !== a.slug).slice(0, 5);
   return (
     <div className="container-x max-w-3xl pb-16">
-      <nav aria-label="Breadcrumb" className="mt-6 text-sm text-text-muted"><Link href="/help" className="hover:underline">Help centre</Link> / <span>{helpCategoryLabels[a.category] ?? 'More help'}</span></nav>
+      <nav aria-label="Breadcrumb" className="mt-6 text-sm text-text-muted"><Link href="/help" className="hover:underline">Help center</Link> / <span>{helpCategoryLabels[a.category] ?? 'More help'}</span></nav>
       <article className="mt-4">
         <h1 className="text-3xl font-bold">{a.title}</h1>
         {a.summary && <p className="mt-2 text-lg text-text-muted">{a.summary}</p>}

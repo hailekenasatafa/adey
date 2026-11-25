@@ -3,6 +3,7 @@ import './globals.css';
 import { Providers } from '@/components/Providers';
 import localFont from 'next/font/local';
 import { Footer, Nav } from '@/components/Nav';
+import { ServiceWorker } from '@/components/AppInstall';
 
 /** Plus Jakarta Sans for the interface; Noto Sans Ethiopic for Amharic text. Both self-hosted (SIL OFL, see ./fonts). */
 const jakarta = localFont({ src: './fonts/PlusJakartaSans-latin.woff2', weight: '200 800', variable: '--font-jakarta', display: 'swap' });
@@ -12,20 +13,25 @@ export const metadata: Metadata = {
   title: { default: 'Adey Connect — Connecting Communities. Growing Businesses.', template: '%s · Adey Connect' },
   description: 'Discover trusted Habesha businesses, shop verified Ethiopian sellers, and grow with AdConnect — advertising on screens inside community businesses.',
   applicationName: 'Adey Connect',
+  appleWebApp: { capable: true, title: 'Adey Connect', statusBarStyle: 'default' },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   openGraph: { siteName: 'Adey Connect', type: 'website' },
 };
 export const viewport: Viewport = { themeColor: '#174B3A' };
 
 /** Applies the saved light/dark choice (src/lib/theme.ts, key `adey.theme`) before first paint. */
+/** Keeps the browser's install offer (Chrome and Edge on computers) for the footer's Install button, even if it arrives before the page is interactive. */
+const installBoot = "if(!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent))addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__adeyInstall=e})";
+
 const themeBoot = "try{var t=localStorage.getItem('adey.theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`h-full antialiased ${jakarta.variable} ${ethiopic.variable}`} suppressHydrationWarning>
-      <head><script dangerouslySetInnerHTML={{ __html: themeBoot }} /></head>
+      <head><script dangerouslySetInnerHTML={{ __html: themeBoot }} /><script dangerouslySetInnerHTML={{ __html: installBoot }} /></head>
       <body className="min-h-full flex flex-col">
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 btn btn-primary btn-sm">Skip to content</a>
+        <ServiceWorker />
         <Providers>
           <Nav />
           <main id="main" className="flex-1">{children}</main>

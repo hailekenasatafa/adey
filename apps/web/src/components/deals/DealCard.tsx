@@ -23,7 +23,7 @@ export function DealCard({ deal, showBusiness = false }: { deal: DealView; showB
   return (
     <article className="flex flex-col overflow-hidden rounded-[20px] border border-border bg-surface" aria-label={deal.title}>
       {(img || showBusiness) && (
-        <div className="relative aspect-[16/9] bg-gold-soft">
+        <div className="relative aspect-square bg-gold-soft">
           {img ? <img src={img} alt="" className="h-full w-full object-cover" loading="lazy" /> : <div className="grid h-full place-items-center text-gold-deep"><TicketPercent aria-hidden className="h-10 w-10" strokeWidth={1.25} /></div>}
           <span className="badges-on-photo absolute left-3 top-3"><span className="badge"><TicketPercent aria-hidden className="h-3.5 w-3.5" />Deal</span></span>
         </div>

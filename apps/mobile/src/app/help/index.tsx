@@ -22,7 +22,7 @@ export default function Help() {
   const searching = term.length >= 2;
 
   return (
-    <Screen header={<Header title="Help centre" />} keyboard>
+    <Screen header={<Header title="Help center" />} keyboard>
       <Input icon="search" placeholder="Search for help" value={text} onChangeText={setText} returnKeyType="search" autoCorrect={false} accessibilityLabel="Search help articles" containerStyle={{ marginBottom: 8 }} />
       {searching ? (
         found.isLoading ? <Loading /> : found.isError ? <Text color="danger">{friendlyError(found.error)}</Text> : (found.data ?? []).length === 0 ? (

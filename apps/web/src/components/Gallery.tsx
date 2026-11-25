@@ -21,14 +21,18 @@ export function Gallery({ photos, name }: { photos: Photo[]; name: string }) {
   }, [open, close, step]);
 
   if (!photos.length) return <div className="mt-6 grid h-56 place-items-center rounded-[24px] bg-forest-soft text-forest sm:h-72" aria-label={`${name} has not added photos yet`}><Store aria-hidden className="h-12 w-12" strokeWidth={1.25} /></div>;
-  const shown = photos.slice(0, 5);
-  const layout = shown.length === 1 ? 'sm:grid-cols-1' : shown.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-4 sm:grid-rows-2';
+  // Every tile is square: one photo, two side by side, a large photo with two stacked beside it, or a large
+  // photo with four around it. Phones show the first photo only; "Show all photos" opens the rest.
+  const shown = photos.slice(0, photos.length >= 5 ? 5 : photos.length >= 3 ? 3 : photos.length);
+  const layout = shown.length === 1 ? 'sm:max-w-[480px]'
+    : shown.length === 2 ? 'sm:aspect-[2/1] sm:max-w-[960px] sm:grid-cols-2'
+    : shown.length === 3 ? 'sm:aspect-[3/2] sm:max-w-[720px] sm:grid-cols-3 sm:grid-rows-2'
+    : 'sm:aspect-[2/1] sm:max-w-[960px] sm:grid-cols-4 sm:grid-rows-2';
   return (
     <>
-      <div className={`relative mt-6 grid h-64 gap-2 overflow-hidden rounded-[24px] sm:h-[420px] ${layout}`}>
+      <div className={`relative mt-6 grid aspect-square gap-2 overflow-hidden rounded-[24px] ${layout}`}>
         {shown.map((p, i) => {
-          const big = i === 0 && shown.length >= 3;
-          const span = big ? 'sm:col-span-2 sm:row-span-2' : shown.length === 3 && i > 0 ? 'sm:col-span-2' : shown.length === 4 && i === 3 ? 'sm:col-span-2' : '';
+          const span = i === 0 && shown.length >= 3 ? 'sm:col-span-2 sm:row-span-2' : '';
           return (
             <button key={p.url + i} type="button" onClick={() => setOpen(i)} aria-label={`Open photo ${i + 1} of ${photos.length}`}
               className={`group relative overflow-hidden bg-surface-muted ${i === 0 ? '' : 'hidden sm:block'} ${span}`}>

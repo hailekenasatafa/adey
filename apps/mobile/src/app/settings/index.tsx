@@ -3,7 +3,7 @@ import { Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { countryName } from '@adey/shared';
+import { countryName, LEGAL_PAGES_PUBLISHED } from '@adey/shared';
 import { useTheme, type ThemePreference } from '@/lib/theme';
 import { useAuth } from '@/lib/auth';
 import { Card, Divider, Header, Screen, Text } from '@/components/ui';
@@ -67,10 +67,9 @@ export default function Settings() {
 
       {h('Help & legal')}
       <Card padded={false}>
-        <MenuRow icon="help-buoy-outline" label="Help centre" onPress={() => router.push('/help')} />
+        <MenuRow icon="help-buoy-outline" label="Help center" onPress={() => router.push('/help')} />
         {user && (<><Divider /><MenuRow icon="chatbubble-ellipses-outline" label="Contact support" onPress={() => router.push('/support')} /></>)}
-        <Divider />
-        <MenuRow icon="document-outline" label="Privacy policy & terms" onPress={() => router.push('/profile/legal')} />
+        {LEGAL_PAGES_PUBLISHED && (<><Divider /><MenuRow icon="document-outline" label="Privacy policy & terms" onPress={() => router.push('/profile/legal')} /></>)}
         {user && (<><Divider /><MenuRow icon="trash-outline" label="Delete account" danger onPress={() => router.push('/profile/delete-account')} /></>)}
       </Card>
       <Text variant="caption" color="muted" center style={{ marginTop: 20 }}>Adey Connect v{Constants.expoConfig?.version}</Text>

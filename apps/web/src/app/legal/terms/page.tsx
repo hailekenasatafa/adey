@@ -1,9 +1,12 @@
+import { notFound } from 'next/navigation';
+import { LEGAL_PAGES_PUBLISHED } from '@adey/shared';
 import { serverApi } from '@/lib/supabase/server';
 import { LegalDraft } from '@/components/LegalDraft';
 
 export const metadata = { title: 'Terms of Service' };
 
 export default async function Terms() {
+  if (!LEGAL_PAGES_PUBLISHED) notFound(); // offline until a lawyer has reviewed it
   const api = await serverApi();
   const app = await api.settings.get<{ support_email?: string }>('app').catch(() => undefined);
   const email = app?.support_email ?? 'support@adeyconnect.com';

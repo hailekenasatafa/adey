@@ -69,7 +69,7 @@ export function BusinessCardView({ b, signals }: { b: BusinessCard; signals?: Bu
   return (
     <div className="group relative">
       <Link href={`/business/${b.slug}`} className="block rounded-[16px]">
-        <div className="photo aspect-[4/3]">
+        <div className="photo aspect-square">
           {img ? <img src={img} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" /> : <NoPhoto />}
           <span className="badges-on-photo absolute left-3 top-3 flex flex-wrap gap-1 pr-12">{b.is_featured && <Badge tone="accent">Featured</Badge>}<SignalBadges s={s} /></span>
         </div>
@@ -103,7 +103,7 @@ export function ScreenCardView({ s }: { s: ScreenCard }) {
   return (
     <div className="group relative">
       <Link href={`/adconnect/screens/${s.id}`} className="block rounded-[16px]">
-        <div className="photo aspect-[4/3]">
+        <div className="photo aspect-square">
           {img ? <img src={img} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" loading="lazy" /> : <NoPhoto icon={MonitorPlay} />}
           {s.available === false && <span className="badges-on-photo absolute left-3 top-3"><Badge tone="warning">Unavailable for dates</Badge></span>}
         </div>
