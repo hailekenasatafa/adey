@@ -97,7 +97,7 @@ select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
 update public.profiles set privacy = privacy || '{"public_profile": false}' where id = 'a1111111-1111-1111-1111-111111111111';
 select pg_temp.check('privacy: I still see my own name', (select display_name from public.public_profiles where id = 'a1111111-1111-1111-1111-111111111111') = 'Dev Buyer');
 select pg_temp.as_user('a4444444-4444-4444-4444-444444444444');
-select pg_temp.check('privacy: a private profile is masked for other members', (select display_name = 'Adey member' and avatar_url is null from public.public_profiles where id = 'a1111111-1111-1111-1111-111111111111'));
+select pg_temp.check('privacy: a private profile is masked for other members', (select display_name = 'Adey Connect member' and avatar_url is null from public.public_profiles where id = 'a1111111-1111-1111-1111-111111111111'));
 select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
 update public.profiles set privacy = privacy || '{"public_profile": true, "personalized_recommendations": false}' where id = 'a1111111-1111-1111-1111-111111111111';
 select public.track_event('business_view', :'s1', 'business', :'s1', 'sess-v1', 'web');
@@ -597,7 +597,7 @@ values ('DEV FIXTURE Enkutatash Celebration', 'festival', now() + interval '10 d
 select id as ev1 from public.events where title = 'DEV FIXTURE Enkutatash Celebration' \gset
 select pg_temp.check('events: a member''s submission waits for moderation and cannot feature itself',
   (select status = 'pending' and not is_featured and going_count = 0 and slug like 'dev-fixture-enkutatash-celebration-%' from public.events where id = :'ev1'));
-select pg_temp.check('events: the submitter cannot publish it themself', pg_temp.raises(format('update public.events set status = ''published'' where id = %L', :'ev1'), '%managed by Adey moderators%'));
+select pg_temp.check('events: the submitter cannot publish it themself', pg_temp.raises(format('update public.events set status = ''published'' where id = %L', :'ev1'), '%managed by Adey Connect moderators%'));
 select pg_temp.as_anon();
 select pg_temp.check('events: unreviewed events are not public', (select count(*) from public.events) = 0 and (select count(*) from public.search_events()) = 0);
 select pg_temp.as_user('a6666666-6666-6666-6666-666666666666');
@@ -770,7 +770,7 @@ select pg_temp.as_user('a5555555-5555-5555-5555-555555555555');
 select pg_temp.check('admin overview: admins also see escrow, fees and tax collected',
   (select jsonb_array_length(a -> 'finance' -> 'fees_30d') = 1 and (a -> 'finance' -> 'fees_30d' -> 0 ->> 'cents')::int = 400 + 900 + 600 from public.admin_overview() a));
 select pg_temp.check('announcements: promotions reach only members who opted in to marketing', public.send_announcement('Holiday market this weekend', 'Shop gifts from Habesha makers.', 'everyone', 'promotion', '/events') = 0);
-select pg_temp.check('announcements: service messages reach every member', public.send_announcement('Checkout is now live', 'You can now order and pay on Adey.', 'everyone', 'service') = 8);
+select pg_temp.check('announcements: service messages reach every member', public.send_announcement('Checkout is now live', 'You can now order and pay on Adey Connect.', 'everyone', 'service') = 8);
 select pg_temp.check('announcements: sellers-only audience', public.send_announcement('Seller tips', 'Add delivery prices to start selling.', 'sellers', 'service') = 4);
 select pg_temp.as_user('a1111111-1111-1111-1111-111111111111');
 select pg_temp.check('privacy: a member can download their own data, without the sellers'' fee figures',
