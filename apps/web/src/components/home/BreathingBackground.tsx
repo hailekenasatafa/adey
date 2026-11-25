@@ -11,6 +11,7 @@ export function BreathingBackground() {
       <span className="breathing-orb breathing-orb--gold" />
       <span className="breathing-orb breathing-orb--deep" />
       <span className="breathing-orb breathing-orb--muted-gold" />
+      <span className="breathing-veil" />
     </div>
   );
 }
