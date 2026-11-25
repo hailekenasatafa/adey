@@ -7,14 +7,14 @@
 | Publishable key | `sb_publishable_3TacRS4kbXgj4CXBMhqGJg_ET1fOwYv` (public client key; RLS protects data) |
 | Database | 15 migrations applied (history versions match `supabase/migrations`), reference categories seeded, schema fingerprint identical to the locally validated database |
 | Edge functions | `send-push`, `expire-requests` deployed; cron jobs + Vault secrets configured and verified (200 with the worker secret, 401 without) |
-| Website | https://adey-app.netlify.app (Netlify site `adey-app`) |
+| Website | https://adeyconnect.com (Netlify site `adey-app`; the old https://adey-app.netlify.app address still works) |
 
 Still manual in the Supabase dashboard: Auth URL configuration (step 3) and custom SMTP — the built-in mailer only delivers to organization members at 2 emails/hour, so public sign-up needs a provider such as Resend, Brevo, or Postmark. See `docs/STORE_LAUNCH.md`.
 
 ## 1. Supabase (shared backend)
 1. Create project `adey` (us-east-1). Copy the project ref, URL, and **publishable** key.
 2. Apply migrations in order: `supabase link --project-ref <ref> && supabase db push` (or paste each `supabase/migrations/*.sql` into the SQL editor). Then run `supabase/seed.sql`.
-3. Auth → URL configuration: Site URL = the website origin (currently `https://adey-app.netlify.app`, later `https://adey.app`); redirect URLs `<origin>/auth/callback`, `<origin>/auth/reset`, `adey://**`. Enable email confirmations.
+3. Auth → URL configuration: Site URL = `https://adeyconnect.com`; redirect URLs `<origin>/auth/callback`, `<origin>/auth/reset`, `adey://**`. Enable email confirmations.
 4. Storage buckets are created by migration 0011. Verify `verification-docs`, `campaign-creatives`, `message-attachments`, `delivery-evidence` are **private**.
 5. Edge functions: deploy `send-push` and `expire-requests` with JWT verification **off** (`supabase functions deploy <name> --no-verify-jwt`). They authenticate callers themselves and fail closed (`supabase/functions/_shared/worker-auth.ts`): accepted bearer tokens are the service role key, the Vault worker secret, or the optional `PUSH_WORKER_SECRET` function secret. Optional secret: `EXPO_ACCESS_TOKEN`.
 6. Scheduling: generate the worker secret inside the database so it never leaves it —
@@ -27,7 +27,7 @@ Still manual in the Supabase dashboard: Auth URL configuration (step 3) and cust
 ## 2. Mobile (Expo / EAS)
 1. `cp apps/mobile/.env.example apps/mobile/.env` and fill `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `EXPO_PUBLIC_WEB_URL`.
 2. `npx eas-cli@latest init` inside `apps/mobile` → writes the real `extra.eas.projectId` (replace `REPLACE_WITH_EAS_PROJECT_ID` in `app.json` and `updates.url`; set `owner`).
-3. Replace placeholders: bundle id / package `com.adey.app` (if your org uses another), `android.config.googleMaps.apiKey` (Maps SDK for Android key), `associatedDomains`/intent filter host once `adey.app` serves AASA / assetlinks files.
+3. Replace placeholders: bundle id / package `com.adeyconnect.app` (final; it can't change after the first store upload), `android.config.googleMaps.apiKey` (Maps SDK for Android key), `associatedDomains`/intent filter host `adeyconnect.com` (already set in `app.json`; the website still has to serve the AASA / assetlinks files).
 4. Push credentials: `eas credentials` (APNs key for iOS, FCM V1 service account for Android).
 5. Builds: `eas build --profile development` (dev client for simulators/devices), `eas build --profile preview` (internal testers), `eas build --profile production`.
 6. Submit: fill `eas.json → submit.production` (Apple ID, ASC app id, team id; Play service-account JSON) then `eas submit -p ios|android`.
@@ -38,13 +38,13 @@ Why a development build: `react-native-maps`, `expo-notifications` push, `expo-s
 ## 3. Website (Next.js 16)
 1. `cp apps/web/.env.example apps/web/.env.local` and fill `NEXT_PUBLIC_*`.
 2. Deploy to Vercel/Netlify/any Node host: build `pnpm --filter @adey/web build`, start `pnpm --filter @adey/web start`. Root directory is the monorepo; set install command `pnpm install`.
-3. Point `adey.app` at it; this is where auth emails land (`/auth/callback`, `/auth/reset`) and where share links resolve.
+3. Point `adeyconnect.com` at it (done); this is where auth emails land (`/auth/callback`, `/auth/reset`) and where share links resolve.
 
 ## 4. Store listing draft
-**Name:** ADEY — Habesha Marketplace & AdConnect  **Subtitle:** Connecting Communities. Growing Businesses.
+**Name:** Adey Connect  **Subtitle:** Connecting Communities. Growing Businesses.
 **Description:** Find trusted Habesha businesses near you — restaurants, groceries, salons, venues, services. Shop authentic products from verified sellers in Ethiopia. Own a business? List it for free, manage inquiries, and earn by renting the screens in your space to community advertisers through AdConnect. Advertisers pick screens across many businesses, send requests in one tap, and negotiate directly.
 **Keywords:** habesha, ethiopian, eritrean, injera, restaurant, community, marketplace, advertising, digital signage
-**Category:** Shopping (secondary: Business)  **Age rating:** 4+ / Everyone  **Support:** support@adey.app  **Privacy policy:** https://adey.app/legal/privacy
+**Category:** Shopping (secondary: Business)  **Age rating:** 4+ / Everyone  **Support:** support@adeyconnect.com  **Privacy policy:** https://adeyconnect.com/legal/privacy
 
 ## 5. Permission strings (configured in app.json)
 Location (when in use), Camera, Photo library, Notifications. Each string explains the marketplace purpose.

@@ -43,7 +43,7 @@ _Last updated: 2026-11-04. Everything below was built in this pass against the s
 - Profile `locale` is stored; the app does not yet switch the whole UI language.
 
 ## External credentials required
-Supabase project (URL + publishable key), EAS project id + Expo account, Apple Developer (team id, ASC app), Google Play console (service account), Google Maps Android key, domain for `adey.app` (auth redirects, universal links), optional Expo access token for push.
+Supabase project (URL + publishable key), EAS project id + Expo account, Apple Developer (team id, ASC app), Google Play console (service account), Google Maps Android key, domain `adeyconnect.com` (auth redirects, universal links), optional Expo access token for push.
 
 ## Remaining platform dependencies
 Supabase project creation (blocked by free-tier project limit on the account), GitHub repo creation (to push), device/simulator testing, push credential setup.

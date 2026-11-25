@@ -198,7 +198,7 @@ export function Nav() {
 
 export function Footer() {
   const app = useAppSettings();
-  const support = app?.support_email ?? 'support@adey.app';
+  const support = app?.support_email ?? 'support@adeyconnect.com';
   const col = 'space-y-2.5 text-sm text-text-muted [&_a:hover]:text-text [&_a:hover]:underline [&_a]:underline-offset-4';
   return (
     <footer className="mt-24 border-t border-border bg-surface-muted/60">

@@ -6,7 +6,7 @@ export const metadata = { title: 'Privacy Policy' };
 export default async function Privacy() {
   const api = await serverApi();
   const app = await api.settings.get<{ support_email?: string }>('app').catch(() => undefined);
-  const email = app?.support_email ?? 'support@adey.app';
+  const email = app?.support_email ?? 'support@adeyconnect.com';
   return (
     <LegalDraft title="Privacy Policy" updated="November 24, 2026">
       <h2>What we collect</h2>

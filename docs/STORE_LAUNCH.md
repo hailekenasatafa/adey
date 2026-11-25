@@ -41,8 +41,8 @@ Status as of 2026-11-14. The backend and website are live; no store build exists
 ## Review risks to close first
 - **Empty marketplace.** Onboard a handful of real businesses (and at least one screen listing) before submitting to either store.
 - **Account deletion.** The app files a deletion request that staff complete within 30 days; someone must actually process the queue.
-- **User-generated content.** Reports land in the admin area; reviewers expect them to be acted on, and a support contact that answers (`support@adey.app` needs a real mailbox).
-- **Domain.** The owned domain is `adeyconnect.com` (registered at Spaceship, pointed at Netlify). The website footer, privacy page and `platform_settings.app.support_email` still say `support@adey.app`, which is not owned, and adeyconnect.com has no mailbox yet. Universal links also need `/.well-known/assetlinks.json` and `apple-app-site-association` on the website after the first builds.
+- **User-generated content.** Reports land in the admin area; reviewers expect them to be acted on, and a support contact that answers (`support@adeyconnect.com` needs a working mailbox).
+- **Domain.** The owned domain is `adeyconnect.com` (registered at Spaceship, pointed at Netlify). The support address is `support@adeyconnect.com` everywhere (website fallback, `platform_settings.app.support_email` since 2026-11-25, store texts). adeyconnect.com has MX records for both Spaceship forwarding and Zoho Mail: keep one provider and send a test email. Universal links also need `/.well-known/assetlinks.json` and `apple-app-site-association` on the website after the first builds.
 - **Device testing.** Nothing has run on a physical phone yet: maps, camera/photo upload, push, and secure session storage have only been type-checked and unit-tested.
 
 ## Realistic order

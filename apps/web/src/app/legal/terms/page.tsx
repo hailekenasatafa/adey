@@ -6,7 +6,7 @@ export const metadata = { title: 'Terms of Service' };
 export default async function Terms() {
   const api = await serverApi();
   const app = await api.settings.get<{ support_email?: string }>('app').catch(() => undefined);
-  const email = app?.support_email ?? 'support@adey.app';
+  const email = app?.support_email ?? 'support@adeyconnect.com';
   return (
     <LegalDraft title="Terms of Service" updated="November 24, 2026">
       <h2>1. What Adey is</h2>
