@@ -14,7 +14,7 @@ export default function SupportPage() {
 const ROLE: Record<string, { label: string; cls: string }> = {
   user: { label: 'Member', cls: 'bg-surface-muted' },
   assistant: { label: 'Assistant', cls: 'bg-gold-soft' },
-  staff: { label: 'Adey staff', cls: 'bg-forest-soft' },
+  staff: { label: 'Adey Connect staff', cls: 'bg-forest-soft' },
   system: { label: 'System', cls: 'bg-surface-muted italic' },
 };
 
@@ -63,7 +63,7 @@ function Thread({ id, onDone }: { id: string; onDone: () => void }) {
           {!m.data?.length && <li className="text-sm text-text-muted">No messages.</li>}
         </ul>
       )}
-      <div className="mt-3"><label className="label" htmlFor="reply">Your reply (the member sees it as Adey staff)</label><textarea id="reply" className="input min-h-24" value={text} onChange={(e) => setText(e.target.value)} /></div>
+      <div className="mt-3"><label className="label" htmlFor="reply">Your reply (the member sees it as Adey Connect staff)</label><textarea id="reply" className="input min-h-24" value={text} onChange={(e) => setText(e.target.value)} /></div>
       <ErrorLine error={error} />
       <div className="mt-2 flex flex-wrap gap-2"><button type="button" className="btn btn-primary btn-sm" disabled={!text.trim() || send.isPending} onClick={() => { setError(null); send.mutate(false); }}>Reply</button><button type="button" className="btn btn-secondary btn-sm" disabled={!text.trim() || send.isPending} onClick={() => { setError(null); send.mutate(true); }}>Reply and resolve</button></div>
     </div>

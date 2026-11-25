@@ -15,8 +15,8 @@ import { fmtDate } from '@/lib/format';
 const LEVELS: { level: VerificationLevel; what: string; docs: string; docTypes: string[] }[] = [
   { level: 'identity', what: 'Confirms the owner is a real person.', docs: 'Government photo ID', docTypes: ['government_id'] },
   { level: 'business', what: 'Confirms the business is registered.', docs: 'Business license, registration, or tax document', docTypes: ['business_license', 'tax_document'] },
-  { level: 'location', what: 'Confirms the physical location (Adey staff inspect or verify remotely).', docs: 'Lease or utility bill, plus a storefront photo', docTypes: ['lease', 'utility_bill', 'photo'] },
-  { level: 'fulfillment', what: 'Earned after completed bookings or orders with no unresolved disputes.', docs: 'No upload — Adey reviews your booking history', docTypes: [] },
+  { level: 'location', what: 'Confirms the physical location (Adey Connect staff inspect or verify remotely).', docs: 'Lease or utility bill, plus a storefront photo', docTypes: ['lease', 'utility_bill', 'photo'] },
+  { level: 'fulfillment', what: 'Earned after completed bookings or orders with no unresolved disputes.', docs: 'No upload — Adey Connect reviews your booking history', docTypes: [] },
 ];
 
 export default function Verification() {
@@ -55,7 +55,7 @@ export default function Verification() {
 
   return (
     <Screen header={<Header title="Verification" />} keyboard>
-      <Text color="muted" style={{ marginBottom: 14 }}>Badges appear on your profile only after Adey approves a request. Documents are stored privately and seen only by reviewers.</Text>
+      <Text color="muted" style={{ marginBottom: 14 }}>Badges appear on your profile only after Adey Connect approves a request. Documents are stored privately and seen only by reviewers.</Text>
       {applying ? (
         <Card>
           <Text variant="subheading">{badgeLabels[applying]}</Text>

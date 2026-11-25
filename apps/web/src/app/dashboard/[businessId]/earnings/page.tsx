@@ -25,7 +25,7 @@ export default function Earnings() {
       {d && (
         <>
           <div className="card mt-4 p-5"><p className="text-xs font-bold uppercase tracking-wider text-text-muted">Completed earnings (net)</p><p className="text-4xl font-bold text-forest">{formatMoney(d.completed_net_cents)}</p><p className="text-xs text-text-muted">from {d.completed_count} completed booking(s){d.external_settlement_note ? ' · settled directly in Free Launch Mode' : ''}</p>{d.external_settlement_note && <Badge tone="accent" className="mt-2">Free Launch Mode — no commission</Badge>}</div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3"><Stat label="Expected (confirmed, not done)" value={formatMoney(d.expected_confirmed_net_cents)} hint="Not earnings yet" /><Stat label="Confirmed value (gross)" value={formatMoney(d.expected_confirmed_gross_cents)} /><Stat label="Open offers (not revenue)" value={formatMoney(d.pending_requests_value_cents)} /><Stat label="Commission deducted" value={formatMoney(d.completed_commission_cents)} />{d.monetization_enabled && <Stat label="Pending payments" value={formatMoney(d.pending_payment_cents)} />}{d.monetization_enabled && <Stat label="Paid through Adey" value={formatMoney(d.paid_cents)} />}</div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3"><Stat label="Expected (confirmed, not done)" value={formatMoney(d.expected_confirmed_net_cents)} hint="Not earnings yet" /><Stat label="Confirmed value (gross)" value={formatMoney(d.expected_confirmed_gross_cents)} /><Stat label="Open offers (not revenue)" value={formatMoney(d.pending_requests_value_cents)} /><Stat label="Commission deducted" value={formatMoney(d.completed_commission_cents)} />{d.monetization_enabled && <Stat label="Pending payments" value={formatMoney(d.pending_payment_cents)} />}{d.monetization_enabled && <Stat label="Paid through Adey Connect" value={formatMoney(d.paid_cents)} />}</div>
         </>
       )}
       {a.data && <div className="mt-6"><h2 className="font-semibold">Inventory · last 30 days</h2><div className="mt-2 grid gap-3 sm:grid-cols-3"><Stat label="Active screens" value={a.data.active_screens} /><Stat label="Listing views" value={a.data.listing_views} /><Stat label="Advertising inquiries" value={a.data.advertising_inquiries} /><Stat label="Accepted" value={a.data.accepted_campaigns} /><Stat label="Declined" value={a.data.declined} /><Stat label="Utilization" value={a.data.utilization_pct != null ? `${a.data.utilization_pct}%` : '—'} hint="booked screen-days ÷ available" /></div></div>}
@@ -39,7 +39,7 @@ export default function Earnings() {
           </div>
         </div>
       )}
-      <div className="card mt-6 p-4 text-sm"><h2 className="font-semibold">Payments & payouts</h2>{d && !d.monetization_enabled ? <p className="text-text-muted">Integrated payments, receipts, and payouts are off in Free Launch Mode. When Adey enables Monetized Mode, records appear here automatically.</p> : <p className="text-text-muted">{p.data?.payments.length ?? 0} payment(s) · {p.data?.payouts.length ?? 0} payout(s)</p>}</div>
+      <div className="card mt-6 p-4 text-sm"><h2 className="font-semibold">Payments & payouts</h2>{d && !d.monetization_enabled ? <p className="text-text-muted">Integrated payments, receipts, and payouts are off in Free Launch Mode. When Adey Connect enables Monetized Mode, records appear here automatically.</p> : <p className="text-text-muted">{p.data?.payments.length ?? 0} payment(s) · {p.data?.payouts.length ?? 0} payout(s)</p>}</div>
     </div>
   );
 }

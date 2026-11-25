@@ -40,7 +40,7 @@ function List() {
                   {e.status === 'published' && <p className="text-xs text-text-muted">{e.going_count} going · {e.interested_count} interested</p>}
                 </div>
                 {e.status === 'rejected' && e.rejection_reason && <p className="mt-2 rounded-[10px] bg-surface-muted p-2 text-sm"><b>Reason:</b> {e.rejection_reason}</p>}
-                {e.status === 'pending' && <p className="mt-2 text-sm text-text-muted">The Adey team is reviewing this event. You will be notified.</p>}
+                {e.status === 'pending' && <p className="mt-2 text-sm text-text-muted">The Adey Connect team is reviewing this event. You will be notified.</p>}
                 <div className="mt-3 flex flex-wrap gap-1">
                   {e.status !== 'cancelled' && <Link href={`/events/${e.id}/edit`} className="btn btn-outline btn-sm">Edit</Link>}
                   {e.status === 'draft' && <button className="btn btn-secondary btn-sm" disabled={status.isPending} onClick={() => status.mutate({ id: e.id, s: 'pending' })}>Submit for review</button>}

@@ -162,7 +162,7 @@ export function CheckoutFlow({ currency: given }: { currency?: Currency }) {
 
           {p?.points.enabled && (
             <section className="card p-5" aria-labelledby="pts-h">
-              <h2 id="pts-h" className="font-semibold">3. Adey Rewards</h2>
+              <h2 id="pts-h" className="font-semibold">3. Adey Connect Rewards</h2>
               <p className="mt-1 text-sm text-text-muted">Balance: {p.points.balance.toLocaleString()} points{p.points.usable ? ` · use ${p.points.min_points.toLocaleString()}–${p.points.max_points.toLocaleString()} on this order` : ''}</p>
               {p.points.usable && (
                 <div className="mt-3 flex gap-2">
@@ -193,7 +193,7 @@ export function CheckoutFlow({ currency: given }: { currency?: Currency }) {
                 {p.problems.length > 0 && <ul role="alert" className="space-y-1 text-sm text-danger">{p.problems.map((x) => <li key={x}>• {x}</li>)}</ul>}
                 <button className="btn btn-primary w-full" disabled={!p.ok || pay.isPending || leaving || preview.isFetching || quotes.isFetching} onClick={() => pay.mutate()}>{pay.isPending || leaving ? 'Opening secure payment…' : <><Lock aria-hidden className="h-4 w-4" />Pay securely</>}</button>
                 {pay.error && <p role="alert" className="text-sm text-danger">{friendlyError(pay.error)}</p>}
-                <p className="text-xs text-text-muted">Adey holds your payment until you confirm delivery.</p>
+                <p className="text-xs text-text-muted">Adey Connect holds your payment until you confirm delivery.</p>
               </>
             )}
         </aside>

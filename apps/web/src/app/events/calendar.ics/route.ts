@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         postal_code: e.postal_code ?? undefined, country: e.country, lat: e.lat ?? undefined, lng: e.lng ?? undefined,
         is_online: e.is_online, category: e.category, tags: e.tags, updated_at: e.updated_at,
       })),
-      { name: `Adey community events${feed.region_name ? ` (${feed.region_name})` : ''}`, description: 'Habesha community events from Adey.', url: `${origin}/events`, domain: new URL(origin).hostname, refreshMinutes: 240 },
+      { name: `Adey Connect community events${feed.region_name ? ` (${feed.region_name})` : ''}`, description: 'Habesha community events from Adey Connect.', url: `${origin}/events`, domain: new URL(origin).hostname, refreshMinutes: 240 },
     );
     return new Response(body, { headers: { ...headers, 'Content-Type': 'text/calendar; charset=utf-8', 'Content-Disposition': 'inline; filename="adey-events.ics"' } });
   } catch {

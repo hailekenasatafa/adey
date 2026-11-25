@@ -49,7 +49,7 @@ export default function DealsDashboard() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h1 className="text-2xl font-bold">Deals</h1><p className="text-sm text-text-muted">Post an offer, customers claim it on Adey, and you enter their code at the counter. Free.</p></div>
+        <div><h1 className="text-2xl font-bold">Deals</h1><p className="text-sm text-text-muted">Post an offer, customers claim it on Adey Connect, and you enter their code at the counter. Free.</p></div>
         {canManage && <button onClick={() => edit()} className="btn btn-primary btn-sm">+ New deal</button>}
       </div>
 
@@ -98,7 +98,7 @@ export default function DealsDashboard() {
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => edit(d)} className="btn btn-outline btn-sm">Edit</button>
                 <button onClick={() => status.mutate({ id: d.id, s: d.status === 'active' ? 'paused' : 'active' })} disabled={status.isPending} className="btn btn-outline btn-sm">{d.status === 'active' ? 'Pause' : 'Resume'}</button>
-                <button onClick={() => confirm('End this deal? It disappears from Adey and its codes stop working. You can post a new deal any time.') && status.mutate({ id: d.id, s: 'ended' })} disabled={status.isPending} className="btn btn-ghost btn-sm text-danger">End</button>
+                <button onClick={() => confirm('End this deal? It disappears from Adey Connect and its codes stop working. You can post a new deal any time.') && status.mutate({ id: d.id, s: 'ended' })} disabled={status.isPending} className="btn btn-ghost btn-sm text-danger">End</button>
               </div>
             )}
           </div>

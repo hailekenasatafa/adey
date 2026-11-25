@@ -14,7 +14,7 @@ export function BusinessDeals({ business, initial }: { business: { id: string; s
   return (
     <section id="deals" className="mt-10 scroll-mt-24" aria-labelledby="deals-h">
       <div className="mb-4 flex items-end justify-between gap-3">
-        <div><h2 id="deals-h" className="text-xl font-bold">Deals</h2><p className="text-sm text-text-muted">Claim on Adey, then show your code at {business.name}. Free to claim.</p></div>
+        <div><h2 id="deals-h" className="text-xl font-bold">Deals</h2><p className="text-sm text-text-muted">Claim on Adey Connect, then show your code at {business.name}. Free to claim.</p></div>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         {deals.map((d) => (

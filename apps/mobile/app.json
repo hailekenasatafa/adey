@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ADEY",
+    "name": "Adey Connect",
     "slug": "adey",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,7 @@
     "scheme": "adey",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "description": "ADEY (አደይ) — Connecting Communities. Growing Businesses. Discover Habesha businesses, shop verified Ethiopian sellers, and grow with AdConnect.",
+    "description": "Adey Connect (አደይ) — Connecting Communities. Growing Businesses. Discover Habesha businesses, shop verified Ethiopian sellers, and grow with AdConnect.",
     "primaryColor": "#174B3A",
     "backgroundColor": "#FAF8F2",
     "splash": {
@@ -22,10 +22,10 @@
       "bundleIdentifier": "com.adeyconnect.app",
       "config": { "usesNonExemptEncryption": false },
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Adey uses your location to show Habesha businesses and advertising screens near you.",
-        "NSCameraUsageDescription": "Adey uses the camera so you can add photos of your business, products, or screens.",
-        "NSPhotoLibraryUsageDescription": "Adey needs photo access to upload business photos, product images, and campaign creatives.",
-        "NSPhotoLibraryAddUsageDescription": "Adey can save images you download to your photo library.",
+        "NSLocationWhenInUseUsageDescription": "Adey Connect uses your location to show Habesha businesses and advertising screens near you.",
+        "NSCameraUsageDescription": "Adey Connect uses the camera so you can add photos of your business, products, or screens.",
+        "NSPhotoLibraryUsageDescription": "Adey Connect needs photo access to upload business photos, product images, and campaign creatives.",
+        "NSPhotoLibraryAddUsageDescription": "Adey Connect can save images you download to your photo library.",
         "UIBackgroundModes": ["remote-notification"]
       },
       "associatedDomains": ["applinks:adeyconnect.com"]
@@ -74,8 +74,8 @@
       "expo-web-browser",
       ["expo-splash-screen", { "image": "./assets/splash-icon.png", "imageWidth": 160, "resizeMode": "contain", "backgroundColor": "#174B3A", "dark": { "backgroundColor": "#15181A" } }],
       ["expo-notifications", { "icon": "./assets/notification-icon.png", "color": "#174B3A", "defaultChannel": "default" }],
-      ["expo-location", { "locationWhenInUsePermission": "Adey uses your location to show Habesha businesses and advertising screens near you." }],
-      ["expo-image-picker", { "photosPermission": "Adey needs photo access to upload business photos, product images, and campaign creatives.", "cameraPermission": "Adey uses the camera so you can add photos of your business, products, or screens." }],
+      ["expo-location", { "locationWhenInUsePermission": "Adey Connect uses your location to show Habesha businesses and advertising screens near you." }],
+      ["expo-image-picker", { "photosPermission": "Adey Connect needs photo access to upload business photos, product images, and campaign creatives.", "cameraPermission": "Adey Connect uses the camera so you can add photos of your business, products, or screens." }],
       ["expo-video", { "supportsBackgroundPlayback": false, "supportsPictureInPicture": false }],
       ["react-native-maps", { "iosGoogleMapsApiKey": "" }]
     ],

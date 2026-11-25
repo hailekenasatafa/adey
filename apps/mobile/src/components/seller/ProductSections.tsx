@@ -152,7 +152,7 @@ export function Authenticity({ businessId, productId, isAuthentic, product }: { 
   return (
     <Card>
       <Text variant="subheading">Authenticity badge</Text>
-      <Text variant="caption" color="muted" style={{ marginVertical: 6 }}>Adey checks your statement and evidence before a badge appears on the listing. Evidence is kept private.</Text>
+      <Text variant="caption" color="muted" style={{ marginVertical: 6 }}>Adey Connect checks your statement and evidence before a badge appears on the listing. Evidence is kept private.</Text>
       {isAuthentic && <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}><CertificationBadge /><Text variant="caption">is showing on this listing.</Text></View>}
       {paused && (
         <View style={{ backgroundColor: colors.warning + '1A', borderRadius: 10, padding: 12, marginBottom: 10 }}>

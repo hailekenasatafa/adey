@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { Button, EmptyState, ErrorState, Header, Loading, Screen, Text } from '@/components/ui';
 
-const STARTERS = ['Where is my order?', 'How do refunds work?', 'How do I become a verified seller?', 'How do Adey Rewards work?'];
+const STARTERS = ['Where is my order?', 'How do refunds work?', 'How do I become a verified seller?', 'How do Adey Connect Rewards work?'];
 
 export default function SupportChat() {
   const { id, order, q: starter } = useLocalSearchParams<{ id: string; order?: string; q?: string }>();
@@ -39,7 +39,7 @@ export default function SupportChat() {
   };
   const human = useMutation({
     mutationFn: ({ tid, reason }: { tid: string; reason?: string }) => api.support.requestHuman(tid, reason),
-    onSuccess: async (_d, v) => { handedRef.current.add(v.tid); setNotice('The Adey support team has been notified. A person will reply in this conversation.'); await afterChange(v.tid); },
+    onSuccess: async (_d, v) => { handedRef.current.add(v.tid); setNotice('The Adey Connect support team has been notified. A person will reply in this conversation.'); await afterChange(v.tid); },
     onError: (e) => setErr(friendlyError(e)),
   });
   const send = useMutation({
@@ -54,7 +54,7 @@ export default function SupportChat() {
     },
     onSuccess: async (r) => {
       setThreadId(r.thread_id);
-      if (r.asked || r.handed_off) setNotice('The Adey support team has been notified. A person will reply in this conversation.');
+      if (r.asked || r.handed_off) setNotice('The Adey Connect support team has been notified. A person will reply in this conversation.');
       await afterChange(r.thread_id);
       setPending(null);
     },
@@ -74,7 +74,7 @@ export default function SupportChat() {
   const list = msgs.data ?? [];
   useEffect(() => { const t = setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50); return () => clearTimeout(t); }, [list.length, pending, send.isPending]);
 
-  const header = <Header title="Support" subtitle={waiting ? 'Waiting for the support team' : resolved ? 'Resolved' : 'Adey Assistant'} right={threadId && !waiting ? <Pressable onPress={() => human.mutate({ tid: threadId })} disabled={human.isPending} accessibilityRole="button" accessibilityLabel="Talk to a person" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'flex-end' }}><Ionicons name="person-circle-outline" size={26} color={colors.primary} /></Pressable> : undefined} />;
+  const header = <Header title="Support" subtitle={waiting ? 'Waiting for the support team' : resolved ? 'Resolved' : 'Adey Connect Assistant'} right={threadId && !waiting ? <Pressable onPress={() => human.mutate({ tid: threadId })} disabled={human.isPending} accessibilityRole="button" accessibilityLabel="Talk to a person" style={{ minHeight: 44, justifyContent: 'center', alignItems: 'flex-end' }}><Ionicons name="person-circle-outline" size={26} color={colors.primary} /></Pressable> : undefined} />;
   if (!user) return <Screen header={header}><EmptyState icon="chatbubble-ellipses-outline" title="Sign in to chat with support" action="Sign in" onAction={() => router.push('/(auth)/sign-in')} /></Screen>;
 
   return (
@@ -88,7 +88,7 @@ export default function SupportChat() {
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <View style={{ marginBottom: 6 }}>
-              <Text variant="caption" color="muted" center>Replies from the Adey Assistant are automated and can be wrong. Ask for a person any time.</Text>
+              <Text variant="caption" color="muted" center>Replies from the Adey Connect Assistant are automated and can be wrong. Ask for a person any time.</Text>
               {!!order && <Text variant="caption" color="muted" center>This conversation is about one of your orders.</Text>}
             </View>
           }
@@ -106,7 +106,7 @@ export default function SupportChat() {
             <View style={{ gap: 10 }}>
               {!!pending && <Bubble m={{ id: 'pending', role: 'user', content: pending, created_at: new Date().toISOString(), thread_id: '', author_id: null, meta: {} }} />}
               {send.isPending && <Typing />}
-              {(waiting || !!notice) && <Banner text="The Adey support team has been notified. A person will reply in this conversation. You will get a notification when they do." />}
+              {(waiting || !!notice) && <Banner text="The Adey Connect support team has been notified. A person will reply in this conversation. You will get a notification when they do." />}
               {resolved && <Banner text="This conversation was marked resolved. Send a message if you still need help." />}
               {!!err && <Text color="danger" variant="caption" center accessibilityLiveRegion="polite">{err}</Text>}
             </View>
@@ -141,9 +141,9 @@ function Bubble({ m }: { m: SupportMessage }) {
   const { colors, radius } = useTheme();
   if (m.role === 'system') return <Text variant="caption" color="muted" center style={{ marginVertical: 4 }}>{m.content}</Text>;
   const mine = m.role === 'user';
-  const who = m.role === 'assistant' ? 'Adey Assistant · automated' : m.role === 'staff' ? 'Adey support team' : null;
+  const who = m.role === 'assistant' ? 'Adey Connect Assistant · automated' : m.role === 'staff' ? 'Adey Connect support team' : null;
   return (
-    <View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '86%' }} accessible accessibilityLabel={`${mine ? 'You' : who ?? 'Adey'}: ${m.content}`}>
+    <View style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '86%' }} accessible accessibilityLabel={`${mine ? 'You' : who ?? 'Adey Connect'}: ${m.content}`}>
       {!!who && <Text variant="caption" color={m.role === 'staff' ? 'primary' : 'muted'} style={{ marginBottom: 2, fontWeight: '600' }}>{who}</Text>}
       <View style={{ backgroundColor: mine ? colors.primary : m.role === 'staff' ? colors.primarySoft : colors.surfaceMuted, borderRadius: radius.lg, paddingHorizontal: 14, paddingVertical: 10 }}>
         <Text style={{ color: mine ? colors.onPrimary : colors.text }} selectable>{m.content}</Text>
@@ -155,8 +155,8 @@ function Bubble({ m }: { m: SupportMessage }) {
 function Typing() {
   const { colors, radius } = useTheme();
   return (
-    <View style={{ alignSelf: 'flex-start' }} accessibilityLiveRegion="polite" accessibilityLabel="Adey Assistant is typing">
-      <Text variant="caption" color="muted" style={{ marginBottom: 2, fontWeight: '600' }}>Adey Assistant · automated</Text>
+    <View style={{ alignSelf: 'flex-start' }} accessibilityLiveRegion="polite" accessibilityLabel="Adey Connect Assistant is typing">
+      <Text variant="caption" color="muted" style={{ marginBottom: 2, fontWeight: '600' }}>Adey Connect Assistant · automated</Text>
       <View style={{ backgroundColor: colors.surfaceMuted, borderRadius: radius.lg, paddingHorizontal: 14, paddingVertical: 12, flexDirection: 'row', gap: 4 }}>
         {[0.4, 0.7, 1].map((o, i) => <View key={i} style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.textMuted, opacity: o }} />)}
       </View>

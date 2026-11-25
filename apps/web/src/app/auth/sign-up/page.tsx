@@ -29,7 +29,7 @@ function SignUpInner() {
         <div><label className="label">Confirm password</label><input {...register('confirmPassword')} type="password" className="input" />{formState.errors.confirmPassword && <p className="text-sm text-danger">{formState.errors.confirmPassword.message}</p>}</div>
         {error && <p className="text-sm text-danger">{error}</p>}
         <button className="btn btn-primary w-full" disabled={formState.isSubmitting}>Create account</button>
-        <p className="text-center text-xs text-text-muted">By creating an account you agree to Adey's <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
+        <p className="text-center text-xs text-text-muted">By creating an account you agree to Adey Connect's <Link href="/legal/terms" className="underline">Terms</Link> and <Link href="/legal/privacy" className="underline">Privacy Policy</Link>.</p>
       </form>
     </AuthCard>
   );

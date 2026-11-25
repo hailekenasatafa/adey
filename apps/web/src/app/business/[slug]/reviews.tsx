@@ -34,7 +34,7 @@ export function Reviews({ businessId }: { businessId: string }) {
       )}
       {q.isLoading ? <div className="skeleton h-20" /> : !q.data?.length ? <p className="text-sm text-text-muted">No reviews yet.</p> : q.data.map((r) => (
         <div key={r.id} className="card p-4">
-          <div className="flex items-center justify-between"><p className="font-semibold">{r.author?.display_name ?? 'Adey member'} <span className="text-xs text-text-muted font-normal">· {fmtDate(r.created_at)}</span></p><Stars value={r.rating} /></div>
+          <div className="flex items-center justify-between"><p className="font-semibold">{r.author?.display_name ?? 'Adey Connect member'} <span className="text-xs text-text-muted font-normal">· {fmtDate(r.created_at)}</span></p><Stars value={r.rating} /></div>
           {r.is_verified_customer && <Badge tone="info" className="mt-1">Contacted this business</Badge>}
           {r.title && <p className="mt-2 font-semibold">{r.title}</p>}
           {r.body && <p className="mt-1 text-sm">{r.body}</p>}

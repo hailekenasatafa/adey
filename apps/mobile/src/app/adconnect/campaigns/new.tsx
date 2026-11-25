@@ -274,7 +274,7 @@ export default function CampaignWizard() {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}><Text>Creative</Text><Text variant="bodyStrong">{[d.video_path && 'video', d.image_path && 'image'].filter(Boolean).join(' + ') || 'instructions only'}</Text></View>
           </Card>
           <Card>
-            <Text variant="caption" color="muted">Sending creates one request per business. Each owner responds independently. Accepted requests become bookings; in Free Launch Mode, payment is arranged directly between you and the owner and Adey takes no commission.</Text>
+            <Text variant="caption" color="muted">Sending creates one request per business. Each owner responds independently. Accepted requests become bookings; in Free Launch Mode, payment is arranged directly between you and the owner and Adey Connect takes no commission.</Text>
           </Card>
           {error && <Text color="danger" variant="caption">{error}</Text>}
           <Button title="SEND CAMPAIGN REQUESTS" size="lg" fullWidth variant="accent" icon="paper-plane" loading={submit.isPending} onPress={() => submit.mutate()} />

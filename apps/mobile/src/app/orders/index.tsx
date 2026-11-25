@@ -51,7 +51,7 @@ export default function Orders() {
   return (
     <Screen header={header} refreshing={q.isRefetching} onRefresh={() => { q.refetch(); checkoutRows.refetch(); }}>
       {msg && <Text color={msg.tone} variant="caption" style={{ marginTop: 8 }} accessibilityRole="alert">{msg.text}</Text>}
-      {!orders.length && <EmptyState icon="receipt-outline" title="No orders yet" body="When you buy from a seller on Adey, your orders and their delivery status show up here." action="Explore products" onAction={() => router.push('/(tabs)/explore')} />}
+      {!orders.length && <EmptyState icon="receipt-outline" title="No orders yet" body="When you buy from a seller on Adey Connect, your orders and their delivery status show up here." action="Explore products" onAction={() => router.push('/(tabs)/explore')} />}
       {checkouts.length > 0 && (
         <>
           <SectionHeader title="Awaiting payment" style={{ marginTop: 8 }} />

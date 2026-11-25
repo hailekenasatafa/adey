@@ -9,11 +9,11 @@ const jakarta = localFont({ src: './fonts/PlusJakartaSans-latin.woff2', weight: 
 const ethiopic = localFont({ src: './fonts/NotoSansEthiopic.woff2', weight: '100 900', variable: '--font-ethiopic', display: 'swap', preload: false });
 
 export const metadata: Metadata = {
-  title: { default: 'ADEY — Connecting Communities. Growing Businesses.', template: '%s · ADEY' },
+  title: { default: 'Adey Connect — Connecting Communities. Growing Businesses.', template: '%s · Adey Connect' },
   description: 'Discover trusted Habesha businesses, shop verified Ethiopian sellers, and grow with AdConnect — advertising on screens inside community businesses.',
-  applicationName: 'ADEY',
+  applicationName: 'Adey Connect',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-  openGraph: { siteName: 'ADEY', type: 'website' },
+  openGraph: { siteName: 'Adey Connect', type: 'website' },
 };
 export const viewport: Viewport = { themeColor: '#174B3A' };
 

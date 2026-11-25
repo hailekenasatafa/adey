@@ -18,7 +18,7 @@ import { ReviewForm } from '@/components/shop/ReviewForm';
 
 const escrowHelp: Record<EscrowStatus, string> = {
   none: 'No payment has been taken for this order.',
-  held: 'Adey keeps your payment safe and only pays the seller after you confirm delivery or the confirmation window ends.',
+  held: 'Adey Connect keeps your payment safe and only pays the seller after you confirm delivery or the confirmation window ends.',
   released: 'The seller has been paid for this order.',
   refund_pending: 'Your refund has been approved and is on its way back to your payment method.',
   refunded: 'The full amount was returned to your payment method.',
@@ -105,7 +105,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
               <p>{d.description}</p>
               {d.evidence_paths.length > 0 && <p className="text-text-muted">{d.evidence_paths.length} file{d.evidence_paths.length > 1 ? 's' : ''} attached</p>}
               {d.seller_response && <div className="rounded-[10px] bg-surface-muted p-3"><p className="text-xs text-text-muted">Seller response{d.seller_responded_at ? ` · ${fmtDate(d.seller_responded_at)}` : ''}</p><p>{d.seller_response}</p></div>}
-              {d.resolution && <div className="rounded-[10px] bg-forest-soft p-3"><p className="text-xs text-text-muted">Adey decision{d.resolved_at ? ` · ${fmtDate(d.resolved_at)}` : ''}</p><p className="font-semibold">{d.resolution === 'release' ? 'Payment released to the seller' : d.resolution === 'refund_full' ? 'Full refund' : d.resolution === 'refund_partial' ? `Partial refund${d.refund_cents != null ? ` of ${formatMoney(d.refund_cents, o.currency)}` : ''}` : d.resolution}</p>{d.resolution_note && <p>{d.resolution_note}</p>}</div>}
+              {d.resolution && <div className="rounded-[10px] bg-forest-soft p-3"><p className="text-xs text-text-muted">Adey Connect decision{d.resolved_at ? ` · ${fmtDate(d.resolved_at)}` : ''}</p><p className="font-semibold">{d.resolution === 'release' ? 'Payment released to the seller' : d.resolution === 'refund_full' ? 'Full refund' : d.resolution === 'refund_partial' ? `Partial refund${d.refund_cents != null ? ` of ${formatMoney(d.refund_cents, o.currency)}` : ''}` : d.resolution}</p>{d.resolution_note && <p>{d.resolution_note}</p>}</div>}
             </section>
           ))}
 
@@ -133,7 +133,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             ]} total={o.total_cents} />
             <div className="rounded-[12px] bg-surface-muted p-3 text-sm"><p className="font-semibold">{escrowStatusLabels[o.escrow_status]}</p><p className="text-text-muted">{escrowHelp[o.escrow_status]}</p></div>
             {o.refunds.length > 0 && <ul className="space-y-1 text-sm">{o.refunds.map((r) => <li key={r.id} className="flex justify-between"><span>Refund · {r.status.replace(/_/g, ' ')}</span><span>{formatMoney(r.amount_cents, r.currency)}</span></li>)}</ul>}
-            {o.points_earned > 0 && <p className="text-xs text-text-muted">You earn {o.points_earned} Adey Rewards points with this order.</p>}
+            {o.points_earned > 0 && <p className="text-xs text-text-muted">You earn {o.points_earned} Adey Connect Rewards points with this order.</p>}
           </section>
 
           <section className="card space-y-2 p-5">
@@ -175,7 +175,7 @@ function DisputeForm({ orderId, onDone, onCancel }: { orderId: string; onDone: (
   return (
     <section className="card space-y-3 p-5" aria-labelledby="dsp-h">
       <h2 id="dsp-h" className="font-semibold">Report a problem</h2>
-      <p className="text-sm text-text-muted">Adey keeps holding the payment while the seller responds and we review it.</p>
+      <p className="text-sm text-text-muted">Adey Connect keeps holding the payment while the seller responds and we review it.</p>
       <div><label htmlFor="dsp-cat" className="label">What went wrong?</label><select id="dsp-cat" value={category} onChange={(e) => setCategory(e.target.value as DisputeInput['category'])} className="input">{Object.entries(disputeCategoryLabels).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
       <div><label htmlFor="dsp-desc" className="label">Describe what happened</label><textarea id="dsp-desc" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={4000} className="input min-h-28" /></div>
       <div><label htmlFor="dsp-files" className="label">Photos or documents (optional)</label><input id="dsp-files" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(e) => setFiles([...(e.target.files ?? [])].slice(0, 6))} className="text-sm" /></div>

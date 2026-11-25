@@ -22,7 +22,7 @@ function SignInInner() {
   const { register, handleSubmit, formState } = useForm<z.infer<typeof signInSchema>>({ resolver: zodResolver(signInSchema) });
   return (
     <AuthCard title="Welcome back" subtitle="Sign in to save businesses, claim deals and message owners."
-      footer={<>New to Adey? <Link href={`/auth/sign-up${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-text underline underline-offset-4">Create an account</Link></>}>
+      footer={<>New to Adey Connect? <Link href={`/auth/sign-up${next !== '/' ? `?next=${encodeURIComponent(next)}` : ''}`} className="font-semibold text-text underline underline-offset-4">Create an account</Link></>}>
       <GoogleSignIn next={next} />
       <form onSubmit={handleSubmit(async (v) => { setError(null); try { await api.auth.signIn(v.email, v.password); router.push(next); router.refresh(); } catch (e) { setError(friendlyError(e)); } })} className="space-y-4" noValidate>
         <div><label htmlFor="si-email" className="label">Email</label><input id="si-email" {...register('email')} type="email" autoComplete="email" className="input" />{formState.errors.email && <p className="mt-1 text-sm text-danger">{formState.errors.email.message}</p>}</div>

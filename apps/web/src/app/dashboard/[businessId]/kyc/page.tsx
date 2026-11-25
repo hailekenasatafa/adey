@@ -71,18 +71,18 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
     await api.owner.addVerificationDocument({ request_id: req.id, business_id: businessId, doc_type: docType, storage_path: path, original_filename: file.name, uploaded_by: session.user.id });
   }, 'Document uploaded privately.');
   const submit = () => task('submit', async () => { await api.seller.submitKyc(businessId); setAttest(false); }, 'Submitted. We will review it and let you know.');
-  const reopen = () => { if (confirm('Change your details? Selling pauses until Adey approves them again. Open orders are not affected.')) task('reopen', async () => { await api.seller.reopenKyc(businessId); }); };
+  const reopen = () => { if (confirm('Change your details? Selling pauses until Adey Connect approves them again. Open orders are not affected.')) task('reopen', async () => { await api.seller.reopenKyc(businessId); }); };
   const c = check.data;
 
   return (
     <div className="space-y-4">
-      <div><h1 className="text-2xl font-bold">Seller verification</h1><p className="text-sm text-text-muted">Listing is free. To take paid orders, Adey confirms who you are. Your details and documents are private — buyers never see them.</p></div>
+      <div><h1 className="text-2xl font-bold">Seller verification</h1><p className="text-sm text-text-muted">Listing is free. To take paid orders, Adey Connect confirms who you are. Your details and documents are private — buyers never see them.</p></div>
       <div className="card p-5">
         <div className="flex flex-wrap items-center gap-2"><b>Status</b><Badge tone={TONE[status]}>{kycStatusLabels[status]}</Badge></div>
         {status === 'approved' && <><p className="mt-2 text-sm">You can take paid orders.{row?.expires_at && <> Renewal due {fmtDate(row.expires_at)}.</>}</p><button onClick={reopen} disabled={!!busy} className="btn btn-outline btn-sm mt-3">Change my details</button><p className="mt-1 text-xs text-text-muted">Selling pauses until your changes are approved.</p></>}
         {(status === 'submitted' || status === 'in_review') && <p className="mt-2 text-sm text-text-muted">We are reviewing your details. You can't edit them while we do.</p>}
         {(status === 'needs_info' || status === 'rejected') && <p className="mt-2 rounded-[8px] bg-warning/10 p-3 text-sm"><b>{status === 'needs_info' ? 'We need more information' : 'Not approved'}:</b> {row?.decision_reason ?? 'No reason was given.'}<br /><span className="text-text-muted">Update your details or documents below, then submit again.</span></p>}
-        {status === 'suspended' && <p className="mt-2 rounded-[8px] bg-danger/10 p-3 text-sm"><b>Selling is paused:</b> {row?.decision_reason ?? 'No reason was given.'} Contact Adey support to resolve it.</p>}
+        {status === 'suspended' && <p className="mt-2 rounded-[8px] bg-danger/10 p-3 text-sm"><b>Selling is paused:</b> {row?.decision_reason ?? 'No reason was given.'} Contact Adey Connect support to resolve it.</p>}
       </div>
       {ok && <p role="status" className="text-sm text-success">{ok}</p>}
       {err && <ErrorNote error={err} />}
@@ -122,7 +122,7 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
 
         <div className="card space-y-4 p-5">
           <h2 className="font-semibold">3 · Documents</h2>
-          <p className="text-xs text-text-muted">Photos or PDFs, up to 15 MB. Kept in a private store seen only by you and Adey's reviewers.</p>
+          <p className="text-xs text-text-muted">Photos or PDFs, up to 15 MB. Kept in a private store seen only by you and Adey Connect's reviewers.</p>
           {DOCS.map((d) => { const req = reqs.data?.find((r) => r.level === d.level && OPEN.includes(r.status)) ?? reqs.data?.find((r) => r.level === d.level); return (
             <div key={d.level}>
               <p className="text-sm font-semibold">{d.title}</p>
@@ -134,7 +134,7 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
         {editable && <div className="card space-y-3 p-5">
           <h2 className="font-semibold">4 · Review and submit</h2>
           {check.isLoading ? <div className="skeleton h-16" /> : check.error ? <ErrorNote error={check.error} /> : <ul className="space-y-1 text-sm">{c?.items.map((i) => <li key={i.key} className="flex items-center gap-1.5">{i.done ? <CircleCheck aria-hidden className="h-4 w-4 text-success" /> : <Circle aria-hidden className="h-4 w-4 text-text-muted" />}{i.label}{!i.required && <span className="text-text-muted"> (optional)</span>}</li>)}</ul>}
-          <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={attest} onChange={(e) => setAttest(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--forest)]" />I confirm the information and documents are true and belong to me or my business, and I agree Adey may verify them.</label>
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={attest} onChange={(e) => setAttest(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--forest)]" />I confirm the information and documents are true and belong to me or my business, and I agree Adey Connect may verify them.</label>
           <button onClick={submit} disabled={!c?.complete || !attest || !!busy} className="btn btn-primary btn-sm">{busy === 'submit' ? 'Submitting…' : status === 'not_started' || status === 'draft' ? 'Submit for review' : 'Submit again'}</button>
           {c && !c.complete && <p className="text-xs text-text-muted">Finish the unchecked items to submit.</p>}
         </div>}

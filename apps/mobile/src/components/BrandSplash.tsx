@@ -40,7 +40,7 @@ export function BrandSplash({ onDone }: { onDone: () => void }) {
         <AdeyFlower size={96} petal={brand.gold} center={scheme === 'dark' ? brand.forest : brand.ivory} />
       </Animated.View>
       <Animated.View style={[styles.text, textStyle]}>
-        <Text variant="display" style={{ color: brand.ivory, letterSpacing: 6 }}>
+        <Text variant="display" numberOfLines={1} adjustsFontSizeToFit style={{ color: brand.ivory, letterSpacing: 3, paddingHorizontal: 24 }}>
           {brandText.name}
         </Text>
         <Text variant="heading" style={{ color: brand.gold, marginTop: 2 }}>

@@ -91,7 +91,7 @@ export default function DealsManager() {
             <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
               <Button title="Edit" size="sm" variant="outline" onPress={() => edit(d)} />
               <Button title={d.status === 'active' ? 'Pause' : 'Resume'} size="sm" variant="outline" onPress={() => status.mutate({ id: d.id, s: d.status === 'active' ? 'paused' : 'active' })} />
-              <Button title="End" size="sm" variant="ghost" onPress={() => Alert.alert('End this deal?', 'It disappears from Adey and its codes stop working. You can post a new deal any time.', [{ text: 'Cancel', style: 'cancel' }, { text: 'End deal', style: 'destructive', onPress: () => status.mutate({ id: d.id, s: 'ended' }) }])} />
+              <Button title="End" size="sm" variant="ghost" onPress={() => Alert.alert('End this deal?', 'It disappears from Adey Connect and its codes stop working. You can post a new deal any time.', [{ text: 'Cancel', style: 'cancel' }, { text: 'End deal', style: 'destructive', onPress: () => status.mutate({ id: d.id, s: 'ended' }) }])} />
             </View>
           )}
         </Card>

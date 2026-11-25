@@ -14,7 +14,7 @@ export default function AdminQueue() {
   return (
     <Screen header={<Header title="Administration" />}>
       {roles.staff ? (
-        <EmptyState icon="desktop-outline" title="Handled in the web admin console" body="This queue is reviewed on the Adey website, where staff have the full tools and audit log." action="Open in browser" onAction={() => Linking.openURL(`${WEB_URL}${path}`)} />
+        <EmptyState icon="desktop-outline" title="Handled in the web admin console" body="This queue is reviewed on the Adey Connect website, where staff have the full tools and audit log." action="Open in browser" onAction={() => Linking.openURL(`${WEB_URL}${path}`)} />
       ) : (
         <EmptyState icon="lock-closed-outline" title="Staff only" body="Your account doesn't have moderation permissions." />
       )}

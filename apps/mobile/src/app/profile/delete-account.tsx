@@ -21,7 +21,7 @@ export default function DeleteAccount() {
     <Screen header={<Header title="Delete account" />}>
       <Card>
         <Text variant="subheading" color="danger">This is permanent</Text>
-        <Text style={{ marginTop: 8 }}>Requesting deletion signs you out and schedules removal of your profile, saved items, messages, and notifications. Adey staff process requests within 30 days, as required to complete active bookings and keep financial records auditable.</Text>
+        <Text style={{ marginTop: 8 }}>Requesting deletion signs you out and schedules removal of your profile, saved items, messages, and notifications. Adey Connect staff process requests within 30 days, as required to complete active bookings and keep financial records auditable.</Text>
         {businesses.length > 0 && (
           <Text color="warning" style={{ marginTop: 10 }}>You own {businesses.length} business{businesses.length > 1 ? 'es' : ''}. Transfer ownership or unpublish them first, or they will be unpublished when the account is removed.</Text>
         )}

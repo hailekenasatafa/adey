@@ -47,13 +47,13 @@ export function place(b: { city?: string | null; state?: string | null; country?
 /** "New" and "Trending" badges (from business_signals). */
 export function SignalBadges({ s }: { s?: BusinessSignals | null }) {
   if (!s?.is_new && !s?.is_trending) return null;
-  return <>{s.is_new && <Badge tone="info">New on Adey</Badge>}{s.is_trending && <Badge tone="accent"><TrendingUp aria-hidden className="h-3.5 w-3.5" />Trending</Badge>}</>;
+  return <>{s.is_new && <Badge tone="info">New on Adey Connect</Badge>}{s.is_trending && <Badge tone="accent"><TrendingUp aria-hidden className="h-3.5 w-3.5" />Trending</Badge>}</>;
 }
 
 /** One highlighted review, quoted with its author. */
 export function ReviewQuote({ s, className = '' }: { s?: BusinessSignals | null; className?: string }) {
   if (!s?.review_quote) return null;
-  return <p className={`text-sm text-text-muted ${className}`}><span>“{s.review_quote}”</span> <span className="whitespace-nowrap">— {s.review_author ?? 'Adey member'}</span></p>;
+  return <p className={`text-sm text-text-muted ${className}`}><span>“{s.review_quote}”</span> <span className="whitespace-nowrap">— {s.review_author ?? 'Adey Connect member'}</span></p>;
 }
 
 /** What a card shows when there is no photo yet: a quiet tile with one icon. */

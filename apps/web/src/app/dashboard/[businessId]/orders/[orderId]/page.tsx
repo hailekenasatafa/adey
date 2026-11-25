@@ -133,7 +133,7 @@ export default function SellerOrder() {
               <div className="flex justify-between border-t border-border pt-2 text-base font-bold"><dt>Your proceeds</dt><dd>{formatMoney(o.net_to_seller_cents, cur)}</dd></div>
             </>}
           </dl>
-          <p className="mt-2 text-xs text-text-muted">Tax is collected by Adey and is not part of your proceeds. {escrowStatusLabels[o.escrow_status]}.{o.escrow_status === 'held' && ' It is released when the buyer confirms delivery, or automatically a few days after delivery.'}</p>
+          <p className="mt-2 text-xs text-text-muted">Tax is collected by Adey Connect and is not part of your proceeds. {escrowStatusLabels[o.escrow_status]}.{o.escrow_status === 'held' && ' It is released when the buyer confirms delivery, or automatically a few days after delivery.'}</p>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ export default function SellerOrder() {
           <p className="mt-1 whitespace-pre-wrap">{d.description}</p>
           {d.seller_response ? <p className="mt-3 rounded-[8px] bg-surface-muted p-3"><b>Your response:</b> {d.seller_response}</p> : dispute?.id === d.id && can('orders.fulfill') && (
             <div className="mt-3 space-y-2">
-              <p className="text-text-muted">You can respond once. Adey reviews both sides and decides.</p>
+              <p className="text-text-muted">You can respond once. Adey Connect reviews both sides and decides.</p>
               <Field label="Your response"><textarea value={response} onChange={(e) => setResponse(e.target.value)} className="input min-h-24" /></Field>
               <button disabled={response.trim().length < 10 || run.isPending} onClick={() => run.mutate(async () => { await api.seller.respondDispute(d.id, response.trim()); setResponse(''); })} className="btn btn-primary btn-sm">Send response</button>
             </div>)}

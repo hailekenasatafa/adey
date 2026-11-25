@@ -48,7 +48,7 @@ function Payouts({ businessId, manage }: { businessId: string; manage: boolean }
   };
   return (
     <Screen header={<Header title="Payouts" />} keyboard refreshing={list.isRefetching} onRefresh={() => { acct.refetch(); list.refetch(); ledger.refetch(); }}>
-      <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>Adey holds each buyer's payment and releases it to you after delivery is confirmed.</Text>
+      <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>Adey Connect holds each buyer's payment and releases it to you after delivery is confirmed.</Text>
       <View style={{ gap: 14 }}>
         {manage && (
           <Card>

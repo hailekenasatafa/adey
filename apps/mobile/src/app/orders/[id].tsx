@@ -21,13 +21,13 @@ import { cover } from '@/components/cards';
 
 const escrowHelp: Record<EscrowStatus, string> = {
   none: 'No payment has been taken for this order.',
-  held: 'Adey is holding your payment and releases it to the seller only after you confirm delivery (or the confirmation window ends).',
+  held: 'Adey Connect is holding your payment and releases it to the seller only after you confirm delivery (or the confirmation window ends).',
   released: 'The seller has been paid for this order.',
   refund_pending: 'A refund has been approved and is being sent back to your payment method.',
   refunded: 'Your payment for this order was refunded.',
   partially_refunded: 'Part of your payment was refunded; the rest went to the seller.',
 };
-const disputeStatus: Record<string, string> = { open: 'Open', under_review: 'Under review by Adey', resolved: 'Resolved', dismissed: 'Closed' };
+const disputeStatus: Record<string, string> = { open: 'Open', under_review: 'Under review by Adey Connect', resolved: 'Resolved', dismissed: 'Closed' };
 const humanize = (s: string) => s.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 
 export default function OrderDetail() {
@@ -117,7 +117,7 @@ export default function OrderDetail() {
           ...(o.discount_cents > 0 ? [{ label: 'Rewards discount', cents: o.discount_cents, negative: true }] : []),
         ]} />
         {o.refunded_cents > 0 && <Text variant="caption" color="success" style={{ marginTop: 8 }}>Refunded: {formatMoney(o.refunded_cents, o.currency)}</Text>}
-        {o.points_earned > 0 && <Text variant="caption" color="muted" style={{ marginTop: 4 }}>Adey Rewards: {o.points_earned.toLocaleString()} points</Text>}
+        {o.points_earned > 0 && <Text variant="caption" color="muted" style={{ marginTop: 4 }}>Adey Connect Rewards: {o.points_earned.toLocaleString()} points</Text>}
       </Card>
 
       <SectionHeader title={pickup ? 'Pickup' : 'Delivery'} />
@@ -211,7 +211,7 @@ function DisputeForm({ orderId, userId, onClose, onDone }: { orderId: string; us
   return (
     <Card style={{ marginTop: 12, borderColor: colors.warning }}>
       <Text variant="subheading">Report a problem</Text>
-      <Text variant="caption" color="muted" style={{ marginBottom: 10 }}>Your payment stays on hold while the seller responds and Adey reviews it.</Text>
+      <Text variant="caption" color="muted" style={{ marginBottom: 10 }}>Your payment stays on hold while the seller responds and Adey Connect reviews it.</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
         {(Object.keys(disputeCategoryLabels) as DisputeInput['category'][]).map((c) => <Chip key={c} small label={disputeCategoryLabels[c]} selected={category === c} onPress={() => setCategory(c)} />)}
       </View>

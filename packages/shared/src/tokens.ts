@@ -119,7 +119,7 @@ export const shadows = {
 } as const;
 
 export const brandText = {
-  name: 'ADEY',
+  name: 'ADEY CONNECT',
   nameAm: 'አደይ',
   tagline: 'Connecting Communities. Growing Businesses.',
 } as const;

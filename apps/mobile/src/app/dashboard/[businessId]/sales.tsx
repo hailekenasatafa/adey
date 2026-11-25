@@ -21,7 +21,7 @@ function Sales({ businessId }: { businessId: string }) {
   const active = d?.series.filter((s) => s.orders > 0) ?? [];
   return (
     <Screen header={<Header title="Sales" />} refreshing={q.isRefetching} onRefresh={() => q.refetch()}>
-      <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>Your proceeds from paid orders, after Adey's fee. Tax is not included.</Text>
+      <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>Your proceeds from paid orders, after Adey Connect's fee. Tax is not included.</Text>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>{[7, 30, 90].map((n) => <Chip key={n} label={`${n} days`} selected={days === n} onPress={() => setDays(n)} />)}</View>
       {q.isLoading ? <Loading /> : q.error ? <ErrorState error={q.error} onRetry={() => q.refetch()} /> : !d || !active.length ? <EmptyState icon="trending-up-outline" title="No sales in this period" body="Orders will appear here once buyers pay." /> : (
         <View style={{ gap: 12 }}>

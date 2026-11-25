@@ -79,7 +79,7 @@ export function EventForm({ event, businessId, onlyBusinesses }: { event: Commun
   return (
     <FormCtx.Provider value={{ f, set }}>
     <form onSubmit={(e) => { e.preventDefault(); setErr(null); save.mutate(false); }} className="space-y-6">
-      <p className="card p-4 text-sm text-text-muted">New events are reviewed by the Adey team before they appear. Events organised by a verified business are published straight away. If you change the title, description, artwork or timing of a published event it may be reviewed again.</p>
+      <p className="card p-4 text-sm text-text-muted">New events are reviewed by the Adey Connect team before they appear. Events organised by a verified business are published straight away. If you change the title, description, artwork or timing of a published event it may be reviewed again.</p>
 
       <section className="card space-y-3 p-5"><h2 className="font-semibold">About the event</h2>
         <Field k="title" label="Title" maxLength={140} required />

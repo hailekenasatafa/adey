@@ -162,7 +162,7 @@ export default function ScreenDetail() {
         {!isMine && (
           <View style={{ gap: 10, marginTop: 24 }}>
             <Button title="Contact screen owner" icon="chatbubble-ellipses-outline" fullWidth onPress={() => { track('screen_inquiry', { businessId: b.id, targetType: 'screen', targetId: s.id }); if (!user) return router.push('/(auth)/sign-in'); router.push({ pathname: '/inquiry/[businessId]', params: { businessId: b.id, type: 'advertising', screen: s.id } }); }} />
-            <Text variant="caption" color="muted">Ask about dates, price and the ad you want to run. You and the owner agree everything and pay each other directly; Adey takes no commission.</Text>
+            <Text variant="caption" color="muted">Ask about dates, price and the ad you want to run. You and the owner agree everything and pay each other directly; Adey Connect takes no commission.</Text>
             <Button title="Call owner" icon="call-outline" variant="outline" fullWidth disabled={!b.phone} onPress={() => b.phone && callPhone(b.phone, b.id)} />
             {campaignsEnabled && <>
               <Button title={inCart ? 'Added to campaign ✓' : 'Add to Campaign'} icon={inCart ? 'checkmark' : 'add'} variant="secondary" fullWidth onPress={() => gate(() => cart.toggle(cartItem))} />

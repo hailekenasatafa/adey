@@ -105,7 +105,7 @@ export default function CampaignWizard() {
         {step === 5 && <>
           <h2 className="text-xl font-bold">{d.name}</h2><p className="text-text-muted">{managed.find((b) => b.id === biz)?.name} · {d.start} to {d.end} ({days} days)</p>
           <dl className="grid grid-cols-2 gap-2 text-sm"><dt className="text-text-muted">Screens</dt><dd className="font-semibold">{cart.items.length}</dd><dt className="text-text-muted">Proposed total</dt><dd className="font-semibold">{formatMoney(total)}</dd><dt className="text-text-muted">Budget</dt><dd className="font-semibold">{formatMoney(budgetCents)}</dd><dt className="text-text-muted">Creative</dt><dd className="font-semibold">{[d.video && 'video', d.image && 'image'].filter(Boolean).join(' + ') || 'instructions only'}</dd></dl>
-          <p className="rounded-[14px] bg-surface-muted p-3 text-xs text-text-muted">Sending creates one request per business; each owner responds independently. Accepted requests become bookings. In Free Launch Mode payment is arranged directly and Adey takes no commission.</p>
+          <p className="rounded-[14px] bg-surface-muted p-3 text-xs text-text-muted">Sending creates one request per business; each owner responds independently. Accepted requests become bookings. In Free Launch Mode payment is arranged directly and Adey Connect takes no commission.</p>
           <button onClick={() => submit.mutate()} className="btn btn-accent w-full" disabled={submit.isPending}>SEND CAMPAIGN REQUESTS</button>
         </>}
         {error && <p className="text-sm text-danger">{error}</p>}

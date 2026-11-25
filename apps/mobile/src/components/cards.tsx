@@ -67,7 +67,7 @@ export function BusinessCardItem({ b, horizontal, signals }: { b: BusinessCard; 
           </Text>
         )}
         <RatingStars rating={b.rating_avg} count={b.rating_count} />
-        {signals?.review_quote && !horizontal ? <Text variant="caption" color="muted" numberOfLines={2}>“{signals.review_quote}” — {signals.review_author ?? 'Adey member'}</Text> : null}
+        {signals?.review_quote && !horizontal ? <Text variant="caption" color="muted" numberOfLines={2}>“{signals.review_quote}” — {signals.review_author ?? 'Adey Connect member'}</Text> : null}
         {(b.selling_enabled || (b.trust_tier && b.trust_tier !== 'new')) && (
           <View style={styles.badgeRow}>
             <TrustBadge tier={b.trust_tier} />

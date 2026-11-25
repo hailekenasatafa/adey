@@ -24,12 +24,12 @@ export default function Deals() {
         onRefresh={() => q.refetch()}
         ListHeaderComponent={
           <View style={{ gap: 10, marginBottom: 4 }}>
-            <Text color="muted">Claim a deal on Adey, then show your code at the business. Claiming is free.</Text>
+            <Text color="muted">Claim a deal on Adey Connect, then show your code at the business. Claiming is free.</Text>
             <Input placeholder="Search deals or businesses" value={text} onChangeText={setText} returnKeyType="search" onSubmitEditing={() => setQuery(text.trim())} icon="search-outline" />
           </View>
         }
         ListEmptyComponent={q.isLoading ? <Loading /> : q.isError ? <ErrorState error={q.error} onRetry={() => q.refetch()} /> : (
-          <EmptyState icon="pricetags-outline" title={query ? 'No deals match' : 'No deals yet'} body={query ? 'Try another search.' : 'Businesses post deals here as they join Adey. Own a business? Post the first one from your dashboard — it’s free.'} />
+          <EmptyState icon="pricetags-outline" title={query ? 'No deals match' : 'No deals yet'} body={query ? 'Try another search.' : 'Businesses post deals here as they join Adey Connect. Own a business? Post the first one from your dashboard — it’s free.'} />
         )}
         renderItem={({ item: d }) => (
           <DealCard showBusiness deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim,

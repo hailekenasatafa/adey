@@ -61,7 +61,7 @@ export function ReviewList({ businessId, canReview }: { businessId: string; canR
             <View style={styles.head}>
               <Avatar url={r.author?.avatar_url} name={r.author?.display_name} size={36} />
               <View style={{ flex: 1, marginLeft: 10 }}>
-                <Text variant="label">{r.author?.display_name ?? 'Adey member'}</Text>
+                <Text variant="label">{r.author?.display_name ?? 'Adey Connect member'}</Text>
                 <Text variant="caption" color="muted">{new Date(r.created_at).toLocaleDateString()}</Text>
               </View>
               <View style={{ flexDirection: 'row' }}>

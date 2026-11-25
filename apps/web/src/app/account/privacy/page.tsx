@@ -39,7 +39,7 @@ export default function Privacy() {
         <h2 id="pv-h" className="font-semibold">Your profile</h2>
         <div className="mt-2 divide-y divide-border">
           <Toggle label="Public profile" checked={p.public_profile} disabled={setP.isPending} onChange={(v) => setP.mutate({ public_profile: v })}
-            hint="Turn this off for a private profile: other members then see “Adey member” instead of your name and photo. Sellers still receive the delivery name on orders you place." />
+            hint="Turn this off for a private profile: other members then see “Adey Connect member” instead of your name and photo. Sellers still receive the delivery name on orders you place." />
           <Toggle label="Personalised recommendations" checked={p.personalized_recommendations} disabled={setP.isPending} onChange={(v) => setP.mutate({ personalized_recommendations: v })}
             hint="Use what you view and save to suggest businesses and products." />
         </div>
@@ -52,7 +52,7 @@ export default function Privacy() {
           : !blocked.data?.length ? <p className="mt-2 text-sm text-text-muted">You have not blocked anyone.</p>
           : <ul className="mt-2 divide-y divide-border">{blocked.data.map((b) => (
             <li key={b.blocked_id} className="flex items-center justify-between gap-3 py-2 text-sm">
-              <span className="flex items-center gap-2">{b.blocked?.avatar_url ? <img src={mediaUrlFromPath('avatars', b.blocked.avatar_url) ?? ''} alt="" className="h-8 w-8 rounded-full object-cover" /> : <span className="grid h-8 w-8 place-items-center rounded-full bg-surface-muted text-text-muted"><User aria-hidden className="h-4 w-4" /></span>}{b.blocked?.display_name ?? 'Adey member'}</span>
+              <span className="flex items-center gap-2">{b.blocked?.avatar_url ? <img src={mediaUrlFromPath('avatars', b.blocked.avatar_url) ?? ''} alt="" className="h-8 w-8 rounded-full object-cover" /> : <span className="grid h-8 w-8 place-items-center rounded-full bg-surface-muted text-text-muted"><User aria-hidden className="h-4 w-4" /></span>}{b.blocked?.display_name ?? 'Adey Connect member'}</span>
               <button className="btn btn-outline btn-sm" disabled={unblock.isPending} onClick={() => unblock.mutate(b.blocked_id)}>Unblock</button>
             </li>))}</ul>}
         {unblock.error && <div className="mt-2"><ErrorLine error={unblock.error} /></div>}
@@ -60,7 +60,7 @@ export default function Privacy() {
 
       <section className="card p-5" aria-labelledby="dl-h">
         <h2 id="dl-h" className="font-semibold">Download my data</h2>
-        <p className="mt-1 text-sm text-text-muted">Get a JSON file with a copy of the information Adey holds about you.</p>
+        <p className="mt-1 text-sm text-text-muted">Get a JSON file with a copy of the information Adey Connect holds about you.</p>
         <button className="btn btn-outline btn-sm mt-3" disabled={exp.isPending} onClick={() => { setNote(null); exp.mutate(); }}>{exp.isPending ? 'Preparing…' : 'Download my data'}</button>
         {note && <p role="status" className="mt-2 text-sm text-text-muted">{note}</p>}
         {exp.error && <div className="mt-2"><ErrorLine error={exp.error} /></div>}

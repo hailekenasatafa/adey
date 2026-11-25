@@ -28,17 +28,17 @@ export function openWebsite(url: string, businessId?: string) {
 export async function shareBusiness(b: { slug: string; name: string }, businessId?: string) {
   track('share_click', { businessId });
   const url = `${WEB_URL}/business/${b.slug}`;
-  return Share.share(Platform.OS === 'ios' ? { message: `${b.name} on Adey`, url } : { message: `${b.name} on Adey — ${url}` });
+  return Share.share(Platform.OS === 'ios' ? { message: `${b.name} on Adey Connect`, url } : { message: `${b.name} on Adey Connect — ${url}` });
 }
 
 export async function shareScreen(id: string, name: string) {
   const url = `${WEB_URL}/adconnect/screens/${id}`;
-  return Share.share(Platform.OS === 'ios' ? { message: `Advertising screen at ${name} — Adey AdConnect`, url } : { message: `Advertising screen at ${name} — ${url}` });
+  return Share.share(Platform.OS === 'ios' ? { message: `Advertising screen at ${name} — AdConnect on Adey Connect`, url } : { message: `Advertising screen at ${name} — ${url}` });
 }
 
 export async function shareProduct(id: string, name: string) {
   const url = `${WEB_URL}/product/${id}`;
-  return Share.share(Platform.OS === 'ios' ? { message: `${name} on Adey`, url } : { message: `${name} on Adey — ${url}` });
+  return Share.share(Platform.OS === 'ios' ? { message: `${name} on Adey Connect`, url } : { message: `${name} on Adey Connect — ${url}` });
 }
 
 const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;

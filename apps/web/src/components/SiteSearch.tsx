@@ -17,7 +17,7 @@ function scopeFor(path: string, view: string | null): Scope {
   if (path.startsWith('/deals')) return { action: '/deals', label: 'Search deals', what: 'Deal or business', where: true };
   if (path.startsWith('/events')) return { action: '/events', label: 'Search events', what: 'Event, venue or host', where: true };
   if (path.startsWith('/adconnect')) return { action: '/adconnect', label: 'Search screens', what: 'Business, screen or city', where: false };
-  if (path.startsWith('/search')) return { action: '/search', label: 'Search Adey', what: 'Businesses, products, events', where: false };
+  if (path.startsWith('/search')) return { action: '/search', label: 'Search Adey Connect', what: 'Businesses, products, events', where: false };
   if (path.startsWith('/market') && view === 'products') return { action: '/market', label: 'Search products', what: 'Product or shop', where: false };
   return { action: '/market', label: 'Search businesses', what: 'Business, food or service', where: true };
 }
@@ -137,7 +137,7 @@ export const SiteSearch = forwardRef<SiteSearchHandle, { size?: 'lg' | 'sm' }>(f
               <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => pick(items.length)}
                 className={`flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-left text-sm ${active === items.length ? 'bg-surface-muted' : 'hover:bg-surface-muted'}`}>
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[12px] bg-surface-muted text-text-muted"><Search aria-hidden className="h-5 w-5" /></span>
-                <span>Search all of Adey for <b>{q.trim()}</b></span>
+                <span>Search all of Adey Connect for <b>{q.trim()}</b></span>
               </button>
             </li>
           )}
@@ -151,7 +151,7 @@ export const SiteSearch = forwardRef<SiteSearchHandle, { size?: 'lg' | 'sm' }>(f
 export function SiteSearchFallback() {
   return (
     <div aria-hidden className="mx-auto flex h-12 w-full max-w-3xl items-center gap-3 rounded-full border border-border bg-surface px-5 shadow-md md:h-16 md:px-7">
-      <Search className="h-4 w-4 text-text-muted md:hidden" /><span className="text-sm text-text-muted">Search Adey</span>
+      <Search className="h-4 w-4 text-text-muted md:hidden" /><span className="text-sm text-text-muted">Search Adey Connect</span>
     </div>
   );
 }

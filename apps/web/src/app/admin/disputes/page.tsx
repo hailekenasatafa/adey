@@ -12,7 +12,7 @@ export default function Disputes() {
   const q = useQuery({ queryKey: ['admin-disputes'], queryFn: () => api.admin.disputes() });
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
-  const resolve = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'dispute_status'> }) => api.admin.resolveDispute(id, status, notes[id] || 'Reviewed by Adey'), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-disputes'] }), onError: (e) => setError(friendlyError(e)) });
+  const resolve = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'dispute_status'> }) => api.admin.resolveDispute(id, status, notes[id] || 'Reviewed by Adey Connect'), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-disputes'] }), onError: (e) => setError(friendlyError(e)) });
   return (
     <div>
       <h2 className="text-xl font-bold">Open disputes ({q.data?.length ?? 0})</h2>

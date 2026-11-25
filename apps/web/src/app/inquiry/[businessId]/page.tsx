@@ -36,7 +36,7 @@ function InquiryPageInner() {
     <div className="container-x max-w-xl py-10">
       <h1 className="text-2xl font-bold">{TITLES[kind]} {biz.data?.name ?? ''}</h1>
       {kind === 'advertising' ? (
-        <p className="mt-2 text-sm text-text-muted">Say when you want to run your ad, for how long, your budget, and whether it’s a video or an image. You and the owner agree the details and payment directly; Adey isn’t part of the agreement and takes no commission.</p>
+        <p className="mt-2 text-sm text-text-muted">Say when you want to run your ad, for how long, your budget, and whether it’s a video or an image. You and the owner agree the details and payment directly; Adey Connect isn’t part of the agreement and takes no commission.</p>
       ) : (
         <div className="mt-4 flex gap-2"><button type="button" onClick={() => setValue('type', 'contact')} className={`chip ${kind === 'contact' ? 'chip-on' : ''}`}>Message</button><button type="button" onClick={() => setValue('type', 'quote')} className={`chip ${kind === 'quote' ? 'chip-on' : ''}`}>Request quote</button></div>
       )}

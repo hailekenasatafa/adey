@@ -159,7 +159,7 @@ async function pay(admin: Admin, caller: Caller, checkout: CheckoutRow, fromApp:
   let coupon: string | null = null;
   if (checkout.discount_cents > 0) {
     const created = await stripe<{ id: string }>('POST', '/coupons', {
-      amount_off: checkout.discount_cents, currency, duration: 'once', name: 'Adey Rewards', max_redemptions: 1, metadata: { checkout_id: checkout.id },
+      amount_off: checkout.discount_cents, currency, duration: 'once', name: 'Adey Connect Rewards', max_redemptions: 1, metadata: { checkout_id: checkout.id },
     }, { idempotencyKey: `coupon_${checkout.id}` });
     coupon = created.id;
   }

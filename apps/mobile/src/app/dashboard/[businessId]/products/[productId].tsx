@@ -123,7 +123,7 @@ function Editor({ businessId, productId, p, isEt, canCatalog, canStock }: { busi
             <Input label="SKU (optional)" value={d.sku} onChangeText={(sku) => set({ sku })} autoCapitalize="characters" />
 
             <View style={{ backgroundColor: colors.surfaceMuted, borderRadius: radius.md, padding: 12, marginBottom: 14 }}>
-              <SwitchRow label="Can be bought online" hint="Buyers can pay on Adey once your seller verification is approved and online ordering is open. Needs a price. Set delivery prices under Delivery." value={d.purchasable} onChange={(purchasable) => set({ purchasable })} />
+              <SwitchRow label="Can be bought online" hint="Buyers can pay on Adey Connect once your seller verification is approved and online ordering is open. Needs a price. Set delivery prices under Delivery." value={d.purchasable} onChange={(purchasable) => set({ purchasable })} />
               <SwitchRow label="Track stock" value={d.track_inventory} onChange={(track_inventory) => set({ track_inventory })} />
               {d.track_inventory && (
                 <>
@@ -148,7 +148,7 @@ function Editor({ businessId, productId, p, isEt, canCatalog, canStock }: { busi
             <Input label="Tags (comma separated)" value={d.tags} onChangeText={(tags) => set({ tags })} placeholder="habesha kemis, wedding" autoCapitalize="none" />
 
             <SwitchRow label={`Ships only within ${isEt ? 'Ethiopia' : 'the US'}`} value={d.domestic_only} onChange={(domestic_only) => set({ domestic_only })} />
-            {!d.domestic_only && <Text variant="caption" color="warning" style={{ marginBottom: 12 }}>For paid orders on Adey, delivery prices come from your Delivery settings. Anything else is arranged with the buyer directly.</Text>}
+            {!d.domestic_only && <Text variant="caption" color="warning" style={{ marginBottom: 12 }}>For paid orders on Adey Connect, delivery prices come from your Delivery settings. Anything else is arranged with the buyer directly.</Text>}
             <Input label="Return policy (optional)" value={d.return_policy} onChangeText={(return_policy) => set({ return_policy })} multiline placeholder="e.g. Returns accepted within 7 days for unused items." />
             <SwitchRow label="Visible to customers" value={d.is_active} onChange={(is_active) => set({ is_active })} />
             <ErrorNote error={error} />

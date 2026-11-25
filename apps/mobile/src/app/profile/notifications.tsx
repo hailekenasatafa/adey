@@ -20,12 +20,12 @@ const ROWS: { key: keyof NotificationPrefs; label: string; hint: string }[] = [
   { key: 'orders', label: 'Orders', hint: 'Payment received, accepted, cancelled, refunds' },
   { key: 'shipping', label: 'Delivery updates', hint: 'Shipped, out for delivery, delivered' },
   { key: 'reviews', label: 'Reviews', hint: 'New reviews of your business or products' },
-  { key: 'rewards', label: 'Adey Rewards', hint: 'Points earned and tier changes' },
+  { key: 'rewards', label: 'Adey Connect Rewards', hint: 'Points earned and tier changes' },
   { key: 'events', label: 'Events', hint: 'Reminders and changes for events you plan to attend' },
-  { key: 'support', label: 'Support replies', hint: 'When the Adey team answers you' },
+  { key: 'support', label: 'Support replies', hint: 'When the Adey Connect team answers you' },
   { key: 'messages', label: 'Messages', hint: 'New chat messages' },
   { key: 'deals', label: 'New deals', hint: 'When a business you saved posts a deal' },
-  { key: 'marketing', label: 'Tips & announcements', hint: 'Occasional news from Adey' },
+  { key: 'marketing', label: 'Tips & announcements', hint: 'Occasional news from Adey Connect' },
 ];
 
 export default function NotificationPrefsScreen() {

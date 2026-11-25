@@ -15,7 +15,7 @@ export default function Legal() {
         <MenuRow icon="shield-checkmark-outline" label="How verification works" onPress={() => openWebsite(`${WEB_URL}/verification`)} />
       </Card>
       <Text variant="caption" color="muted" style={{ marginTop: 16 }}>
-        Adey stores your account data with Supabase (US East). Identity documents uploaded for verification are kept in a private bucket readable only by you and Adey staff reviewing your request.
+        Adey Connect stores your account data with Supabase (US East). Identity documents uploaded for verification are kept in a private bucket readable only by you and Adey Connect staff reviewing your request.
       </Text>
     </Screen>
   );

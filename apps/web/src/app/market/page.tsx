@@ -9,7 +9,7 @@ import { FiltersLabel } from '@/components/SearchPill';
 import { FxAttribution } from '@/components/commerce';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Adey Market', description: 'Find Habesha-owned businesses — restaurants, groceries, salons, services and more — with photos, menus, reviews and deals.' };
+export const metadata: Metadata = { title: 'Market', description: 'Find Habesha-owned businesses — restaurants, groceries, salons, services and more — with photos, menus, reviews and deals.' };
 
 type SP = {
   view?: string; market?: string; category?: string; q?: string; sort?: string; page?: string; rating?: string;
@@ -56,7 +56,7 @@ export default async function MarketPage({ searchParams }: { searchParams: Promi
   return (
     <div className="container-x pb-16">
       <div className="mt-6">
-        <h1 className="text-3xl font-semibold">Adey Market</h1>
+        <h1 className="text-3xl font-semibold">Adey Connect Market</h1>
         <p className="mt-1 text-text-muted">Habesha-owned businesses near you.</p>
       </div>
       <div className="mt-4 flex gap-6 border-b border-border text-sm font-semibold" role="tablist">

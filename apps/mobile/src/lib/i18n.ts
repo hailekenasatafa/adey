@@ -8,7 +8,7 @@ import { getLocales } from 'expo-localization';
 export type Locale = 'en' | 'am';
 
 const en = {
-  appName: 'ADEY',
+  appName: 'Adey Connect',
   tagline: 'Connecting Communities. Growing Businesses.',
   tabs: { home: 'Home', explore: 'Explore', adconnect: 'AdConnect', saved: 'Saved', profile: 'Profile' },
   onboarding: {
@@ -25,11 +25,11 @@ const en = {
   },
   home: {
     searchPlaceholder: 'What are you looking for?',
-    market: 'ADEY MARKET',
+    market: 'ADEY CONNECT MARKET',
     marketBody: 'Find businesses, products, and services.',
     exploreUs: 'Explore US Market',
     exploreEt: 'Explore Ethiopian Market',
-    adconnect: 'ADEY ADCONNECT',
+    adconnect: 'ADCONNECT',
     adconnectBody: 'Discover advertising spaces and grow your business.',
     findScreens: 'Find Screens',
     createCampaign: 'Create Campaign',

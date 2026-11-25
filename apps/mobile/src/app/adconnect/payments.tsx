@@ -30,8 +30,8 @@ function Payments() {
           {!h.monetization_enabled && (
             <Card>
               <Badge label="Free Launch Mode" tone="accent" />
-              <Text style={{ marginTop: 8 }}>Integrated payments, receipts, and payouts are switched off. Bookings are settled directly between advertiser and screen owner, and Adey charges no commission.</Text>
-              <Text variant="caption" color="muted" style={{ marginTop: 6 }}>When Adey enables Monetized Mode, this page will show payment intents, receipts, and payout tracking without an app update.</Text>
+              <Text style={{ marginTop: 8 }}>Integrated payments, receipts, and payouts are switched off. Bookings are settled directly between advertiser and screen owner, and Adey Connect charges no commission.</Text>
+              <Text variant="caption" color="muted" style={{ marginTop: 6 }}>When Adey Connect enables Monetized Mode, this page will show payment intents, receipts, and payout tracking without an app update.</Text>
             </Card>
           )}
           <SectionHeader title={`Payments (${h.payments.length})`} />

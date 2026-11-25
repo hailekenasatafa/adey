@@ -26,7 +26,7 @@ export default function Team() {
           ))}
         </View>
       )}
-      {isOwner && <Text variant="caption" color="muted" style={{ marginTop: 16 }}>Inviting team members by email is handled on the Adey website (Business → Team), which can look up accounts securely.</Text>}
+      {isOwner && <Text variant="caption" color="muted" style={{ marginTop: 16 }}>Inviting team members by email is handled on the Adey Connect website (Business → Team), which can look up accounts securely.</Text>}
     </Screen>
   );
 }

@@ -47,7 +47,7 @@ function Payouts() {
   };
   return (
     <div className="space-y-4">
-      <div><h1 className="text-2xl font-bold">Payouts</h1><p className="text-sm text-text-muted">Adey holds each buyer's payment and releases it to you after delivery is confirmed.</p></div>
+      <div><h1 className="text-2xl font-bold">Payouts</h1><p className="text-sm text-text-muted">Adey Connect holds each buyer's payment and releases it to you after delivery is confirmed.</p></div>
       {manage && (
         <div className="card space-y-3 p-5">
           <h2 className="font-semibold">How you get paid</h2>

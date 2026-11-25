@@ -18,15 +18,15 @@ export default function RewardsPage() {
   if (loading) return <div className="container-x py-10"><div className="skeleton h-40" /></div>;
   if (!session) return (
     <div className="container-x max-w-3xl pb-16">
-      <h1 className="mt-8 text-3xl font-bold">Adey Rewards</h1>
-      <p className="mt-2 text-text-muted">Earn points when you buy from participating Adey businesses, and use them to take money off a later order.</p>
+      <h1 className="mt-8 text-3xl font-bold">Adey Connect Rewards</h1>
+      <p className="mt-2 text-text-muted">Earn points when you buy from participating Adey Connect businesses, and use them to take money off a later order.</p>
       <div className="mt-6"><Empty title="Sign in to see your rewards" body="Your balance, tier and history are private to you." action={<Link href="/auth/sign-in?next=/rewards" className="btn btn-primary btn-sm">Sign in</Link>} /></div>
     </div>
   );
   const s = q.data;
   return (
     <div className="container-x max-w-4xl pb-16">
-      <h1 className="mt-8 text-3xl font-bold">{s?.program_name ?? 'Adey Rewards'}</h1>
+      <h1 className="mt-8 text-3xl font-bold">{s?.program_name ?? 'Adey Connect Rewards'}</h1>
       {q.isLoading ? <div className="mt-6 space-y-3"><div className="skeleton h-28" /><div className="skeleton h-40" /></div>
         : q.error ? <div className="mt-6"><ErrorLine error={q.error} retry={() => q.refetch()} /></div>
         : !s ? null : !s.enabled ? <div className="mt-6"><Empty title="Rewards are not active right now" body="The rewards programme is switched off at the moment. Any points you hold are kept." /></div>

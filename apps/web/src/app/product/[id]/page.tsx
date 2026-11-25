@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const p = await api.shop.product(id).catch(() => null);
   if (!p) return { title: 'Product not found' };
   const img = mediaUrlFromPath('product-media', p.images[0]);
-  return { title: p.name, description: p.description?.slice(0, 160) ?? `${p.name} from ${p.business?.name ?? 'an Adey seller'}`, openGraph: { title: p.name, images: img ? [img] : undefined } };
+  return { title: p.name, description: p.description?.slice(0, 160) ?? `${p.name} from ${p.business?.name ?? 'an Adey Connect seller'}`, openGraph: { title: p.name, images: img ? [img] : undefined } };
 }
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {

@@ -134,7 +134,7 @@ export default function EventDetail() {
           </Card>
         </>
       )}
-      <Text variant="caption" color="muted" style={{ marginTop: 16 }}>Community events are submitted by members and reviewed by Adey. Check details with the organiser before you travel.</Text>
+      <Text variant="caption" color="muted" style={{ marginTop: 16 }}>Community events are submitted by members and reviewed by Adey Connect. Check details with the organiser before you travel.</Text>
     </Screen>
   );
 }

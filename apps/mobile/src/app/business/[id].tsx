@@ -96,7 +96,7 @@ export default function BusinessDetail() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 10, flexWrap: 'wrap' }}>
           <RatingStars rating={b.rating_avg} count={b.rating_count} size={16} />
           {status.open !== null && <Badge label={status.label} tone={status.open ? 'success' : 'neutral'} icon="time-outline" />}
-          {sig?.is_new && <Badge label="New on Adey" tone="info" />}
+          {sig?.is_new && <Badge label="New on Adey Connect" tone="info" />}
           {sig?.is_trending && <Badge label="Trending" tone="accent" icon="flame-outline" />}
           {sig?.saves_count ? <Text variant="caption" color="muted">♥ Saved by {sig.saves_count}</Text> : null}
         </View>
@@ -116,7 +116,7 @@ export default function BusinessDetail() {
         {sig?.review_quote ? (
           <View style={{ marginTop: 12, padding: 14, borderRadius: radius.lg, backgroundColor: colors.primarySoft }}>
             <Text>“{sig.review_quote}”</Text>
-            <Text variant="caption" color="muted" style={{ marginTop: 4 }}>— {sig.review_author ?? 'Adey member'}{sig.review_verified ? ' · Contacted this business' : ''}</Text>
+            <Text variant="caption" color="muted" style={{ marginTop: 4 }}>— {sig.review_author ?? 'Adey Connect member'}{sig.review_verified ? ' · Contacted this business' : ''}</Text>
           </View>
         ) : null}
 
@@ -133,7 +133,7 @@ export default function BusinessDetail() {
         {deals.data?.length ? (
           <View style={{ marginTop: 20, gap: 10 }}>
             <SectionHeader title={`Deals (${deals.data.length})`} />
-            <Text variant="caption" color="muted" style={{ marginTop: -6 }}>Claim on Adey, then show your code here. Free to claim.</Text>
+            <Text variant="caption" color="muted" style={{ marginTop: -6 }}>Claim on Adey Connect, then show your code here. Free to claim.</Text>
             {deals.data.map((d) => <DealCard key={d.id} deal={{ id: d.id, title: d.title, description: d.description, terms: d.terms, image_path: d.image_path, claims_count: d.claims_count, my_claim: d.my_claim, business: { id: b.id, slug: b.slug, name: b.name } }} />)}
           </View>
         ) : null}

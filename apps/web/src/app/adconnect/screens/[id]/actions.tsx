@@ -38,7 +38,7 @@ export function ScreenActions({ screen }: { screen: CartItem & { phone: string |
   return (
     <div className="card space-y-2 p-4">
       <button onClick={contact} className="btn btn-primary w-full"><MessageCircle aria-hidden className="h-4 w-4" />Contact screen owner</button>
-      <p className="text-xs text-text-muted">Ask about dates, price and the ad you want to run. You and the owner agree everything directly; Adey takes no commission.</p>
+      <p className="text-xs text-text-muted">Ask about dates, price and the ad you want to run. You and the owner agree everything directly; Adey Connect takes no commission.</p>
       <div className="grid grid-cols-2 gap-2">
         {phone ? <a href={`tel:${phone}`} className="btn btn-outline btn-sm"><Phone aria-hidden className="h-4 w-4" />Call owner</a> : <button disabled className="btn btn-outline btn-sm"><Phone aria-hidden className="h-4 w-4" />Call owner</button>}
         <button onClick={() => signedIn(() => toggleSave.mutate())} className="btn btn-outline btn-sm" aria-pressed={isSaved}><Heart aria-hidden className={`h-4 w-4 ${isSaved ? 'fill-[#e0484d] text-[#e0484d]' : ''}`} />{isSaved ? 'Saved' : 'Save'}</button>

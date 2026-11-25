@@ -15,7 +15,7 @@ export function CampaignsGate({ children, inline = false }: { children: React.Re
     return (
       <div className={wrap}>
         <Empty title="Contact screen owners directly"
-          body="AdConnect connects advertisers with screen owners. Find a screen, then use Contact screen owner to agree dates, price and payment between yourselves. Adey's campaign and booking tools are switched off."
+          body="AdConnect connects advertisers with screen owners. Find a screen, then use Contact screen owner to agree dates, price and payment between yourselves. Adey Connect's campaign and booking tools are switched off."
           action={<Link href="/adconnect" className="btn btn-primary btn-sm">Browse screens</Link>} />
       </div>
     );

@@ -20,7 +20,7 @@ function Inner({ businessId }: { businessId: string | null }) {
   if (!profile || q.isLoading) return <div className="skeleton h-40" />;
   if (q.error || !q.data) return <ErrorLine error={q.error ?? new Error('Could not check whether you can post events.')} retry={() => q.refetch()} />;
   if (!q.data.allowed) return (
-    <Empty title="Only verified businesses can post events" body="To keep the calendar trustworthy, events are posted by verified Adey businesses. Add your business and finish verification, then come back to post."
+    <Empty title="Only verified businesses can post events" body="To keep the calendar trustworthy, events are posted by verified Adey Connect businesses. Add your business and finish verification, then come back to post."
       action={<div className="flex flex-wrap justify-center gap-2"><Link href="/dashboard" className="btn btn-primary btn-sm">Your business dashboard</Link><Link href="/verification" className="btn btn-outline btn-sm">How verification works</Link></div>} />
   );
   if (q.data.mode === 'verified_businesses') {

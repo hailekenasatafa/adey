@@ -44,7 +44,7 @@ function EarningsAndCalendar() {
               <View style={{ width: '50%' }}><KeyValue label="Open offers (not revenue)" value={formatMoney(e.pending_requests_value_cents)} /></View>
               <View style={{ width: '50%' }}><KeyValue label="Commission deducted" value={formatMoney(e.completed_commission_cents)} /></View>
               {e.monetization_enabled && <View style={{ width: '50%' }}><KeyValue label="Pending payments" value={formatMoney(e.pending_payment_cents)} /></View>}
-              {e.monetization_enabled && <View style={{ width: '50%' }}><KeyValue label="Paid through Adey" value={formatMoney(e.paid_cents)} /></View>}
+              {e.monetization_enabled && <View style={{ width: '50%' }}><KeyValue label="Paid through Adey Connect" value={formatMoney(e.paid_cents)} /></View>}
             </View>
             {e.external_settlement_note && <Badge label="Free Launch Mode" tone="accent" />}
             {e.external_settlement_note && <Text variant="caption" color="muted" style={{ marginTop: 6 }}>{e.external_settlement_note}</Text>}

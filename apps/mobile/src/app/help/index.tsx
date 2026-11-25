@@ -58,7 +58,7 @@ export default function Help() {
       )}
       <Card style={{ marginTop: 24 }}>
         <Text variant="bodyStrong">Still need help?</Text>
-        <Text color="muted">Chat with the Adey assistant. You can ask for a person at any time.</Text>
+        <Text color="muted">Chat with the Adey Connect assistant. You can ask for a person at any time.</Text>
         <Button title="Ask the assistant" icon="chatbubble-ellipses-outline" style={{ marginTop: 10 }} onPress={() => router.push('/support')} />
       </Card>
     </Screen>

@@ -14,7 +14,7 @@ const LEVELS: { level: VerificationLevel; what: string; docs: string; types: str
   { level: 'identity', what: 'Confirms the owner is a real person.', docs: 'Government photo ID', types: ['government_id'] },
   { level: 'business', what: 'Confirms the business is registered.', docs: 'License, registration, or tax document', types: ['business_license', 'tax_document'] },
   { level: 'location', what: 'Confirms the physical location.', docs: 'Lease or utility bill + storefront photo', types: ['lease', 'utility_bill', 'photo'] },
-  { level: 'fulfillment', what: 'Earned after completed bookings/orders with no unresolved disputes.', docs: 'No upload — Adey reviews your history', types: [] },
+  { level: 'fulfillment', what: 'Earned after completed bookings/orders with no unresolved disputes.', docs: 'No upload — Adey Connect reviews your history', types: [] },
 ];
 
 export default function Verification() {
@@ -40,7 +40,7 @@ export default function Verification() {
   return (
     <div>
       <h1 className="text-2xl font-bold">Verification</h1>
-      <p className="text-sm text-text-muted">Badges appear only after Adey approves a request. Documents are private to you and the reviewers.</p>
+      <p className="text-sm text-text-muted">Badges appear only after Adey Connect approves a request. Documents are private to you and the reviewers.</p>
       {applying && (
         <div className="card mt-4 p-5 space-y-3">
           <h2 className="font-semibold">{badgeLabels[applying]}</h2>

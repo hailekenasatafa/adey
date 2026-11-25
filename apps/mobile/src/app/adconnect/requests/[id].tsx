@@ -89,7 +89,7 @@ export default function RequestDetail() {
           {myTurn ? (
             <>
               <Text variant="subheading">{iAmOwner ? 'Respond to this request' : 'Respond to the counteroffer'}</Text>
-              <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>{iAmOwner ? 'Accepting creates a booking at the current price. Nothing is paid through Adey in Free Launch Mode.' : 'Accepting books the screen at the owner\'s price.'}</Text>
+              <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>{iAmOwner ? 'Accepting creates a booking at the current price. Nothing is paid through Adey Connect in Free Launch Mode.' : 'Accepting books the screen at the owner\'s price.'}</Text>
               {mode === 'idle' && (
                 <View style={{ gap: 8 }}>
                   <Button title={`Accept ${formatMoney(r.current_price_cents, r.currency)}`} icon="checkmark" fullWidth loading={respond.isPending} onPress={() => Alert.alert('Accept offer?', `This confirms a booking at ${formatMoney(r.current_price_cents, r.currency)} for ${fmtDateRange(r.start_date, r.end_date)}.`, [{ text: 'Cancel', style: 'cancel' }, { text: 'Accept', onPress: () => respond.mutate({ action: 'accept' }) }])} />

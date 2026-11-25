@@ -47,7 +47,7 @@ export default function Overview() {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3" id="publish">
-        <div><h1 className="text-2xl font-bold">Overview</h1>{b && <div className="mt-1 flex items-center gap-2"><Badge tone={published ? 'success' : b.status === 'suspended' ? 'danger' : 'warning'}>{published ? 'Published' : b.status === 'suspended' ? 'Suspended by Adey' : 'Draft — not visible yet'}</Badge>{d && <VerificationBadges badges={d.badges as never} compact />}</div>}</div>
+        <div><h1 className="text-2xl font-bold">Overview</h1>{b && <div className="mt-1 flex items-center gap-2"><Badge tone={published ? 'success' : b.status === 'suspended' ? 'danger' : 'warning'}>{published ? 'Published' : b.status === 'suspended' ? 'Suspended by Adey Connect' : 'Draft — not visible yet'}</Badge>{d && <VerificationBadges badges={d.badges as never} compact />}</div>}</div>
         {b && b.role !== 'staff' && b.status !== 'suspended' && <button onClick={() => publish.mutate(published ? 'draft' : 'published')} className={`btn btn-sm ${published ? 'btn-outline' : 'btn-primary'}`} disabled={publish.isPending}>{published ? 'Unpublish' : 'Publish now — it’s free'}</button>}
       </div>
       {err && <p className="mt-2 text-sm text-danger">{err}</p>}

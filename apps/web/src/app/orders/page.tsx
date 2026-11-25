@@ -25,7 +25,7 @@ export default function OrdersPage() {
       <h1 className="mt-8 text-3xl font-bold">Orders</h1>
       {q.isLoading ? <div className="mt-6 space-y-3"><div className="skeleton h-24" /><div className="skeleton h-24" /></div>
         : q.error ? <p role="alert" className="mt-6 text-danger">{friendlyError(q.error)} <button className="btn btn-ghost btn-sm" onClick={() => q.refetch()}>Try again</button></p>
-        : !rows.length ? <div className="mt-6"><Empty title="No orders yet" body="When you buy from Adey sellers your orders appear here." action={<Link href="/market" className="btn btn-primary btn-sm">Browse the market</Link>} /></div>
+        : !rows.length ? <div className="mt-6"><Empty title="No orders yet" body="When you buy from Adey Connect sellers your orders appear here." action={<Link href="/market" className="btn btn-primary btn-sm">Browse the market</Link>} /></div>
         : (
           <>
             {checkouts.length > 0 && (

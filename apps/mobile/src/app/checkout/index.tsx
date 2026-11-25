@@ -167,7 +167,7 @@ export default function Checkout() {
 
       {pq?.enabled && (
         <>
-          <SectionHeader title="3. Adey Rewards" />
+          <SectionHeader title="3. Adey Connect Rewards" />
           <Card>
             <Text>You have {pq.balance.toLocaleString()} points.</Text>
             {pq.usable ? (
@@ -203,7 +203,7 @@ export default function Checkout() {
               </>
             ) : null}
           </Card>
-          <Text variant="caption" color="muted" style={{ marginTop: 10 }}>Adey holds your payment safely and releases it to each seller only after you confirm delivery.</Text>
+          <Text variant="caption" color="muted" style={{ marginTop: 10 }}>Adey Connect holds your payment safely and releases it to each seller only after you confirm delivery.</Text>
           {error && <Text color="danger" variant="caption" style={{ marginTop: 8 }}>{error}</Text>}
           <Button title="Pay securely" icon="lock-closed" size="lg" fullWidth style={{ marginTop: 12 }} loading={pay.isPending} disabled={!p?.ok || preview.isFetching}
             onPress={() => pay.mutate()} accessibilityHint="Opens the secure payment page" />

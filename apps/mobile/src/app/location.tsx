@@ -15,7 +15,7 @@ export default function LocationPicker() {
   return (
     <Screen header={<Header title="Your location" />}>
       <Text color="muted" style={{ marginBottom: 16 }}>
-        Adey shows businesses and advertising screens near this location. It's only used to sort and filter results.
+        Adey Connect shows businesses and advertising screens near this location. It's only used to sort and filter results.
       </Text>
       <Button
         title={permission === 'denied' ? 'Location permission denied — open Settings' : 'Use my current location'}

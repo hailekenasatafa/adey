@@ -18,7 +18,7 @@ function Page() {
   const q = useQuery({ queryKey: ['admin-order-disputes'], queryFn: () => api.admin.orderDisputes() });
   return (
     <div>
-      <PageHead title="Order disputes" hint="Buyer reports on marketplace orders. Adey holds the payment until you decide." />
+      <PageHead title="Order disputes" hint="Buyer reports on marketplace orders. Adey Connect holds the payment until you decide." />
       <ErrorLine error={q.error} />
       {q.isLoading ? <Loading /> : !q.data?.length ? <Empty title="No open order disputes" /> : <div className="space-y-4">{q.data.map((d) => <Dispute key={d.id} d={d} />)}</div>}
     </div>

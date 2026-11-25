@@ -31,7 +31,7 @@ export function ReportButton({ targetType, targetId, label = 'Report' }: { targe
           {send.isSuccess ? (
             <>
               <Text variant="heading">Thanks for telling us</Text>
-              <Text color="muted">The Adey team will review this. We may hide it or contact the people involved.</Text>
+              <Text color="muted">The Adey Connect team will review this. We may hide it or contact the people involved.</Text>
               <Button title="Done" onPress={() => setOpen(false)} />
             </>
           ) : (

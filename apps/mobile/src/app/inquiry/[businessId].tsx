@@ -50,7 +50,7 @@ export default function InquiryScreen() {
   return (
     <Screen header={<Header title={kind === 'quote' ? 'Request a quote' : kind === 'advertising' ? 'Contact screen owner' : 'Contact business'} subtitle={biz.data?.name} />} keyboard>
       {kind === 'advertising' ? (
-        <Text variant="caption" color="muted" style={{ marginBottom: 16 }}>Say when you want to run your ad, for how long, your budget, and whether it’s a video or an image. You and the owner agree the details and payment directly; Adey isn’t part of the agreement and takes no commission.</Text>
+        <Text variant="caption" color="muted" style={{ marginBottom: 16 }}>Say when you want to run your ad, for how long, your budget, and whether it’s a video or an image. You and the owner agree the details and payment directly; Adey Connect isn’t part of the agreement and takes no commission.</Text>
       ) : (
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
           <Chip label="Message" icon="chatbubble-ellipses-outline" selected={kind === 'contact'} onPress={() => setValue('type', 'contact')} />

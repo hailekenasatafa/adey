@@ -8,7 +8,7 @@ import { timeAgo } from '@/lib/format';
 import { Badge, Button, Card, EmptyState, ErrorState, Header, Loading, Screen, Text } from '@/components/ui';
 import { MenuRow } from '@/components/MenuRow';
 
-const STARTERS = ['Where is my order?', 'How do refunds work?', 'How do I become a verified seller?', 'How do Adey Rewards work?'];
+const STARTERS = ['Where is my order?', 'How do refunds work?', 'How do I become a verified seller?', 'How do Adey Connect Rewards work?'];
 
 export default function Support() {
   const { user } = useAuth();
@@ -27,7 +27,7 @@ export default function Support() {
   return (
     <Screen header={header} refreshing={q.isRefetching} onRefresh={() => q.refetch()}>
       <Card>
-        <Text variant="subheading">Ask the Adey Assistant</Text>
+        <Text variant="subheading">Ask the Adey Connect Assistant</Text>
         <Text color="muted" style={{ marginTop: 4 }}>Quick answers about orders, delivery, payments and more. It is automated, and you can ask for a person at any time.</Text>
         <View style={{ gap: 8, marginTop: 12 }}>
           {STARTERS.map((s) => <Button key={s} title={s} variant="outline" onPress={() => start(s)} />)}

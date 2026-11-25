@@ -73,7 +73,7 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
       qc.invalidateQueries({ queryKey: ['events'] });
       qc.invalidateQueries({ queryKey: ['event'] });
       qc.invalidateQueries({ queryKey: ['my-events'] });
-      const msg = row.status === 'published' ? 'Your event is published.' : row.status === 'pending' ? 'Thanks. Your event was submitted and will appear after a quick review by the Adey team.' : 'Your event was saved.';
+      const msg = row.status === 'published' ? 'Your event is published.' : row.status === 'pending' ? 'Thanks. Your event was submitted and will appear after a quick review by the Adey Connect team.' : 'Your event was saved.';
       Alert.alert(existing ? 'Event updated' : 'Event submitted', msg);
       router.replace('/events/mine');
     },
@@ -136,7 +136,7 @@ export function EventForm({ existing }: { existing?: CommunityEvent }) {
   return (
     <Screen header={<Header title={existing ? 'Edit event' : 'Add an event'} />} keyboard>
       <Card style={{ marginBottom: 16 }}>
-        <Text variant="caption" color="muted">{verifiedOnly ? 'Only verified businesses can post events. Your event may be reviewed by the Adey team before it appears in the calendar.' : 'Events from verified businesses are published right away. Everything else is reviewed by the Adey team before it appears in the calendar.'}</Text>
+        <Text variant="caption" color="muted">{verifiedOnly ? 'Only verified businesses can post events. Your event may be reviewed by the Adey Connect team before it appears in the calendar.' : 'Events from verified businesses are published right away. Everything else is reviewed by the Adey Connect team before it appears in the calendar.'}</Text>
       </Card>
 
       <Pressable onPress={changeCover} accessibilityRole="button" accessibilityLabel={cover ? 'Change cover photo' : 'Add a cover photo'} style={{ height: 150, borderRadius: 16, overflow: 'hidden', backgroundColor: colors.surfaceMuted, alignItems: 'center', justifyContent: 'center', marginBottom: 6 }}>

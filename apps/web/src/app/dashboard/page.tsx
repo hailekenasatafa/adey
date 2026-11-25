@@ -9,7 +9,7 @@ export default function DashboardHome() {
   return (
     <div className="container-x pb-16">
       <div className="mt-8 flex items-center justify-between"><h1 className="text-3xl font-bold">My businesses</h1><Link href="/dashboard/new" className="btn btn-primary btn-sm">+ Add business</Link></div>
-      <p className="text-text-muted">Manage listings, products, screens, campaigns, and verification. Everything here is shared with the Adey app.</p>
+      <p className="text-text-muted">Manage listings, products, screens, campaigns, and verification. Everything here is shared with the Adey Connect app.</p>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {loading ? <div className="skeleton h-28" /> : businesses.length === 0 ? <div className="sm:col-span-3"><Empty title="List your first business" body="It's free. Your business starts as a draft; publish when the profile looks right. Listing also unlocks AdConnect as an advertiser or screen owner." action={<Link href="/dashboard/new" className="btn btn-primary">Create business profile</Link>} /></div> : businesses.map((b) => (
           <Link key={b.id} href={`/dashboard/${b.id}`} className="card flex items-center gap-4 p-4 hover:shadow-md">

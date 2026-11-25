@@ -63,7 +63,7 @@ function ProfileForm({ businessId, profile }: { businessId: string; profile: Shi
       {txt('handling_days_max', 'Days to prepare an order: at most', { keyboardType: 'number-pad' })}
       <SwitchRow label="Buyers can pick orders up" value={f.allow_pickup} onChange={(v) => set({ allow_pickup: v })} />
       {f.allow_pickup && txt('pickup_instructions', 'Pickup instructions', { multiline: true, hint: 'Shown to the buyer after they choose pickup.' })}
-      <SwitchRow label="Use live carrier prices" hint="Only applies when Adey's carrier service is switched on and your products have weights. Otherwise your rate table below is used." value={f.use_carrier_rates} onChange={(v) => set({ use_carrier_rates: v })} />
+      <SwitchRow label="Use live carrier prices" hint="Only applies when Adey Connect's carrier service is switched on and your products have weights. Otherwise your rate table below is used." value={f.use_carrier_rates} onChange={(v) => set({ use_carrier_rates: v })} />
       {msg && <Text variant="caption" color="success" accessibilityRole="alert">{msg}</Text>}
       <ErrorNote error={err} />
       <Button title="Save" loading={save.isPending} onPress={() => save.mutate()} />

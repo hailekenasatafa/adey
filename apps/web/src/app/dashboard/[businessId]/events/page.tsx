@@ -10,7 +10,7 @@ import { fmtDate } from '@/lib/media';
 import { ListSkeleton } from '@/components/seller/common';
 
 const TONE = { published: 'success', pending: 'info', rejected: 'danger', cancelled: 'neutral', draft: 'neutral' } as const;
-const NOTE: Record<string, string> = { pending: 'Waiting for Adey to review it.', draft: 'Not published yet.' };
+const NOTE: Record<string, string> = { pending: 'Waiting for Adey Connect to review it.', draft: 'Not published yet.' };
 
 export default function BusinessEvents() {
   const { businessId } = useParams<{ businessId: string }>();

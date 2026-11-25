@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const api = await serverApi();
   const b = await api.market.business(slug).catch(() => null);
   if (!b) return { title: 'Business not found' };
-  return { title: b.name, description: b.tagline ?? b.description?.slice(0, 160) ?? `${b.name} on Adey`, openGraph: { title: b.name, description: b.tagline ?? undefined, images: b.cover_url ? [mediaUrlFromPath('business-media', b.cover_url)!] : undefined } };
+  return { title: b.name, description: b.tagline ?? b.description?.slice(0, 160) ?? `${b.name} on Adey Connect`, openGraph: { title: b.name, description: b.tagline ?? undefined, images: b.cover_url ? [mediaUrlFromPath('business-media', b.cover_url)!] : undefined } };
 }
 
 export default async function BusinessPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -69,7 +69,7 @@ export default async function BusinessPage({ params }: { params: Promise<{ slug:
           {signals?.review_quote && (
             <figure className="mt-6 rounded-[20px] bg-forest-soft p-5">
               <blockquote className="text-lg leading-snug">“{signals.review_quote}”</blockquote>
-              <figcaption className="mt-2 text-sm text-text-muted">— {signals.review_author ?? 'Adey member'} · <Stars value={signals.review_rating ?? 5} size="text-xs" />{signals.review_verified ? ' · Contacted this business' : ''} · <a href="#reviews" className="font-semibold text-forest hover:underline">All reviews</a></figcaption>
+              <figcaption className="mt-2 text-sm text-text-muted">— {signals.review_author ?? 'Adey Connect member'} · <Stars value={signals.review_rating ?? 5} size="text-xs" />{signals.review_verified ? ' · Contacted this business' : ''} · <a href="#reviews" className="font-semibold text-forest hover:underline">All reviews</a></figcaption>
             </figure>
           )}
           {b.tagline && <p className="mt-6 text-lg">{b.tagline}</p>}

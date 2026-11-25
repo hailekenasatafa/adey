@@ -34,7 +34,7 @@ export default function CartTab() {
   if (cart.isLoading) return <Screen>{header}<Loading /></Screen>;
   if (cart.isError || !cart.data) return <Screen>{header}<ErrorState error={new Error(friendlyError(cart.error))} onRetry={() => cart.refetch()} /></Screen>;
   const v: CartView = cart.data;
-  if (!v.items.length) return <Screen refreshing={cart.isRefetching} onRefresh={() => cart.refetch()}>{header}<EmptyState icon="bag-outline" title="Your cart is empty" body="Add products from verified sellers and pay safely — Adey holds your payment until you confirm delivery." action="Explore products" onAction={() => router.push('/(tabs)/explore')} /></Screen>;
+  if (!v.items.length) return <Screen refreshing={cart.isRefetching} onRefresh={() => cart.refetch()}>{header}<EmptyState icon="bag-outline" title="Your cart is empty" body="Add products from verified sellers and pay safely — Adey Connect holds your payment until you confirm delivery." action="Explore products" onAction={() => router.push('/(tabs)/explore')} /></Screen>;
 
   return (
     <Screen refreshing={cart.isRefetching} onRefresh={() => cart.refetch()} keyboard>

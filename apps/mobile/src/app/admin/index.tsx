@@ -23,7 +23,7 @@ export default function Admin() {
   const disputes = useQuery({ queryKey: ['admin-disputes'], queryFn: () => api.admin.disputes(), enabled: roles.staff });
   const setStatus = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'verification_status'> }) => api.admin.setVerificationStatus(id, status, notes[id] || undefined), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-verifications'] }), onError: (e) => setError(friendlyError(e)) });
   const resolveReport = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'report_status'> }) => api.admin.resolveReport(id, status, notes[id] || undefined), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-reports'] }), onError: (e) => setError(friendlyError(e)) });
-  const resolveDispute = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'dispute_status'> }) => api.admin.resolveDispute(id, status, notes[id] || 'Reviewed by Adey'), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-disputes'] }), onError: (e) => setError(friendlyError(e)) });
+  const resolveDispute = useMutation({ mutationFn: ({ id, status }: { id: string; status: Enums<'dispute_status'> }) => api.admin.resolveDispute(id, status, notes[id] || 'Reviewed by Adey Connect'), onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-disputes'] }), onError: (e) => setError(friendlyError(e)) });
 
   if (!roles.staff) return <Screen header={<Header title="Administration" />}><EmptyState icon="lock-closed-outline" title="Staff only" body="Your account doesn't have moderation permissions." /></Screen>;
 

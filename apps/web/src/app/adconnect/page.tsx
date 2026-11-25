@@ -9,7 +9,7 @@ import { CleanForm } from '@/components/CleanForm';
 import { FiltersLabel } from '@/components/SearchPill';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Adey AdConnect', description: 'Find TV screens inside Habesha businesses that take local ads, and contact the owners directly.' };
+export const metadata: Metadata = { title: 'AdConnect', description: 'Find TV screens inside Habesha businesses that take local ads, and contact the owners directly.' };
 
 const PAGE_SIZE = 24;
 const SORTS = [['relevance', 'Recommended'], ['price_asc', 'Lowest price'], ['rating', 'Top rated'], ['traffic', 'Most visitors']] as const;

@@ -57,8 +57,8 @@ export default function Home() {
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <View style={styles.brandRow}>
           <AdeyFlower size={30} />
-          <Text variant="heading" style={{ letterSpacing: 4, marginLeft: 8 }}>
-            ADEY
+          <Text variant="heading" numberOfLines={1} adjustsFontSizeToFit style={{ letterSpacing: 1.5, marginLeft: 8, flexShrink: 1 }}>
+            ADEY CONNECT
           </Text>
         </View>
         <View style={styles.topActions}>
@@ -95,7 +95,7 @@ export default function Home() {
               <AdeyFlower size={90} petal={brand.gold} center={brand.forest} />
             </View>
             <Text variant="overline" style={{ color: brand.gold }}>
-              Adey Market
+              Adey Connect Market
             </Text>
             <Text variant="heading" style={{ color: brand.ivory, marginTop: 4 }}>
               Find Habesha-owned businesses near you.
@@ -144,14 +144,14 @@ export default function Home() {
       )}
 
       {!!d?.shop_products?.length && <Section title="Shop from Habesha sellers" items={d.shop_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
-      {!!d?.authentic_products?.length && <Section title="Authentic Habesha" subtitle="Certified by Adey" items={d.authentic_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
+      {!!d?.authentic_products?.length && <Section title="Authentic Habesha" subtitle="Certified by Adey Connect" items={d.authentic_products} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'products' } })} empty="" render={(p) => <ProductCardItem p={p as ProductCard} horizontal />} />}
       {!!(d?.shop_products?.length || d?.authentic_products?.length) && <View style={[styles.padded, { marginTop: 6 }]}><FxAttribution /></View>}
       {!!deals.data?.length && <Section title="Deals near you" items={deals.data} loading={false} onSeeAll={() => router.push('/deals')} empty="" render={(x) => { const it = x as DealFeedItem; return <View style={{ width: 280 }}><DealCard showBusiness deal={{ id: it.id, title: it.title, description: it.description, terms: it.terms, image_path: it.image_path, claims_count: it.claims_count, my_claim: it.my_claim, business: { id: it.business_id, slug: it.business_slug, name: it.business_name, place: [it.city, it.state].filter(Boolean).join(', ') || null, cover_url: it.cover_url } }} /></View>; }} />}
       {!!d?.trusted_vendors?.length && <Section title="Trusted vendors" items={d.trusted_vendors} loading={false} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { mode: 'businesses' } })} empty="" render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />}
       {!!d?.upcoming_events?.length && <Section title="Upcoming events" items={d.upcoming_events} loading={false} onSeeAll={() => router.push('/(tabs)/events')} empty="" render={(e) => <EventTile e={e as EventCard} />} />}
       <Section title="Nearby businesses" items={d?.nearby} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { sort: 'distance' } })} empty={`No published businesses near ${location.label} yet.`}
         render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />
-      <Section title="Verified businesses" items={d?.verified} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { verified: '1' } })} empty="Verified badges appear here once Adey approves verification requests."
+      <Section title="Verified businesses" items={d?.verified} loading={feed.isLoading} onSeeAll={() => router.push({ pathname: '/(tabs)/explore', params: { verified: '1' } })} empty="Verified badges appear here once Adey Connect approves verification requests."
         render={(b) => <BusinessCardItem b={b as BusinessCard} horizontal signals={signals.data?.[(b as BusinessCard).id!]} />} />
       <Section title="Available advertising locations" items={d?.available_screens} loading={feed.isLoading} onSeeAll={() => router.push('/adconnect/screens')} empty="Screen listings appear here once businesses list them in AdConnect."
         render={(s) => <ScreenCardItem s={s as ScreenCard} horizontal />} />
@@ -225,7 +225,7 @@ function Hint({ text }: { text: string }) {
 
 const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
-  brandRow: { flexDirection: 'row', alignItems: 'center' },
+  brandRow: { flexDirection: 'row', alignItems: 'center', flexShrink: 1 },
   topActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   padded: { paddingHorizontal: 16 },
   locationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, alignSelf: 'flex-start' },

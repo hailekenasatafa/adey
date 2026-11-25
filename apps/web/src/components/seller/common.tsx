@@ -52,8 +52,8 @@ export function SellingNotice({ businessId }: { businessId: string }) {
   if (!d) return null;
   return (
     <>
-      {!d.business.selling_enabled && <div className="card mt-4 border-warning/40 bg-warning/5 p-4 text-sm">Listing on Adey is free. You can take paid orders after your <Link href={`/dashboard/${businessId}/kyc`} className="font-semibold text-forest underline">seller verification</Link> is approved.</div>}
-      {!d.checkout_enabled && <div className="card mt-4 p-4 text-sm text-text-muted">Online ordering is not open yet on Adey. You can prepare now — add delivery prices, payout details and products — and orders start once it opens.</div>}
+      {!d.business.selling_enabled && <div className="card mt-4 border-warning/40 bg-warning/5 p-4 text-sm">Listing on Adey Connect is free. You can take paid orders after your <Link href={`/dashboard/${businessId}/kyc`} className="font-semibold text-forest underline">seller verification</Link> is approved.</div>}
+      {!d.checkout_enabled && <div className="card mt-4 p-4 text-sm text-text-muted">Online ordering is not open yet on Adey Connect. You can prepare now — add delivery prices, payout details and products — and orders start once it opens.</div>}
     </>
   );
 }

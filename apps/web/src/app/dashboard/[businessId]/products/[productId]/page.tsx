@@ -147,7 +147,7 @@ function Authenticity({ businessId, productId, isAuthentic, product }: { busines
   return (
     <div className="card space-y-3 p-5">
       <h2 className="font-semibold">Authenticity badge</h2>
-      <p className="text-xs text-text-muted">Adey checks your statement and evidence before a badge appears on the listing. Evidence is kept private.</p>
+      <p className="text-xs text-text-muted">Adey Connect checks your statement and evidence before a badge appears on the listing. Evidence is kept private.</p>
       {isAuthentic && <p className="text-sm"><CertificationBadge /> <span className="ml-1">is showing on this listing.</span></p>}
       {paused && <div className="rounded-[10px] bg-warning/10 p-3 text-sm"><b>The badge is paused.</b> It pauses when the name, description, photos, materials or origin change after approval. Ask for a re-check to bring it back.<div className="mt-2"><button onClick={() => { setF((x) => ({ ...x, type: approved!.type, statement: approved!.statement, maker_name: approved!.maker_name ?? '', technique: approved!.technique ?? '' })); setShow(true); }} className="btn btn-primary btn-sm">Request a re-check</button></div></div>}
       {q.isLoading ? <div className="skeleton h-12" /> : q.error ? <ErrorNote error={q.error} /> : mine.map((r) => (

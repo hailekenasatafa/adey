@@ -44,7 +44,7 @@ export default async function Home() {
         </nav>
       )}
 
-      <Grid title="Businesses on Adey" items={feed?.nearby ?? []} empty="Businesses appear here as soon as owners publish them. Yours could be the first." href="/market" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} signals={signals[(b as BusinessCard).id!]} />} />
+      <Grid title="Businesses on Adey Connect" items={feed?.nearby ?? []} empty="Businesses appear here as soon as owners publish them. Yours could be the first." href="/market" render={(b) => <BusinessCardView key={b.id} b={b as BusinessCard} signals={signals[(b as BusinessCard).id!]} />} />
 
       {deals.length > 0 && (
         <Section title="Deals near you" action={<SeeAll href="/deals" label="All deals" />}>
@@ -60,7 +60,7 @@ export default async function Home() {
         <div className="relative grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">
           <div>
             <h2 className="max-w-lg text-3xl font-semibold leading-tight sm:text-4xl">Own a Habesha business? List it free in a few minutes.</h2>
-            <p className="mt-4 max-w-md text-ivory/80">Add your photos, menu or services and hours, then publish. People searching Adey find you right away. No fees, no contracts.</p>
+            <p className="mt-4 max-w-md text-ivory/80">Add your photos, menu or services and hours, then publish. People searching Adey Connect find you right away. No fees, no contracts.</p>
             <div className="mt-7 flex flex-wrap gap-3"><Link href="/dashboard/new" className="btn btn-accent">List your business for free</Link><Link href="/help/start-selling" className="btn border border-white/25 text-ivory hover:bg-white/10">How it works</Link></div>
           </div>
           <ul className="grid gap-3">
@@ -79,7 +79,7 @@ export default async function Home() {
       {feed?.shop_products?.length ? <Section title="Habesha products" action={<SeeAll href="/market?view=products" />}><div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-4">{feed.shop_products.slice(0, 8).map((p) => <ProductCardView key={p.id} p={p} />)}</div><FxAttribution className="mt-3 text-[11px] text-text-muted" /></Section> : null}
       {feed?.available_screens?.length ? <Grid title="Advertise on community screens" items={feed.available_screens} empty="" href="/adconnect" render={(s) => <ScreenCardView key={s.id} s={s as ScreenCard} />} /> : null}
 
-      <Section title="How Adey works">
+      <Section title="How Adey Connect works">
         <div className="grid gap-10 md:grid-cols-3">
           {HOW.map(({ icon: Icon, title, body }) => (
             <div key={title}>
@@ -96,13 +96,13 @@ export default async function Home() {
 
 const OWNER = [
   { icon: Images, title: 'Show your place', body: 'A photo gallery and your menu or services with prices.' },
-  { icon: TicketPercent, title: 'Bring people back', body: 'Post a deal. Customers claim it on Adey and show the code at your counter.' },
-  { icon: MessageCircle, title: 'Get messages', body: 'Customers contact you in Adey Messages, or call and visit you directly.' },
+  { icon: TicketPercent, title: 'Bring people back', body: 'Post a deal. Customers claim it on Adey Connect and show the code at your counter.' },
+  { icon: MessageCircle, title: 'Get messages', body: 'Customers contact you in Adey Connect Messages, or call and visit you directly.' },
 ];
 const HOW = [
   { icon: Search, title: 'Discover', body: 'Search by name, food, service, city or ZIP. Every business page shows photos, prices, hours and reviews from members.' },
-  { icon: ShieldCheck, title: 'Trust', body: 'Verification badges appear only after Adey has checked the documents a business submits. Each member can review a business once.' },
-  { icon: MessageCircle, title: 'Connect', body: 'Message, call or visit the business directly, and claim its deals. Adey doesn’t take payments or charge businesses.' },
+  { icon: ShieldCheck, title: 'Trust', body: 'Verification badges appear only after Adey Connect has checked the documents a business submits. Each member can review a business once.' },
+  { icon: MessageCircle, title: 'Connect', body: 'Message, call or visit the business directly, and claim its deals. Adey Connect doesn’t take payments or charge businesses.' },
 ];
 
 function SeeAll({ href, label = 'See all' }: { href: string; label?: string }) {

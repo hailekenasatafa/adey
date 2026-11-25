@@ -19,13 +19,13 @@ export default function Rewards() {
   const { colors } = useTheme();
   const { user } = useAuth();
   const q = useQuery({ queryKey: ['rewards', user?.id], queryFn: () => api.rewards.summary(), enabled: !!user });
-  const header = <Header title="Adey Rewards" />;
+  const header = <Header title="Adey Connect Rewards" />;
 
   if (!user) return <Screen header={header}><EmptyState icon="gift-outline" title="Earn points when you shop" body="Sign in to see your points, your tier and your history." action="Sign in" onAction={() => router.push('/(auth)/sign-in')} /></Screen>;
   if (q.isLoading) return <Screen header={header}><Loading /></Screen>;
   if (q.isError) return <Screen header={header}><ErrorState error={q.error} onRetry={() => q.refetch()} /></Screen>;
   const s = q.data;
-  if (!s || !s.enabled) return <Screen header={header}><EmptyState icon="gift-outline" title="Rewards are not active yet" body="Adey Rewards is not switched on right now. Nothing is lost: check back soon." /></Screen>;
+  if (!s || !s.enabled) return <Screen header={header}><EmptyState icon="gift-outline" title="Rewards are not active yet" body="Adey Connect Rewards is not switched on right now. Nothing is lost: check back soon." /></Screen>;
 
   const earnPct = s.max_redeem_pct;
   const toNext = s.next_tier && s.tier ? Math.max(0, Math.min(1, (s.qualifying_points - s.tier.min_points) / Math.max(1, s.next_tier.min_points - s.tier.min_points))) : s.next_tier ? Math.min(1, s.qualifying_points / Math.max(1, s.next_tier.min_points)) : 1;

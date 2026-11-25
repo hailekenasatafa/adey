@@ -103,16 +103,16 @@ export function Nav() {
     <>
       <header className={`fixed inset-x-0 top-0 z-40 border-b bg-background/95 backdrop-blur transition-[border-color,box-shadow] ${compact || !search ? 'border-border shadow-sm' : 'border-transparent'}`}>
         <div className="container-x flex h-16 items-center gap-3">
-          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Adey home">
+          <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="Adey Connect home">
             <AdeyFlower size={30} />
-            <span className="text-[17px] font-bold tracking-[0.22em]">ADEY</span>
+            <span className="text-[17px] font-bold tracking-[0.16em]">ADEY CONNECT</span>
             <span className="ethiopic hidden text-sm text-text-muted sm:inline">አደይ</span>
           </Link>
 
           <div className="hidden min-w-0 flex-1 justify-center md:flex">
             {compact ? (
               <button type="button" onClick={expand} className="flex h-11 w-full max-w-md items-center gap-3 rounded-full border border-border bg-surface pl-5 pr-1.5 text-sm shadow-sm transition hover:shadow-md">
-                <span className="flex-1 truncate text-left font-semibold">Search Adey</span>
+                <span className="flex-1 truncate text-left font-semibold">Search Adey Connect</span>
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-forest text-[color:var(--on-forest)]"><Search aria-hidden className="h-4 w-4" strokeWidth={2.25} /></span>
               </button>
             ) : (
@@ -204,7 +204,7 @@ export function Footer() {
     <footer className="mt-24 border-t border-border bg-surface-muted/60">
       <div className="container-x grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
-          <div className="flex items-center gap-2"><AdeyFlower size={28} /><span className="font-bold tracking-[0.22em]">ADEY</span><span className="ethiopic text-text-muted">አደይ</span></div>
+          <div className="flex items-center gap-2"><AdeyFlower size={28} /><span className="font-bold tracking-[0.16em]">ADEY CONNECT</span><span className="ethiopic text-text-muted">አደይ</span></div>
           <p className="mt-4 max-w-sm text-sm text-text-muted">Find Habesha-owned businesses, see their menus and photos, and claim their deals. Listing a business is free.</p>
         </div>
         <nav aria-label="Marketplace"><h2 className="mb-4 text-sm font-semibold">Marketplace</h2><ul className={col}><li><Link href="/market">Find businesses</Link></li><li><Link href="/deals">Deals</Link></li><li><Link href="/events">Events</Link></li><li><Link href="/adconnect">AdConnect</Link></li><li><Link href="/dashboard/new">List your business for free</Link></li><li><Link href="/market?market=et">Ethiopian Market</Link></li></ul></nav>
@@ -212,7 +212,7 @@ export function Footer() {
       </div>
       <div className="border-t border-border">
         <div className="container-x flex flex-col-reverse items-center justify-between gap-4 py-5 text-sm text-text-muted sm:flex-row">
-          <p>© {new Date().getFullYear()} Adey. Apps for iPhone and Android are on the way.</p>
+          <p>© {new Date().getFullYear()} Adey Connect. Apps for iPhone and Android are on the way.</p>
           <ThemeToggle />
         </div>
       </div>

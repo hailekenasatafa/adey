@@ -171,7 +171,7 @@ function SellerOrder({ businessId, orderId }: { businessId: string; orderId: str
               </>
             )}
           </View>
-          <Text variant="caption" color="muted" style={{ marginTop: 8 }}>Tax is collected by Adey and is not part of your proceeds. {escrowStatusLabels[o.escrow_status]}.{o.escrow_status === 'held' ? ' It is released when the buyer confirms delivery, or automatically a few days after delivery.' : ''}</Text>
+          <Text variant="caption" color="muted" style={{ marginTop: 8 }}>Tax is collected by Adey Connect and is not part of your proceeds. {escrowStatusLabels[o.escrow_status]}.{o.escrow_status === 'held' ? ' It is released when the buyer confirms delivery, or automatically a few days after delivery.' : ''}</Text>
         </Card>
 
         {o.shipments.length > 0 && (
@@ -197,7 +197,7 @@ function SellerOrder({ businessId, orderId }: { businessId: string; orderId: str
             <Text style={{ marginTop: 4 }}>{d.description}</Text>
             {d.seller_response ? <View style={{ backgroundColor: colors.surfaceMuted, borderRadius: 8, padding: 10, marginTop: 10 }}><Text variant="caption"><Text variant="label">Your response: </Text>{d.seller_response}</Text></View> : open?.id === d.id && (
               <View style={{ marginTop: 10 }}>
-                <Text variant="caption" color="muted" style={{ marginBottom: 8 }}>You can respond once. Adey reviews both sides and decides.</Text>
+                <Text variant="caption" color="muted" style={{ marginBottom: 8 }}>You can respond once. Adey Connect reviews both sides and decides.</Text>
                 <Input label="Your response" value={response} onChangeText={setResponse} multiline />
                 <Button title="Send response" disabled={response.trim().length < 10} loading={run.isPending} onPress={() => run.mutate(async () => { await api.seller.respondDispute(d.id, response.trim()); setResponse(''); })} />
                 <ErrorNote error={err} />

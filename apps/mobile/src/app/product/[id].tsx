@@ -205,7 +205,7 @@ export default function ProductDetail() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Avatar url={r.author?.avatar_url} name={r.author?.display_name} size={32} />
                 <View style={{ flex: 1 }}>
-                  <Text variant="label">{r.author?.display_name ?? 'Adey member'}</Text>
+                  <Text variant="label">{r.author?.display_name ?? 'Adey Connect member'}</Text>
                   <Text variant="caption" color="muted">{new Date(r.created_at).toLocaleDateString()}</Text>
                 </View>
                 <Text variant="label" color="accent">{r.rating} ★</Text>

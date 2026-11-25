@@ -39,7 +39,7 @@ export default function SignUp() {
       )}
       <Button title="Create Account" size="lg" fullWidth loading={formState.isSubmitting} onPress={() => onSubmit()} />
       <Text variant="caption" color="muted" center style={{ marginTop: 14 }}>
-        By continuing you agree to Adey's Terms of Service and Privacy Policy.
+        By continuing you agree to Adey Connect's Terms of Service and Privacy Policy.
       </Text>
       <View style={{ alignItems: 'center', marginTop: 18 }}>
         <Text color="muted">

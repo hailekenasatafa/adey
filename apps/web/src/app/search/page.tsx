@@ -20,7 +20,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const none = r && !r.products.length && !r.businesses.length && !r.categories.length && !r.events.length;
   return (
     <div className="container-x pb-16">
-      <h1 className="mt-6 text-3xl font-semibold">{query.length >= 2 ? <>Results for “{query}”</> : 'Search Adey'}</h1>
+      <h1 className="mt-6 text-3xl font-semibold">{query.length >= 2 ? <>Results for “{query}”</> : 'Search Adey Connect'}</h1>
       {query.length < 2 ? <p className="mt-2 text-text-muted">Use the search bar above to find businesses, products and events. Type at least two characters.</p>
         : failed ? <div className="mt-8"><Empty title="Search is unavailable right now" body="Please try again in a moment." /></div>
         : r && (

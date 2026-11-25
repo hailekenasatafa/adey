@@ -73,7 +73,7 @@ export default function Settings() {
         <MenuRow icon="document-outline" label="Privacy policy & terms" onPress={() => router.push('/profile/legal')} />
         {user && (<><Divider /><MenuRow icon="trash-outline" label="Delete account" danger onPress={() => router.push('/profile/delete-account')} /></>)}
       </Card>
-      <Text variant="caption" color="muted" center style={{ marginTop: 20 }}>ADEY v{Constants.expoConfig?.version}</Text>
+      <Text variant="caption" color="muted" center style={{ marginTop: 20 }}>Adey Connect v{Constants.expoConfig?.version}</Text>
     </Screen>
   );
 }

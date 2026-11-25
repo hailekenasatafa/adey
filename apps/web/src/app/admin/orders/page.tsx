@@ -64,7 +64,7 @@ function Detail({ id, onBack }: { id: string; onBack: () => void }) {
           <dl className="mt-3 space-y-1 border-t border-border pt-3 text-sm">
             {row('Items', o.subtotal_cents)}{row('Delivery', o.shipping_cents)}{row('Tax', o.tax_cents)}{o.discount_cents > 0 && row('Reward discount', o.discount_cents, true)}
             <div className="flex justify-between gap-4 border-t border-border pt-2 font-bold"><dt>Buyer paid</dt><dd>{formatMoney(o.total_cents, c)}</dd></div>
-            {row(`Adey fee (${o.commission_bps / 100}%)`, o.commission_cents)}{o.label_cost_cents > 0 && row('Shipping label cost', o.label_cost_cents)}{o.refunded_cents > 0 && row('Refunded', o.refunded_cents)}
+            {row(`Adey Connect fee (${o.commission_bps / 100}%)`, o.commission_cents)}{o.label_cost_cents > 0 && row('Shipping label cost', o.label_cost_cents)}{o.refunded_cents > 0 && row('Refunded', o.refunded_cents)}
             <div className="flex justify-between gap-4 font-semibold"><dt>Seller proceeds</dt><dd>{formatMoney(o.net_to_seller_cents, c)}</dd></div>
           </dl>
         </div>

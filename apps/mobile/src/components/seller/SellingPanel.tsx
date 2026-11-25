@@ -43,7 +43,7 @@ export function SellingPanel({ businessId, role }: { businessId: string; role: s
     { done: d.shipping_ready, label: 'Delivery prices set', href: `${base}/shipping`, show: can('shipping.manage') || d.shipping_ready },
     { done: d.finance?.payout_ready ?? false, label: 'Payout details added', href: `${base}/payouts`, show: !!d.finance },
     { done: products.isLoading ? null : buyable, label: 'A product people can buy online', href: `${base}/products`, show: true },
-    { done: d.checkout_enabled, label: 'Online ordering open on Adey', href: `${base}/orders`, note: d.checkout_enabled ? undefined : 'Not open yet. You can prepare now.', show: true },
+    { done: d.checkout_enabled, label: 'Online ordering open on Adey Connect', href: `${base}/orders`, note: d.checkout_enabled ? undefined : 'Not open yet. You can prepare now.', show: true },
   ].filter((s) => s.show);
   const todos = [
     { n: d.orders.to_accept, label: 'New orders to accept', f: 'paid' }, { n: d.orders.to_ship, label: 'Orders to ship', f: 'processing' }, { n: d.orders.in_transit, label: 'On their way', f: 'shipped' },
@@ -54,7 +54,7 @@ export function SellingPanel({ businessId, role }: { businessId: string; role: s
     <View style={{ gap: 12, marginTop: 12 }}>
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-          <Text variant="subheading">Selling on Adey</Text>
+          <Text variant="subheading">Selling on Adey Connect</Text>
           <TrustBadge tier={d.business.trust_tier} />
         </View>
         <Text variant="caption" color="muted">{d.orders.completed_30d} completed in 30 days</Text>
@@ -107,9 +107,9 @@ export function SellingPanel({ businessId, role }: { businessId: string; role: s
       </Card>
 
       <Card>
-        <Text variant="label">Adey Rewards</Text>
+        <Text variant="label">Adey Connect Rewards</Text>
         <Text variant="caption" color="muted" style={{ marginBottom: 8 }}>Buyers earn points when they buy from participating sellers. {d.business.loyalty_participating ? 'Your shop takes part.' : 'Your shop is not taking part.'}</Text>
-        {role && role !== 'staff' && <SwitchRow label="Take part in Adey Rewards" value={d.business.loyalty_participating} disabled={toggle.isPending} onChange={(v) => toggle.mutate(v)} />}
+        {role && role !== 'staff' && <SwitchRow label="Take part in Adey Connect Rewards" value={d.business.loyalty_participating} disabled={toggle.isPending} onChange={(v) => toggle.mutate(v)} />}
         <ErrorNote error={err} />
       </Card>
 
@@ -117,7 +117,7 @@ export function SellingPanel({ businessId, role }: { businessId: string; role: s
         <Card>
           <Text variant="label">Money</Text>
           <View style={{ flexDirection: 'row', gap: 12, marginTop: 6 }}>
-            <View style={{ flex: 1 }}><Text variant="caption" color="muted">Held safely by Adey until delivery</Text><Text variant="subheading">{money(d.finance.held_in_escrow)}</Text></View>
+            <View style={{ flex: 1 }}><Text variant="caption" color="muted">Held safely by Adey Connect until delivery</Text><Text variant="subheading">{money(d.finance.held_in_escrow)}</Text></View>
             <View style={{ flex: 1 }}><Text variant="caption" color="muted">Released to you · 30 days</Text><Text variant="subheading">{money(d.finance.released_30d)}</Text></View>
           </View>
           {d.finance.payouts.length > 0 && (

@@ -75,7 +75,7 @@ export default function Products() {
             <Field label="SKU (optional)"><input value={d.sku} onChange={(e) => set({ sku: e.target.value })} className="input" /></Field>
             <div className="sm:col-span-2 space-y-2 rounded-[12px] bg-surface-muted p-3">
               <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={!!d.purchasable} onChange={(e) => set({ purchasable: e.target.checked })} className={cb} />Can be bought online</label>
-              <p className="text-xs text-text-muted">Buyers can pay on Adey once your seller verification is approved and online ordering is open. Needs a price. Set delivery prices under Delivery.</p>
+              <p className="text-xs text-text-muted">Buyers can pay on Adey Connect once your seller verification is approved and online ordering is open. Needs a price. Set delivery prices under Delivery.</p>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={!!d.track_inventory} onChange={(e) => set({ track_inventory: e.target.checked })} className={cb} />Track stock</label>
               {d.track_inventory && <div className="grid gap-3 sm:grid-cols-3">
                 {editing.id ? <div className="text-sm"><span className="label">In stock</span><p>{d.stock} — <Link href={`/dashboard/${businessId}/products/${editing.id}`} className="font-semibold text-forest underline">adjust stock</Link></p></div> : <Field label="Starting stock"><input type="number" min={0} value={d.stock} onChange={(e) => set({ stock: e.target.value })} className="input" /></Field>}

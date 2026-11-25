@@ -65,7 +65,7 @@ export default function BookingDetail() {
           {iAmOwner && <View style={{ width: '50%' }}><KeyValue label="Your net" value={formatMoney(b.net_to_owner_cents, b.currency)} /></View>}
           <View style={{ width: '50%' }}><KeyValue label="Accepted" value={fmtDate(b.accepted_at)} /></View>
         </View>
-        {!b.monetized && <Text variant="caption" color="muted" style={{ marginTop: 6 }}>Free Launch Mode: payment is arranged directly between advertiser and screen owner. Adey records the agreement but does not process money.</Text>}
+        {!b.monetized && <Text variant="caption" color="muted" style={{ marginTop: 6 }}>Free Launch Mode: payment is arranged directly between advertiser and screen owner. Adey Connect records the agreement but does not process money.</Text>}
       </Card>
 
       {iAmOwner && b.status !== 'cancelled' && b.status !== 'completed' && (
@@ -116,7 +116,7 @@ export default function BookingDetail() {
         {b.status !== 'cancelled' && !showDispute && <Button title="Open a dispute" variant="ghost" onPress={() => setShowDispute(true)} />}
         {showDispute && (
           <Card>
-            <Input label="What went wrong?" multiline value={disputeText} onChangeText={setDisputeText} placeholder="Describe the issue. Adey moderators will review and contact both parties." />
+            <Input label="What went wrong?" multiline value={disputeText} onChangeText={setDisputeText} placeholder="Describe the issue. Adey Connect moderators will review and contact both parties." />
             <View style={{ flexDirection: 'row', gap: 8 }}><Button title="Cancel" variant="ghost" onPress={() => setShowDispute(false)} /><Button title="Submit dispute" variant="danger" style={{ flex: 1 }} disabled={disputeText.trim().length < 5} loading={dispute.isPending} onPress={() => dispute.mutate(myBiz)} /></View>
           </Card>
         )}

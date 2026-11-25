@@ -75,20 +75,20 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
     await api.owner.addVerificationDocument({ request_id: req.id, business_id: businessId, doc_type: docType, storage_path: path, original_filename: file.name, uploaded_by: user.id });
   }, 'Document uploaded privately.');
   const submit = () => task('submit', async () => { await api.seller.submitKyc(businessId); setAttest(false); }, 'Submitted. We will review it and let you know.');
-  const reopen = () => Alert.alert('Change your details?', 'Selling pauses until Adey approves them again. Open orders are not affected.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Change details', onPress: () => { task('reopen', async () => { await api.seller.reopenKyc(businessId); }); } }]);
+  const reopen = () => Alert.alert('Change your details?', 'Selling pauses until Adey Connect approves them again. Open orders are not affected.', [{ text: 'Cancel', style: 'cancel' }, { text: 'Change details', onPress: () => { task('reopen', async () => { await api.seller.reopenKyc(businessId); }); } }]);
   const c = check.data;
   const locked = !editable || !!busy;
   const field = (k: string, label: string, extra: Partial<React.ComponentProps<typeof Input>> = {}) => <Input label={label} value={f[k]} onChangeText={(v) => set(k, v)} editable={!locked} {...extra} />;
 
   return (
     <Screen header={<Header title="Seller verification" />} keyboard>
-      <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>Listing is free. To take paid orders, Adey confirms who you are. Your details and documents are private; buyers never see them.</Text>
+      <Text variant="caption" color="muted" style={{ marginBottom: 12 }}>Listing is free. To take paid orders, Adey Connect confirms who you are. Your details and documents are private; buyers never see them.</Text>
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}><Text variant="bodyStrong">Status</Text><Badge tone={TONE[status]} label={kycStatusLabels[status]} /></View>
         {status === 'approved' && <><Text style={{ marginTop: 8 }}>You can take paid orders.{row?.expires_at ? ` Renewal due ${fmtDate(row.expires_at)}.` : ''}</Text><Button title="Change my details" variant="outline" size="sm" disabled={!!busy} style={{ marginTop: 10, alignSelf: 'flex-start' }} onPress={reopen} /><Text variant="caption" color="muted" style={{ marginTop: 4 }}>Selling pauses until your changes are approved.</Text></>}
         {(status === 'submitted' || status === 'in_review') && <Text color="muted" style={{ marginTop: 8 }}>We are reviewing your details. You can't edit them while we do.</Text>}
         {(status === 'needs_info' || status === 'rejected') && <View style={{ marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: colors.warning + '1A' }}><Text variant="caption"><Text variant="label">{status === 'needs_info' ? 'We need more information' : 'Not approved'}: </Text>{row?.decision_reason ?? 'No reason was given.'}{'\n'}Update your details or documents below, then submit again.</Text></View>}
-        {status === 'suspended' && <View style={{ marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: colors.danger + '1A' }}><Text variant="caption"><Text variant="label">Selling is paused: </Text>{row?.decision_reason ?? 'No reason was given.'} Contact Adey support to resolve it.</Text></View>}
+        {status === 'suspended' && <View style={{ marginTop: 8, padding: 10, borderRadius: 8, backgroundColor: colors.danger + '1A' }}><Text variant="caption"><Text variant="label">Selling is paused: </Text>{row?.decision_reason ?? 'No reason was given.'} Contact Adey Connect support to resolve it.</Text></View>}
       </Card>
       {ok && <Text variant="caption" color="success" accessibilityRole="alert" style={{ marginTop: 10 }}>{ok}</Text>}
       <ErrorNote error={err} />
@@ -127,7 +127,7 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
 
           <Card>
             <Text variant="subheading">3. Documents</Text>
-            <Text variant="caption" color="muted" style={{ marginBottom: 10 }}>Photos or PDFs, up to 15 MB. Kept in a private store seen only by you and Adey's reviewers.</Text>
+            <Text variant="caption" color="muted" style={{ marginBottom: 10 }}>Photos or PDFs, up to 15 MB. Kept in a private store seen only by you and Adey Connect's reviewers.</Text>
             {DOCS.map((d) => {
               const req = reqs.data?.find((r) => r.level === d.level && OPEN.includes(r.status)) ?? reqs.data?.find((r) => r.level === d.level);
               return (
@@ -164,7 +164,7 @@ function KycBody({ businessId, row }: { businessId: string; row: SellerKycProfil
               ))}
               <Pressable onPress={() => setAttest((a) => !a)} accessibilityRole="checkbox" accessibilityState={{ checked: attest }} style={{ flexDirection: 'row', gap: 10, marginVertical: 12, minHeight: 44, alignItems: 'flex-start' }}>
                 <Ionicons name={attest ? 'checkbox' : 'square-outline'} size={24} color={colors.primary} />
-                <Text variant="caption" style={{ flex: 1 }}>I confirm the information and documents are true and belong to me or my business, and I agree Adey may verify them.</Text>
+                <Text variant="caption" style={{ flex: 1 }}>I confirm the information and documents are true and belong to me or my business, and I agree Adey Connect may verify them.</Text>
               </Pressable>
               <Button title={status === 'not_started' || status === 'draft' ? 'Submit for review' : 'Submit again'} disabled={!c?.complete || !attest || !!busy} loading={busy === 'submit'} onPress={submit} />
               {c && !c.complete && <Text variant="caption" color="muted" style={{ marginTop: 6 }}>Finish the unchecked items to submit.</Text>}

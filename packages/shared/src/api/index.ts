@@ -1059,7 +1059,7 @@ export const orderStatusTone: Record<OrderStatus, Tone> = {
 };
 export const escrowStatusLabels: Record<EscrowStatus, string> = {
   none: 'No payment held',
-  held: 'Payment held safely by Adey',
+  held: 'Payment held safely by Adey Connect',
   released: 'Payment released to seller',
   refund_pending: 'Refund in progress',
   refunded: 'Refunded',

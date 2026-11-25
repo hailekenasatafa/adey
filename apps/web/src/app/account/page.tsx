@@ -10,7 +10,7 @@ import { setTheme, useTheme, type ThemeChoice } from '@/lib/theme';
 import { Toggle } from '@/components/community/common';
 
 const GROUPS: [string, [keyof NotificationPrefs, string][]][] = [
-  ['You', [['deals', 'New deals from businesses you saved'], ['messages', 'Messages'], ['events', 'Events'], ['support', 'Support replies'], ['orders', 'Orders'], ['shipping', 'Delivery updates'], ['rewards', 'Adey Rewards']]],
+  ['You', [['deals', 'New deals from businesses you saved'], ['messages', 'Messages'], ['events', 'Events'], ['support', 'Support replies'], ['orders', 'Orders'], ['shipping', 'Delivery updates'], ['rewards', 'Adey Connect Rewards']]],
   ['Your business', [['inquiries', 'Customer inquiries'], ['reviews', 'Reviews'], ['payments', 'Payments and payouts']]],
   ['AdConnect', [['ad_requests', 'Advertising requests'], ['offers', 'Offers and counteroffers'], ['bookings', 'Bookings']]],
   ['General', [['verification', 'Verification updates'], ['marketing', 'Tips and announcements'], ['push', 'Push notifications (mobile app)'], ['email', 'Email']]],

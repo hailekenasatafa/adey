@@ -21,7 +21,7 @@ export default function Sales() {
   const active = d?.series.filter((s) => s.orders > 0) ?? [];
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2"><div><h1 className="text-2xl font-bold">Sales</h1><p className="text-sm text-text-muted">Your proceeds from paid orders, after Adey's fee. Tax is not included.</p></div>
+      <div className="flex flex-wrap items-center justify-between gap-2"><div><h1 className="text-2xl font-bold">Sales</h1><p className="text-sm text-text-muted">Your proceeds from paid orders, after Adey Connect's fee. Tax is not included.</p></div>
         <div className="flex gap-2" role="group" aria-label="Period">{[7, 30, 90].map((n) => <button key={n} onClick={() => setDays(n)} aria-pressed={days === n} className={`chip ${days === n ? 'chip-on' : ''}`}>{n} days</button>)}</div></div>
       {q.isLoading ? <ListSkeleton /> : q.error ? <p role="alert" className="text-sm text-danger">{friendlyError(q.error)}</p> : !d || !active.length ? <Empty title="No sales in this period" body="Orders will appear here once buyers pay." /> : (
         <>

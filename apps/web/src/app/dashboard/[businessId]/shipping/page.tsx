@@ -60,7 +60,7 @@ function ProfileForm({ businessId, profile }: { businessId: string; profile: Shi
       </div>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.allow_pickup} onChange={(e) => set({ allow_pickup: e.target.checked })} className="h-4 w-4 accent-[var(--forest)]" />Buyers can pick orders up</label>
       {f.allow_pickup && <Field label="Pickup instructions" hint="Shown to the buyer after they choose pickup."><textarea value={f.pickup_instructions} onChange={(e) => set({ pickup_instructions: e.target.value })} className="input min-h-20" /></Field>}
-      <div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.use_carrier_rates} onChange={(e) => set({ use_carrier_rates: e.target.checked })} className="h-4 w-4 accent-[var(--forest)]" />Use live carrier prices</label><p className="mt-1 text-xs text-text-muted">Only applies when Adey's carrier service is switched on and your products have weights. Otherwise your rate table below is used.</p></div>
+      <div><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.use_carrier_rates} onChange={(e) => set({ use_carrier_rates: e.target.checked })} className="h-4 w-4 accent-[var(--forest)]" />Use live carrier prices</label><p className="mt-1 text-xs text-text-muted">Only applies when Adey Connect's carrier service is switched on and your products have weights. Otherwise your rate table below is used.</p></div>
       {msg && <p role="status" className="text-sm text-success">{msg}</p>}<ErrorNote error={err} />
       <button onClick={() => save.mutate()} disabled={save.isPending} className="btn btn-primary btn-sm">{save.isPending ? 'Saving…' : 'Save'}</button>
     </div>

@@ -11,7 +11,7 @@ export function CheckoutReturn({ id, status, app }: { id: string; status: 'succe
   const deepLink = `adey://checkout/return?checkout_id=${encodeURIComponent(id)}&status=${status}`;
   useEffect(() => { if (app && id) window.location.replace(deepLink); }, [app, id, deepLink]);
   if (!id) return <div className="container-x py-10"><Empty title="Nothing to show" body="This link is missing the checkout reference." action={<Link href="/orders" className="btn btn-primary btn-sm">Your orders</Link>} /></div>;
-  if (app) return <div className="container-x max-w-xl py-16 text-center"><h1 className="text-2xl font-bold">{status === 'success' ? 'Payment received' : 'Payment cancelled'}</h1><p className="mt-2 text-text-muted">Taking you back to the Adey app…</p><a href={deepLink} className="btn btn-primary mt-6">Return to the app</a></div>;
+  if (app) return <div className="container-x max-w-xl py-16 text-center"><h1 className="text-2xl font-bold">{status === 'success' ? 'Payment received' : 'Payment cancelled'}</h1><p className="mt-2 text-text-muted">Taking you back to the Adey Connect app…</p><a href={deepLink} className="btn btn-primary mt-6">Return to the app</a></div>;
   return status === 'cancelled' ? <Cancelled id={id} /> : <Success id={id} />;
 }
 
@@ -45,7 +45,7 @@ function SuccessInner({ id }: { id: string }) {
     <div className="container-x max-w-xl py-12">
       <div className="card space-y-4 p-6">
         <h1 className="text-2xl font-bold">{s.status === 'paid' ? 'Thank you, your order is confirmed' : pending ? 'Confirming your payment…' : 'Payment not completed'}</h1>
-        <p className="text-sm text-text-muted">{s.status === 'paid' ? 'Adey holds your payment safely until you confirm delivery. Sellers have been notified.' : pending ? 'This can take a moment. You can leave this page — your orders update automatically.' : 'No payment was taken. Your items are back in your cart.'}</p>
+        <p className="text-sm text-text-muted">{s.status === 'paid' ? 'Adey Connect holds your payment safely until you confirm delivery. Sellers have been notified.' : pending ? 'This can take a moment. You can leave this page — your orders update automatically.' : 'No payment was taken. Your items are back in your cart.'}</p>
         <ul className="divide-y divide-border">
           {s.orders.map((o) => <li key={o.id} className="flex items-center justify-between py-2 text-sm"><Link href={`/orders/${o.id}`} className="font-semibold text-forest">Order {o.order_number}</Link><span className="text-text-muted">{orderStatusLabels[o.status]} · {formatMoney(o.total_cents, s.currency)}</span></li>)}
         </ul>

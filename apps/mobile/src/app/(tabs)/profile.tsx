@@ -28,7 +28,7 @@ export default function Profile() {
       <Screen>
         <View style={{ paddingTop: insets.top + 8 }}><Text variant="title">Profile</Text></View>
         <Card style={{ marginTop: 20 }}>
-          <Text variant="subheading">One account for the whole Adey ecosystem</Text>
+          <Text variant="subheading">One account for the whole Adey Connect ecosystem</Text>
           <Text color="muted" style={{ marginTop: 6 }}>Shop and save as a customer, run your business, list advertising screens, and launch campaigns — all from one login.</Text>
           <Button title="Sign In" style={{ marginTop: 16 }} fullWidth onPress={() => router.push('/(auth)/sign-in')} />
           <Button title="Create Account" variant="outline" style={{ marginTop: 8 }} fullWidth onPress={() => router.push('/(auth)/sign-up')} />
@@ -50,7 +50,7 @@ export default function Profile() {
       <View style={{ paddingTop: insets.top + 8, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
         <Avatar url={profile?.avatar_url} name={profile?.display_name} size={64} />
         <View style={{ flex: 1 }}>
-          <Text variant="heading">{profile?.display_name ?? 'Adey member'}</Text>
+          <Text variant="heading">{profile?.display_name ?? 'Adey Connect member'}</Text>
           <Text variant="caption" color="muted">{user.email}</Text>
           <View style={{ flexDirection: 'row', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
             <Badge label="Customer" tone="neutral" />
@@ -65,7 +65,7 @@ export default function Profile() {
 
       <View style={styles.quick}>
         <Quick icon="receipt-outline" label="Orders" onPress={() => router.push('/orders')} />
-        {rewards.data?.enabled && <Quick icon="gift-outline" label={points != null ? `${points.toLocaleString()} pts` : 'Rewards'} a11y="Adey Rewards" onPress={() => router.push('/rewards')} />}
+        {rewards.data?.enabled && <Quick icon="gift-outline" label={points != null ? `${points.toLocaleString()} pts` : 'Rewards'} a11y="Adey Connect Rewards" onPress={() => router.push('/rewards')} />}
         <Quick icon="heart-outline" label="Saved" onPress={() => router.push('/(tabs)/saved')} />
         <Quick icon="chatbubbles-outline" label="Messages" badge={unread.data?.messages} onPress={() => router.push('/messages')} />
         <Quick icon="notifications-outline" label="Notifications" badge={unread.data?.notifications} onPress={() => router.push('/notifications')} />
@@ -75,7 +75,7 @@ export default function Profile() {
       {businesses.length === 0 ? (
         <Card>
           <Text variant="subheading">Own a business or sell from Ethiopia?</Text>
-          <Text color="muted" style={{ marginTop: 4 }}>List it on Adey Market for free. You'll also unlock AdConnect as an advertiser or screen owner.</Text>
+          <Text color="muted" style={{ marginTop: 4 }}>List it on Adey Connect Market for free. You'll also unlock AdConnect as an advertiser or screen owner.</Text>
           <Button title="Add my business" icon="add" style={{ marginTop: 12 }} onPress={() => router.push('/business/new')} />
         </Card>
       ) : (
@@ -110,7 +110,7 @@ export default function Profile() {
         <MenuRow icon="receipt-outline" label="My orders" onPress={() => router.push('/orders')} />
         <Divider />
         <MenuRow icon="location-outline" label="Delivery addresses" onPress={() => router.push('/settings/addresses')} /></>}
-        {rewards.data?.enabled && (<><Divider /><MenuRow icon="gift-outline" label="Adey Rewards" value={points != null ? `${points.toLocaleString()} pts` : undefined} onPress={() => router.push('/rewards')} /></>)}
+        {rewards.data?.enabled && (<><Divider /><MenuRow icon="gift-outline" label="Adey Connect Rewards" value={points != null ? `${points.toLocaleString()} pts` : undefined} onPress={() => router.push('/rewards')} /></>)}
         <Divider />
         <MenuRow icon="calendar-outline" label="Events I am going to" onPress={() => router.push('/(tabs)/events?mine=1')} />
         <Divider />
@@ -140,7 +140,7 @@ export default function Profile() {
       )}
 
       <Button title="Sign out" variant="outline" icon="log-out-outline" style={{ marginTop: 20 }} fullWidth onPress={() => signOut().then(() => router.replace('/(tabs)'))} />
-      <Text variant="caption" color="muted" center style={{ marginTop: 16 }}>ADEY v{Constants.expoConfig?.version} · {user.id.slice(0, 8)}</Text>
+      <Text variant="caption" color="muted" center style={{ marginTop: 16 }}>Adey Connect v{Constants.expoConfig?.version} · {user.id.slice(0, 8)}</Text>
     </Screen>
   );
 }

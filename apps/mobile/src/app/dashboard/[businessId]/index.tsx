@@ -60,12 +60,12 @@ export default function BusinessDashboard() {
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ gap: 6 }}>
-            <Badge label={b.status === 'published' ? 'Published' : b.status === 'suspended' ? 'Suspended by Adey' : b.status === 'pending' ? 'Pending review' : 'Draft (not visible)'} tone={b.status === 'published' ? 'success' : b.status === 'suspended' ? 'danger' : 'warning'} />
+            <Badge label={b.status === 'published' ? 'Published' : b.status === 'suspended' ? 'Suspended by Adey Connect' : b.status === 'pending' ? 'Pending review' : 'Draft (not visible)'} tone={b.status === 'published' ? 'success' : b.status === 'suspended' ? 'danger' : 'warning'} />
             <VerificationBadges badges={o?.badges as never} compact />
           </View>
           {canManage && b.status !== 'suspended' && <Button title={b.status === 'published' ? 'Unpublish' : 'Publish'} size="sm" variant={b.status === 'published' ? 'outline' : 'primary'} loading={publish.isPending} onPress={togglePublish} />}
         </View>
-        {b.status === 'suspended' && <Text variant="caption" color="danger" style={{ marginTop: 8 }}>Contact Adey support to resolve the suspension.</Text>}
+        {b.status === 'suspended' && <Text variant="caption" color="danger" style={{ marginTop: 8 }}>Contact Adey Connect support to resolve the suspension.</Text>}
         {err && <Text variant="caption" color="danger" style={{ marginTop: 8 }}>{err}</Text>}
         <View style={{ marginTop: 14 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

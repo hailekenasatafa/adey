@@ -52,7 +52,7 @@ export default function AdConnectHub() {
           <View style={{ gap: 6, marginTop: 8 }}>
             <Step n="1" text="Find a screen by city, size, visitors and price." />
             <Step n="2" text="Contact the screen owner about dates, price and your ad." />
-            <Step n="3" text="Agree and pay each other directly. Adey takes no commission." />
+            <Step n="3" text="Agree and pay each other directly. Adey Connect takes no commission." />
           </View>
           <Text variant="caption" style={{ color: brand.ivory, opacity: 0.8 }}>Visitor numbers are the owners’ own estimates.</Text>
         </LinearGradient>

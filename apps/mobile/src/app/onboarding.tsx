@@ -13,8 +13,8 @@ const { width } = Dimensions.get('window');
 
 const SLIDES = [
   { key: 'community', icon: 'storefront-outline' as const, title: 'Discover Habesha Businesses.', body: 'Find restaurants, shops and services near you, and shop products from verified sellers.' },
-  { key: 'safe', icon: 'shield-checkmark-outline' as const, title: 'Pay Safely.', body: 'Adey holds your payment and releases it to the seller only after you confirm delivery.' },
-  { key: 'rewards', icon: 'gift-outline' as const, title: 'Rewards & Community.', body: 'Earn Adey Rewards points when you shop, and find community events near you.' },
+  { key: 'safe', icon: 'shield-checkmark-outline' as const, title: 'Pay Safely.', body: 'Adey Connect holds your payment and releases it to the seller only after you confirm delivery.' },
+  { key: 'rewards', icon: 'gift-outline' as const, title: 'Rewards & Community.', body: 'Earn Adey Connect Rewards points when you shop, and find community events near you.' },
   { key: 'grow', icon: 'trending-up-outline' as const, title: 'Grow Your Business.', body: 'Businesses can sell online and advertise on screens across the community.' },
 ];
 
@@ -37,7 +37,7 @@ export default function Onboarding() {
         <View style={styles.brand}>
           <AdeyFlower size={28} />
           <Text variant="label" style={{ letterSpacing: 3, marginLeft: 8 }}>
-            ADEY
+            ADEY CONNECT
           </Text>
         </View>
         <Pressable onPress={() => finish('/(tabs)')} hitSlop={10} accessibilityRole="button">

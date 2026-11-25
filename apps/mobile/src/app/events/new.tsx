@@ -10,7 +10,7 @@ export default function NewEvent() {
   const { user, loading, businesses } = useAuth();
   const can = useQuery({ queryKey: ['events', 'can-submit', user?.id], queryFn: () => api.events.canSubmit(), enabled: !!user });
   if (loading || (user && can.isLoading)) return <Screen header={<Header title="Submit an event" />}><Loading /></Screen>;
-  if (!user) return <Screen header={<Header title="Submit an event" />}><EmptyState icon="calendar-outline" title="Sign in to submit an event" body="Verified businesses can share festivals, markets, concerts and gatherings with the Adey community." action="Sign in" onAction={() => router.push('/(auth)/sign-in')} /></Screen>;
+  if (!user) return <Screen header={<Header title="Submit an event" />}><EmptyState icon="calendar-outline" title="Sign in to submit an event" body="Verified businesses can share festivals, markets, concerts and gatherings with the Adey Connect community." action="Sign in" onAction={() => router.push('/(auth)/sign-in')} /></Screen>;
   if (can.isError) return <Screen header={<Header title="Submit an event" />}><ErrorState error={can.error} onRetry={() => can.refetch()} /></Screen>;
   if (!can.data?.allowed) return (
     <Screen header={<Header title="Submit an event" />}>

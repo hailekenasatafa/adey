@@ -67,7 +67,7 @@ function Page() {
   });
   return (
     <div>
-      <PageHead title="Event sources" hint={<>Outside calendars that Adey reads automatically. Imported events wait in <Link href="/admin/events" className="underline">Events</Link> for review unless a source publishes automatically.</>}
+      <PageHead title="Event sources" hint={<>Outside calendars that Adey Connect reads automatically. Imported events wait in <Link href="/admin/events" className="underline">Events</Link> for review unless a source publishes automatically.</>}
         right={<div className="flex gap-2"><button type="button" className="btn btn-outline btn-sm" disabled={run.isPending} onClick={() => { setError(null); setNote(null); run.mutate(); }}>{run.isPending ? 'Starting…' : 'Run import now'}</button><button type="button" className="btn btn-primary btn-sm" onClick={() => { setForm(BLANK); setError(null); }}>Add source</button></div>} />
       <p className="card mb-4 p-3 text-sm text-text-muted">Eventbrite has no public search, so it is followed by organization, venue or single event. Eventbrite and Ticketmaster need their API keys set on the server (<code>EVENTBRITE_API_TOKEN</code>, <code>TICKETMASTER_API_KEY</code>).</p>
       {note && <p role="status" className="mb-3 text-sm text-forest">{note}</p>}

@@ -48,7 +48,7 @@ export default function SignIn() {
           </Text>
         </Link>
         <Text color="muted">
-          New to Adey?{' '}
+          New to Adey Connect?{' '}
           <Link href="/(auth)/sign-up">
             <Text variant="label" color="primary">
               Create an account

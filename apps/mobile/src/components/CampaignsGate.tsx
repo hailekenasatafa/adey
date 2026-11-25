@@ -14,7 +14,7 @@ export function CampaignsGate({ children }: { children: React.ReactNode }) {
     return (
       <Screen header={<Header title="AdConnect" />}>
         <EmptyState icon="chatbubble-ellipses-outline" title="Contact screen owners directly"
-          body="AdConnect connects advertisers with screen owners. Find a screen, then use Contact screen owner to agree dates, price and payment between yourselves. Adey's campaign and booking tools are switched off."
+          body="AdConnect connects advertisers with screen owners. Find a screen, then use Contact screen owner to agree dates, price and payment between yourselves. Adey Connect's campaign and booking tools are switched off."
           action="Browse screens" onAction={() => router.replace('/adconnect/screens')} />
       </Screen>
     );

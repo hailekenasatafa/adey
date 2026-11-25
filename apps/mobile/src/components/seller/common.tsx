@@ -59,11 +59,11 @@ export function SellingNotice({ businessId }: { businessId: string }) {
     <View style={{ gap: 10, marginBottom: 12 }}>
       {!d.business.selling_enabled && (
         <Card style={{ backgroundColor: colors.warning + '14', borderColor: colors.warning + '66' }}>
-          <Text variant="caption">Listing on Adey is free. You can take paid orders after your seller verification is approved.</Text>
+          <Text variant="caption">Listing on Adey Connect is free. You can take paid orders after your seller verification is approved.</Text>
           <Pressable onPress={() => router.push(`/dashboard/${businessId}/kyc`)} accessibilityRole="link" style={{ minHeight: 44, justifyContent: 'center' }}><Text variant="label" color="primary">Open seller verification</Text></Pressable>
         </Card>
       )}
-      {!d.checkout_enabled && <Card><Text variant="caption" color="muted">Online ordering is not open yet on Adey. You can prepare now: add delivery prices, payout details and products. Orders start once it opens.</Text></Card>}
+      {!d.checkout_enabled && <Card><Text variant="caption" color="muted">Online ordering is not open yet on Adey Connect. You can prepare now: add delivery prices, payout details and products. Orders start once it opens.</Text></Card>}
     </View>
   );
 }

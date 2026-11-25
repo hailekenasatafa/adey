@@ -128,7 +128,7 @@ export function ProductReviews({ productId, businessId, name }: { productId: str
       {canReview && <ReviewForm productId={productId} businessId={businessId} name={name} />}
       {reviews.isLoading ? <div className="skeleton h-20" /> : reviews.error ? <p className="text-sm text-danger">{friendlyError(reviews.error)}</p> : !reviews.data?.length ? <p className="text-sm text-text-muted">No reviews yet. Reviews come from members who bought this item.</p> : reviews.data.map((r) => (
         <div key={r.id} className="card p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-semibold">{r.author?.display_name ?? 'Adey member'} <span className="text-xs font-normal text-text-muted">· {fmtDate(r.created_at)}</span></p><Stars value={r.rating} /></div>
+          <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-semibold">{r.author?.display_name ?? 'Adey Connect member'} <span className="text-xs font-normal text-text-muted">· {fmtDate(r.created_at)}</span></p><Stars value={r.rating} /></div>
           <div className="mt-1 flex flex-wrap gap-2 text-xs">
             {r.is_verified_purchase && <Badge tone="success"><BadgeCheck aria-hidden className="h-3.5 w-3.5" />Verified purchase</Badge>}
             {r.authenticity_rating != null && <span className="text-text-muted">Authenticity {r.authenticity_rating}/5</span>}

@@ -34,7 +34,7 @@ export function ReportButton({ targetType, targetId, label = 'Report', className
             {send.isSuccess ? (
               <>
                 <h2 className="text-lg font-bold">Thanks for telling us</h2>
-                <p className="mt-2 text-sm text-text-muted">The Adey team will review this. We may hide it or contact the people involved.</p>
+                <p className="mt-2 text-sm text-text-muted">The Adey Connect team will review this. We may hide it or contact the people involved.</p>
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-primary btn-sm mt-4" autoFocus>Done</button>
               </>
             ) : (
