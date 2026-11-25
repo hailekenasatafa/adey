@@ -30,7 +30,7 @@ export function Gallery({ photos, name }: { photos: Photo[]; name: string }) {
     : 'sm:aspect-[2/1] sm:max-w-[960px] sm:grid-cols-4 sm:grid-rows-2';
   return (
     <>
-      <div className={`relative mt-6 grid aspect-square gap-2 overflow-hidden rounded-[24px] ${layout}`}>
+      <div className={`relative mt-6 grid aspect-square grid-rows-1 gap-2 overflow-hidden rounded-[24px] ${layout}`}>
         {shown.map((p, i) => {
           const span = i === 0 && shown.length >= 3 ? 'sm:col-span-2 sm:row-span-2' : '';
           return (
